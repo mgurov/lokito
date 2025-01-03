@@ -13,6 +13,9 @@ export default defineConfig({
       }
     }
   },
+  preview: {
+    port: 5174,
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
