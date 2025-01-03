@@ -6,7 +6,7 @@ test('upload configuration', async ({ page, appState }) => {
 
     await page.getByTitle('Upload configuration').click();
 
-    const content = JSON.stringify([{id: 'testSource1', name: 'Test Source', query: '{job="test"}', color: '#ff0000', active: true}], null, 2);
+    const content = JSON.stringify({sources: [{id: 'testSource1', name: 'Test Source', query: '{job="test"}', color: '#ff0000', active: true}], filters: []}, null, 2);
 
     await (new UploadSection(page).uploadConfig(content));
 

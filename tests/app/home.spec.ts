@@ -45,9 +45,9 @@ test('download sources', async ({ page }) => {
 
     await page.getByTitle('Download configuration').click();
 
-    const downloadData = await downloadCapture.toJson() as {name: string}[];
+    const downloadData = await downloadCapture.toJson() as {sources: {name: string}[]};
 
-    expect(downloadData.map((s) => s.name)).toEqual(['Test Source']);
+    expect(downloadData.sources.map((s) => s.name)).toEqual(['Test Source']);
 });
 
 class DownloadCapture {

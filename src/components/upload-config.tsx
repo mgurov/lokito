@@ -14,8 +14,10 @@ import {
 import { setAllSources } from '@/data/redux/sourcesSlice';
 import { Source } from '@/data/source';
 import { Alert, AlertTitle } from './ui/alert';
+import { Filter } from '@/data/filters/filter';
+import { createFilter } from '@/data/filters/filtersSlice';
 
-function UploadConfig({ onConfigLoad }: { onConfigLoad: (sources: Source[]) => void }) {
+function UploadConfig({ onConfigLoad }: { onConfigLoad: (config: {sources: Source[], filters: Filter[]}) => void }) {
   const [isDragActive, setIsDragActive] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
@@ -56,7 +58,7 @@ function UploadConfig({ onConfigLoad }: { onConfigLoad: (sources: Source[]) => v
             setUploadError('Could not read the file dropped');
             return;
           }
-          let config = null;
+          let config: {sources: Source[], filters: Filter[]};
           try {
             config = JSON.parse(event.target.result);
           } catch (_error) {
@@ -64,13 +66,14 @@ function UploadConfig({ onConfigLoad }: { onConfigLoad: (sources: Source[]) => v
             return;
           }
 
-          if (!Array.isArray(config) || config.length === 0) {
-            setUploadError('The JSON expected to contain a non-empty array');
+          if (!config.sources || !config.filters) {
+            setUploadError('Could not find sources or filters in the JSON uploaded');
             return;
           }
-          onConfigLoad(config as Source[]);
+
+          onConfigLoad(config);
           toast.success('Successful 🎉🎉', {
-            description: `${config.length} sources have been loaded from file`,
+            description: `${config.sources.length} sources and ${config.filters.length} filters have been loaded from file`,
           });
         } catch (error) {
           console.error(error);
@@ -118,8 +121,11 @@ function UploadConfig({ onConfigLoad }: { onConfigLoad: (sources: Source[]) => v
 export function UploadSourcesConfiguration() {
   const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch();
-  function loadSources(sources: Source[]) {
-    dispatch(setAllSources(sources));
+  function loadSources(config: {sources: Source[], filters: Filter[]}) {
+    dispatch(setAllSources(config.sources));
+    config.filters.forEach((filter) => {
+      dispatch(createFilter(filter));
+    });
     setIsOpen(false);
   }
   return (
