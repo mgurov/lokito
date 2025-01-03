@@ -59,7 +59,6 @@ export const logDataSlice = createSlice({
     builder.addCase(createFilter, (state, action) => {
       const filter = action.payload;
       const predicate = RegExp(filter.messageRegex);
-      console.log('applying new filter', filter);
       for (const line of state.logs) {
         if (line.acked) {
           continue;

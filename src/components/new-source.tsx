@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariantVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -16,7 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { createNewSource } from '@/data/redux/sourcesSlice';
 import { SourceMutation } from '@/data/source';
 
-export function NewSource(props: { preOpen?: boolean; buttonText?: string }) {
+export function NewSource(props: { preOpen?: boolean; buttonText?: string, buttonVariant?: keyof typeof buttonVariantVariants }) {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(props.preOpen);
 
@@ -30,7 +30,7 @@ export function NewSource(props: { preOpen?: boolean; buttonText?: string }) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button size="sm" variant="ghost">
+        <Button size="sm" variant={props.buttonVariant ?? "ghost"}>
           {props.buttonText ?? 'New Source'}
         </Button>
       </SheetTrigger>

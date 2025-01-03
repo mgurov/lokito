@@ -46,9 +46,9 @@ export default function NewRule({ log, open, setOpen }: NewRuleProps) {
     if (RegExp(messageRegex).test(logLine)) {
       logLineMatchesRegex = 'yes';
     }
-  } catch (e: any) {
+  } catch (e: unknown) {
     logLineMatchesRegex = 'err';
-    errorMessage = e.message;
+    errorMessage = (e as {message: string}).message;
   }
 
   const handleSubmit = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {

@@ -53,8 +53,6 @@ export const sourcesSlice = createSlice({
       saveSourcesToStorage(Object.values(state.data));
     },
     changeSourceActive: (state, action: PayloadAction<ChangeSourceActive>) => {
-      //TODO: add delay to demo progress
-
       state.data[action.payload.sourceId].active = action.payload.newValue;
       saveSourcesToStorage(Object.values(state.data));
     },
@@ -64,6 +62,7 @@ export const sourcesSlice = createSlice({
     },
     setAllSources: (state, action: PayloadAction<Source[]>) => {
       state.data = _.keyBy(action.payload, 'id');
+      saveSourcesToStorage(Object.values(state.data));
     },
   },
 });

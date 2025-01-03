@@ -17,7 +17,7 @@ const IS_SERVER = typeof window === 'undefined';
 const SOURCES_STORAGE_KEY = 'sources';
 export function loadSourcesFromStorage(): Source[] {
     const sourcesJson = IS_SERVER ? undefined : localStorage.getItem(SOURCES_STORAGE_KEY);
-    const result = sourcesJson ? JSON.parse(sourcesJson) : [];
+    const result = sourcesJson ? JSON.parse(sourcesJson) as Source[] : [];
     for (const source of result) {
         source.active = source.active ?? true; //backwards compatibility
     }

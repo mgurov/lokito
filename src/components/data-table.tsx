@@ -13,6 +13,7 @@ import { DataTablePagination } from './data-table-pagination';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { LogPanel } from '@/components/log-panel';
+import { Log } from '@/data/schema';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -22,11 +23,11 @@ interface DataTableProps<TData, TValue> {
 // TODO: move to redux together with interceptor logic
 const REFRESH_RATE = 60;
 
-export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
+export function DataTable({ columns, data }: DataTableProps<Log, Log>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
   const table = useReactTable({
-    data,
+    data: data as unknown as Log[],
     columns,
     initialState: {
       pagination: {
@@ -37,8 +38,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
       rowSelection,
       expanded,
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    getRowId: (row: any) => row.id, //NB: log specific.
+    getRowId: (row: Log) => row.id,
     enableRowSelection: true,
     enableExpanding: true,
     onRowSelectionChange: setRowSelection,

@@ -38,13 +38,12 @@ export function ShowData() {
         {doWeHaveData
           ? tabTriggers
           : sources
-              .filter((source) => source.active)
-              .map((source) => (
-                <TabsTrigger key={source.id} value={source.id} disabled>
-                  {source.name}
-                </TabsTrigger>
-              ))}
-        <NewSource preOpen={sources.length === 0} />
+            .filter((source) => source.active)
+            .map((source) => (
+              <TabsTrigger key={source.id} value={source.id} disabled>
+                {source.name}
+              </TabsTrigger>
+            ))}
       </TabsList>
       <TabsContent value="all">
         <ShowAllSourcesData />
@@ -143,12 +142,11 @@ export function NoActiveSourcesHint() {
 
   return (
     <div className="rounded-md bg-blue-50 p-4 text-red-800">
-      There are no active sources. You can <NewSource buttonText="create a new one" />,{' '}
+      There are no active sources. You can <NewSource buttonText="create a new one" buttonVariant="outline" />,{' '}
       <Button size="sm" variant="outline" asChild>
         <Link to="/sources">activate an existing one</Link>
       </Button>{' '}
-      or upload a configration from a file
-      <UploadSourcesConfiguration /> to start fetching data.
+      or upload a configuration from a file <UploadSourcesConfiguration /> to start fetching data.
     </div>
   );
 }

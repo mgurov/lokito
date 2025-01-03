@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -37,7 +38,7 @@ function useAxios({
       }
     };
 
-    fetchData();
+    void fetchData();
   }, [url, method, body, headers]);
 
   return { data, error, loading };

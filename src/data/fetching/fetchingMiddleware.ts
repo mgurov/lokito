@@ -31,7 +31,7 @@ fetchingMiddleware.startListening({
                 }
 
                 for (const sourceState of Object.values(fetchingState.sourcesState)) {
-                    await processSourceFetching(sourceState, listenerApi as ListenerEffectAPI<RootState, AppDispatch>, forkApi)
+                    await processSourceFetching(sourceState, listenerApi as ListenerEffectAPI<RootState, AppDispatch>)
                 }
                 if (fetchingState.overallState.firstFetchInProgress) {
                     listenerApi.dispatch(fetchingActions.firstFetchCompleted())
@@ -44,7 +44,7 @@ fetchingMiddleware.startListening({
     },
 })
 
-async function processSourceFetching(sourceState: SourceFetchingState, listenerApi: ListenerEffectAPI<RootState, AppDispatch>, forkApi: any) {
+async function processSourceFetching(sourceState: SourceFetchingState, listenerApi: ListenerEffectAPI<RootState, AppDispatch>) {
     if (sourceState.state === 'fetching') {
         console.error('source is already fetching', sourceState)
     }
@@ -74,13 +74,11 @@ async function processSourceFetching(sourceState: SourceFetchingState, listenerA
             sourceId: source.id,
         })
 
-        await forkApi.delay(500) //artificial delay to make users appreciate our hard work
-
         //would probably nice somehow move it to the logDataSlice or extract into a separate middleware
         const linePredicates = Object.values(listenerApi.getState().filters.data).map(filter => RegExp(filter.messageRegex))
         for (const log of logs) {
             for (const linePredicate of linePredicates) {
-                if (linePredicate.test(log.line)) {
+                if (linePredicate.test(log.line)) {                    
                     log.acked = true
                     break
                 }
@@ -89,9 +87,11 @@ async function processSourceFetching(sourceState: SourceFetchingState, listenerA
 
         listenerApi.dispatch(receiveBatch({ logs }));
         listenerApi.dispatch(fetchingActions.sourceFetchedOk(sourceState.sourceId))
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
         console.error('error fetching logs', e)
-        const errMessage = e.message ?? JSON.stringify(e)
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const errMessage = 'message' in e ? e.message : JSON.stringify(e)
         listenerApi.dispatch(fetchingActions.sourceFetchErr({
             sourceId: sourceState.sourceId,
             err: errMessage,
@@ -103,11 +103,17 @@ async function processSourceFetching(sourceState: SourceFetchingState, listenerA
 async function fetchLokiLogs(params: { query: string, from: string, sourceId: string }) {
     const url = buildLokiUrl(params.query, params.from);
 
-    return axios.get(url)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return axios.get<{data: {result: any[]}}>(url)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .then(response => response.data.data.result.map((l: any) => ({
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             stream: { ...l.stream },
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
             id: l.values?.[0]?.[0].toString(),
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             line: l.values?.[0]?.[1],
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
             timestamp: new Date(parseInt(l.values?.[0]?.[0].slice(0, -6))).toISOString(),
             sourceId: params.sourceId,
             acked: false,

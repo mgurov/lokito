@@ -1,5 +1,5 @@
 export type Log = {
-  stream: { [key: string]: any };
+  stream: { [key: string]: unknown };
   id: string;
   line: string;
   timestamp: string;

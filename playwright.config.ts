@@ -21,7 +21,7 @@ export default defineConfig({
   use: {
     actionTimeout: 1000,
     navigationTimeout: 1000,
-    baseURL: 'http://localhost:5002',
+    baseURL: 'http://localhost:5174',
     trace: 'on-first-retry',
   },
 
@@ -44,7 +44,7 @@ export default defineConfig({
 
   webServer: {
     command: 'npm run dev',
-    url: 'http://localhost:5002',
+    url: 'http://localhost:5174',
     reuseExistingServer: !process.env.CI,
   },
 });

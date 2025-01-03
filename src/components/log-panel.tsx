@@ -1,5 +1,5 @@
 import { CheckIcon, CopyIcon } from '@radix-ui/react-icons';
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import NewRule from '@/components/rule-editor';
 import { Button } from '@/components/ui/button';
 import {
@@ -47,7 +47,7 @@ export function LogPanel(props: { log: Log }) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuRadioGroup value={props.log.stream.message}>
+              <DropdownMenuRadioGroup value={props.log.stream.message as string}>
                 {/* TODO: Should programitically load all rules */}
                 {rules.map((rule) => (
                   <DropdownMenuRadioItem key={rule.value} value={rule.value}>
@@ -71,12 +71,12 @@ export function LogPanel(props: { log: Log }) {
                   {field}
                 </div>
                 <div className="group flex space-x-2">
-                  <span>{props.log.stream?.[field]} </span>
+                  <span>{props.log.stream?.[field] as ReactNode} </span>
                   {props.log.stream?.[field] !== undefined && (
                     <Button
                       size="icon"
                       variant="outline"
-                      onClick={() => handleCopyToClipboard(props.log.stream?.[field], field)}
+                      onClick={() => handleCopyToClipboard(props.log.stream?.[field] as string, field)}
                       className="h-4 w-4 border-none bg-transparent text-gray-600 opacity-0 transition-opacity group-hover:opacity-100"
                       title={copiedField === field ? 'Copied!' : 'Copy'}
                     >
