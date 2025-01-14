@@ -13,6 +13,7 @@ import {
   deleteSource,
   useSources,
 } from '@/data/redux/sourcesSlice';
+import { NewSource } from '@/components/new-source';
 
 
 export default function Index() {
@@ -23,6 +24,7 @@ export default function Index() {
       <div className="mt-4 flex items-center justify-between">
         <h3 className="text-2xl font-bold tracking-tight">List of sources</h3>
         <div className="flex items-center gap-x-2">
+          <NewSource buttonVariant='outline' />
           <UploadSourcesConfiguration />
           <DownloadSourcesConfiguration />
         </div>

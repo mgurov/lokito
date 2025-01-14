@@ -88,7 +88,7 @@ export default function FetchingControl() {
         </Button>
       )}
 
-      <Button size="sm" variant="ghost" asChild>
+      <Button data-testid="sources-button" size="sm" variant="ghost" asChild>
         <Link to="/sources">
           Sources
         </Link>
