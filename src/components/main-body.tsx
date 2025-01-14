@@ -44,6 +44,7 @@ export function ShowData() {
                 {source.name}
               </TabsTrigger>
             ))}
+        <NewSource />
       </TabsList>
       <TabsContent value="all">
         <ShowAllSourcesData />

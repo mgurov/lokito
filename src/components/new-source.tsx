@@ -30,11 +30,11 @@ export function NewSource(props: { preOpen?: boolean; buttonText?: string, butto
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button size="sm" variant={props.buttonVariant ?? "ghost"}>
+        <Button data-testid="new-source-button" size="sm" variant={props.buttonVariant ?? "ghost"}>
           {props.buttonText ?? 'New Source'}
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-1/2">
+      <SheetContent data-testid="new-source-sheet" className="w-1/2">
         <SheetHeader>
           <SheetTitle>New Source</SheetTitle>
           <SheetDescription>Define a new Loki source to start consuming data from</SheetDescription>
@@ -57,7 +57,7 @@ export function NewSource(props: { preOpen?: boolean; buttonText?: string, butto
             </div>
           </div>
           <SheetFooter>
-            <Button type="submit">Save changes</Button>
+            <Button data-testid="save-source-button" type="submit">Save changes</Button>
           </SheetFooter>
         </form>
       </SheetContent>
