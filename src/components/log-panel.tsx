@@ -2,14 +2,7 @@ import { CheckIcon, CopyIcon } from '@radix-ui/react-icons';
 import { ReactNode, useState } from 'react';
 import NewRule from '@/components/rule-editor';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { rules } from '@/data/data';
+
 import { Log } from '@/data/schema';
 
 export function LogPanel(props: { log: Log }) {
@@ -34,29 +27,13 @@ export function LogPanel(props: { log: Log }) {
             size="sm"
             variant="outline"
             className="rounded-none border-r-0"
+            data-testid="new-rule-button"
             onClick={() => {
               setIsNewRuleDialogOpen(true);
             }}
           >
             New Rule
           </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button size="sm" variant="outline" className="rounded-none border-r-0">
-                Add to Rule
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuRadioGroup value={props.log.stream.message as string}>
-                {/* TODO: Should programitically load all rules */}
-                {rules.map((rule) => (
-                  <DropdownMenuRadioItem key={rule.value} value={rule.value}>
-                    {rule.label}
-                  </DropdownMenuRadioItem>
-                ))}
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
         <div className="space-y-1 px-3 py-2">
           <h3 className="text-sm font-semibold">Fields</h3>

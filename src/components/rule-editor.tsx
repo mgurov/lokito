@@ -10,7 +10,7 @@ import {
 
 import { Log } from '@/data/schema';
 import { Button } from './ui/button';
-import { Cross2Icon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { useState } from 'react';
 import { Input } from './ui/input';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
@@ -18,6 +18,7 @@ import { useAppDispatch } from '@/data/redux/reduxhooks';
 import { Filter } from '@/data/filters/filter';
 import { createFilter } from '@/data/filters/filtersSlice';
 import { randomId } from '@/lib/utils';
+import { ScrollArea, ScrollBar } from './ui/scroll-area';
 
 interface NewRuleProps {
   log: Log;
@@ -32,7 +33,7 @@ export default function NewRule({ log, open, setOpen }: NewRuleProps) {
 
   const logLine = log.line;
 
-  const [messageRegex, setMessageRegex] = useState<string>(logLine);
+  const [messageRegex, setMessageRegex] = useState<string>(escapeRegExp(logLine));
 
   const dispatch = useAppDispatch();
 
@@ -68,12 +69,15 @@ export default function NewRule({ log, open, setOpen }: NewRuleProps) {
           <DialogDescription></DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <code
-            id="line"
-            className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold"
-          >
-            {logLine}
-          </code>
+          <ScrollArea className="rounded bg-muted ">
+            <code
+              id="line"
+              className="relative px-[0.3rem] py-[0.2rem] font-mono text-sm"
+            >
+              {logLine}
+            </code>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
           <div className="grid grid-cols-4 items-center gap-4">
             <Input
               id="regex"
@@ -84,7 +88,7 @@ export default function NewRule({ log, open, setOpen }: NewRuleProps) {
           </div>
           {logLineMatchesRegex === 'no' && (
             <Alert>
-              <Cross2Icon className="h-4 w-4" />
+              <ExclamationTriangleIcon className="h-4 w-4" />
               <AlertTitle>The regular expression doesn't match the line</AlertTitle>
             </Alert>
           )}
@@ -102,11 +106,15 @@ export default function NewRule({ log, open, setOpen }: NewRuleProps) {
               Close
             </Button>
           </DialogClose>
-          <Button disabled={logLineMatchesRegex != 'yes'} onClick={handleSubmit} type="submit">
+          <Button data-testid="save-rule-button" disabled={logLineMatchesRegex != 'yes'} onClick={handleSubmit} type="submit">
             Save rule
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
+}
+
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
