@@ -83,7 +83,7 @@ export default function FetchingControl() {
           Stop fetching
         </Button>
       ) : (
-        <Button size="sm" onClick={() => startFetchingSources()}>
+        <Button size="sm" onClick={() => startFetchingSources()} data-testid="start-fetching-button">
           Start fetching
         </Button>
       )}
