@@ -83,6 +83,7 @@ export default function NewRule({ log, open, setOpen }: NewRuleProps) {
           </ScrollArea>
           <div className="grid grid-cols-4 items-center gap-4">
             <Input
+              data-testid="rule_regex"
               id="regex"
               value={messageRegex}
               onChange={(e) => setMessageRegex(e.target.value)}

@@ -37,6 +37,7 @@ test('a saved filter should be applied to existing and following messages ', asy
 
     await page.getByText('this_message 1').click();
     await page.getByTestId('new-rule-button').click();
+    await page.getByTestId('rule_regex').fill('this_message');
     await page.getByTestId('save-rule-button').click();
 
     await expectTexts(page.getByTestId('log-message'), 'unrelated 1');
