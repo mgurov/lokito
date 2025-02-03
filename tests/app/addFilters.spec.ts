@@ -4,6 +4,25 @@ import { expectTexts } from './util/visualAssertions';
 
 test('find a line create a filter on it', async ({ page, appState }) => {
 
+    await appState.givenSources({ name: 'existing' });
+
+    await routeLogResponses(page, { message: 'Some<thing> 👻 (H)appened' });
+
+    await page.goto('/');
+
+    await page.getByTestId('start-fetching-button').click();
+
+    await page.getByText('Some<thing> 👻 (H)appened').click();
+    await page.getByTestId('new-rule-button').click();
+    await page.getByTestId('save-rule-button').click();
+
+    await expect(page.getByText('Some<thing> 👻 (H)appened')).not.toBeVisible();
+    await expect(page.getByText('1 ACK messages')).toBeVisible();
+    await expect(page.getByText('Clean ✅')).toBeVisible();
+});
+
+test('a saved filter should be applied to existing and following messages ', async ({ page, appState }) => {
+
     await page.clock.install();
 
     await appState.givenSources({ name: 'existing' });
@@ -30,6 +49,7 @@ test('find a line create a filter on it', async ({ page, appState }) => {
     await expect(page.getByText('3 ACK messages')).toBeVisible();
 
 });
+
 
 test('fetching messages', async ({ page, appState }) => {
 
