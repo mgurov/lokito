@@ -1,6 +1,7 @@
 export type Filter = {
     id: string;
     messageRegex: string;
+    transient?: boolean;
     //TODO: do we want to make Filters specific to sources? Maybe list of sourceIds to apply to.
 };
 

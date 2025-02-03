@@ -108,6 +108,7 @@ export const fetchingSlice = createSlice({
       sourceState.err = null;
     },
     sourceFetchErr: (state, action: PayloadAction<SourceFetchErr>) => {
+      console.log('sourceFetchErr', action.payload);
       const sourceState = state.sourcesState[action.payload.sourceId];
       if (!sourceState) {
         console.error('source state not found', action.payload);
