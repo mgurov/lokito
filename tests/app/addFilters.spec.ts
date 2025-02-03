@@ -27,25 +27,27 @@ test('a saved filter should be applied to existing and following messages ', asy
 
     await appState.givenSources({ name: 'existing' });
 
-    const logs = await routeLogResponses(page, { message: 'Some<thing> (H)appened' });
+    const logs = await routeLogResponses(page, 'this_message 1', 'unrelated 1');
 
     await page.goto('/');
 
     await page.getByTestId('start-fetching-button').click();
 
-    await page.getByText('Some<thing> (H)appened').click();
+    await expectTexts(page.getByTestId('log-message'), 'unrelated 1', 'this_message 1');
+
+    await page.getByText('this_message 1').click();
     await page.getByTestId('new-rule-button').click();
     await page.getByTestId('save-rule-button').click();
 
-    await expect(page.getByText('Some<thing> (H)appened')).not.toBeVisible();
+    await expectTexts(page.getByTestId('log-message'), 'unrelated 1');
     await expect(page.getByText('1 ACK messages')).toBeVisible();
 
     //two more new messages should be captured
-    logs.givenRecords({ message: 'Some<thing> else (H)appened' }, { message: 'Some<thing> (H)appened' });
+    logs.givenRecords('this_message 2', 'unrelated 2', 'this_message 3');
 
     await page.clock.runFor('01:30');
 
-    await expect(page.getByText('Some<thing> (H)appened')).not.toBeVisible();
+    await expectTexts(page.getByTestId('log-message'), 'unrelated 2', 'unrelated 1');
     await expect(page.getByText('3 ACK messages')).toBeVisible();
 
 });
@@ -76,7 +78,7 @@ test('fetching messages', async ({ page, appState }) => {
 // TODO: show the date time message.
 
 
-type LogRecordSpec = {
+type LogRecordSpec = string | {
     timestamp?: string;
     message?: string;
     data?: Record<string, string>;
@@ -107,14 +109,15 @@ class LogSource {
 
     givenRecords(...logRecords: LogRecordSpec[]) {
         let nowCounterMillisecs = new Date().getTime();
-        const newRecords = logRecords.map(({ timestamp, message, data }) => {
-            const timestampString = timestamp || new Date(nowCounterMillisecs++).toISOString();
+        const newRecords = logRecords.map(logSpec => {
+            const logSpecObjectified = typeof logSpec === 'string' ? { message: logSpec } : logSpec;
+            const { timestamp, message = 'a log message', data } = logSpecObjectified;
+            const timestampString = timestamp || new Date(nowCounterMillisecs++).toISOString(); //tODO: do the timestamp into the message
             return {
             stream: {
-                timestampString, // need to prevent deduplication
                 ...data,
             },
-            values: [[timestampString, message || 'a log record']],
+            values: [[timestampString, message]],
         }}
         );
         this.records.push(...newRecords);
