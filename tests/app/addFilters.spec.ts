@@ -7,9 +7,9 @@ test('find a line create a filter on it', async ({ page, appState }) => {
 
     await appState.givenSources({ name: 'existing' });
 
-    await page.goto('/');
-
     const logs = await routeLogResponses(page, { message: 'Some<thing> (H)appened' });
+
+    await page.goto('/');
 
     await page.getByTestId('start-fetching-button').click();
 
@@ -29,6 +29,31 @@ test('find a line create a filter on it', async ({ page, appState }) => {
     await expect(page.getByText('3 ACK messages')).toBeVisible();
 
 });
+
+test('fetching messages', async ({ page, appState }) => {
+
+    await page.clock.install();
+
+    await appState.givenSources({ name: 'existing' });
+
+    const logs = await routeLogResponses(page, { message: 'Some<thing> (H)appened' });
+
+
+    await page.goto('/');
+
+    await page.getByTestId('start-fetching-button').click();
+
+    await expect(page.getByText('Some<thing> (H)appened')).toBeVisible();
+
+    logs.givenRecords({ message: 'Some<thing> else (H)appened' }, { message: 'Some<thing> (H)appened' });
+
+    await page.clock.runFor('01:30');
+
+    await expect(page.getByText('Some<thing> (H)appened')).not.toBeVisible();
+    await expect(page.getByText('3 ACK messages')).toBeVisible();
+
+});
+
 
 type LogRecordSpec = {
     timestamp?: string;
