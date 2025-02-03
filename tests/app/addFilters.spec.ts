@@ -9,7 +9,7 @@ test('find a line create a filter on it', async ({ page, appState }) => {
 
     await page.goto('/');
 
-    await routeLogResponses(page, { message: 'Some<thing> (H)appened' });
+    const logs = await routeLogResponses(page, { message: 'Some<thing> (H)appened' });
 
     await page.getByTestId('start-fetching-button').click();
 
@@ -20,10 +20,13 @@ test('find a line create a filter on it', async ({ page, appState }) => {
     await expect(page.getByText('Some<thing> (H)appened')).not.toBeVisible();
     await expect(page.getByText('1 ACK messages')).toBeVisible();
 
+    //two more new messages should be captured
+    logs.givenRecords({ message: 'Some<thing> (H)appened' }, { message: 'Some<thing> (H)appened' });
+
     await page.clock.runFor('05:00');
 
     await expect(page.getByText('Some<thing> (H)appened')).not.toBeVisible();
-    await expect(page.getByText('1 ACK messages')).toBeVisible();
+    await expect(page.getByText('3 ACK messages')).toBeVisible();
 
 });
 
@@ -35,14 +38,9 @@ type LogRecordSpec = {
 
 type LogRecord = { stream: Record<string, string>, values: string[][] };
 
-async function routeLogResponses(page: Page, ...logRecords: LogRecordSpec[]) {
+async function routeLogResponses(page: Page, ...logRecords: LogRecordSpec[]): Promise<LogSource> {
     const source = new LogSource();
-    source.records = logRecords.map(({ timestamp, message, data }) => ({
-        stream: {
-            ...data,
-        },
-        values: [[timestamp || new Date().toISOString(), message || 'a log record']],
-    }));
+    source.givenRecords(...logRecords);
     await page.route('/lokiprod/api/v1/query_range?**', (route) => {
         const json = {
             data: {
@@ -61,7 +59,15 @@ class LogSource {
 
     public records: LogRecord[] = [];
 
-    constructor() {
+    givenRecords(...logRecords: LogRecordSpec[]) {
+        const newRecords = logRecords.map(({ timestamp, message, data }) => ({
+            stream: {
+                ...data,
+            },
+            values: [[timestamp || new Date().toISOString(), message || 'a log record']],
+        }))
+        this.records.push(...newRecords);
+    
     }
     
 }
