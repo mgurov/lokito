@@ -19,6 +19,12 @@ test('find a line create a filter on it', async ({ page, appState }) => {
 
     await expect(page.getByText('Some<thing> (H)appened')).not.toBeVisible();
     await expect(page.getByText('1 ACK messages')).toBeVisible();
+
+    await page.clock.runFor('05:00');
+
+    await expect(page.getByText('Some<thing> (H)appened')).not.toBeVisible();
+    await expect(page.getByText('1 ACK messages')).toBeVisible();
+
 });
 
 type LogRecordSpec = {
