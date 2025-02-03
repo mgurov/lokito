@@ -110,10 +110,10 @@ export default function NewRule({ log, open, setOpen }: NewRuleProps) {
             </Button>
           </DialogClose>
           <Button data-testid="apply-rule-button" disabled={logLineMatchesRegex != 'yes'} onClick={handleSubmit({save: false})} type="submit">
-            Apply once
+            Apply on current
           </Button>
           <Button data-testid="save-rule-button" disabled={logLineMatchesRegex != 'yes'} onClick={handleSubmit({save: true})} type="submit">
-            Save rule
+            Save for the future
           </Button>
         </DialogFooter>
       </DialogContent>
