@@ -53,6 +53,39 @@ test('a saved filter should be applied to existing and following messages ', asy
 
 });
 
+test('a non-saved filter should be applied to existing but not following messages ', async ({ page, appState }) => {
+
+    await page.clock.install();
+
+    await appState.givenSources({ name: 'existing' });
+
+    const logs = await routeLogResponses(page, 'this_message 1', 'unrelated 1');
+
+    await page.goto('/');
+
+    await page.getByTestId('start-fetching-button').click();
+
+    await expectTexts(page.getByTestId('log-message'), 'unrelated 1', 'this_message 1');
+
+    await page.getByText('this_message 1').click();
+    await page.getByTestId('new-rule-button').click();
+    await page.getByTestId('rule_regex').fill('this_message');
+    await page.getByTestId('apply-rule-button').click();
+
+    await expectTexts(page.getByTestId('log-message'), 'unrelated 1');
+    await expect(page.getByText('1 ACK messages')).toBeVisible();
+
+    // new messages should NOT be captured
+    logs.givenRecords('this_message 2', 'unrelated 2');
+
+    await page.clock.runFor('01:30');
+
+    await expectTexts(page.getByTestId('log-message'), 'unrelated 2', 'this_message 2', 'unrelated 1');
+    await expect(page.getByText('1 ACK messages')).toBeVisible();
+
+});
+
+
 
 test('fetching messages', async ({ page, appState }) => {
 
