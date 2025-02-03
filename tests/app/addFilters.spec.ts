@@ -85,19 +85,18 @@ async function routeLogResponses(page: Page, ...logRecords: LogRecordSpec[]): Pr
 
 class LogSource {
 
-    private counter = 1;
-
     public records: LogRecord[] = [];
 
     givenRecords(...logRecords: LogRecordSpec[]) {
+        let nowCounterMillisecs = new Date().getTime();
         const newRecords = logRecords.map(({ timestamp, message, data }) => {
-            const timestampString = timestamp || new Date().toISOString()
+            const timestampString = timestamp || new Date(nowCounterMillisecs++).toISOString();
             return {
             stream: {
                 timestampString, // need to prevent deduplication
                 ...data,
             },
-            values: [[timestampString + ' _ ' + this.counter++, message || 'a log record']],
+            values: [[timestampString, message || 'a log record']],
         }}
         );
         this.records.push(...newRecords);
