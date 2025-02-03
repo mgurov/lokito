@@ -3,6 +3,8 @@ import { test, expect } from '@tests/app/setup/testExtended';
 
 test('find a line create a filter on it', async ({ page, appState }) => {
 
+    await page.clock.install();
+
     await appState.givenSources({ name: 'existing' });
 
     await page.goto('/');
