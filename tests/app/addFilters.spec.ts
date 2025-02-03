@@ -55,6 +55,8 @@ test('fetching messages', async ({ page, appState }) => {
 
 });
 
+// TODO: show the date time message.
+
 
 type LogRecordSpec = {
     timestamp?: string;
@@ -83,6 +85,8 @@ async function routeLogResponses(page: Page, ...logRecords: LogRecordSpec[]): Pr
 
 class LogSource {
 
+    private counter = 1;
+
     public records: LogRecord[] = [];
 
     givenRecords(...logRecords: LogRecordSpec[]) {
@@ -93,7 +97,7 @@ class LogSource {
                 timestampString, // need to prevent deduplication
                 ...data,
             },
-            values: [[timestampString, message || 'a log record']],
+            values: [[timestampString + ' _ ' + this.counter++, message || 'a log record']],
         }}
         );
         this.records.push(...newRecords);
