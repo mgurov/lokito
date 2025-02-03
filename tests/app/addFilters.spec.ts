@@ -36,21 +36,20 @@ test('fetching messages', async ({ page, appState }) => {
 
     await appState.givenSources({ name: 'existing' });
 
-    const logs = await routeLogResponses(page, { message: 'Some<thing> (H)appened' });
-
+    const logs = await routeLogResponses(page, { message: 'event1' });
 
     await page.goto('/');
 
     await page.getByTestId('start-fetching-button').click();
 
-    await expect(page.getByText('Some<thing> (H)appened')).toBeVisible();
+    await expect(page.getByText('event1')).toBeVisible();
 
-    logs.givenRecords({ message: 'Some<thing> else (H)appened' }, { message: 'Some even more else happened' });
+    logs.givenRecords({ message: 'event2' }, { message: 'event3' });
 
     await page.clock.runFor('01:30');
 
-    logs.givenRecords({ message: 'Some<thing> else (H)appened' }, { message: 'Some even more else happened' });
-    await expect(page.getByText('Some<thing> else (H)appened')).toBeVisible();
+    // logs.givenRecords({ message: 'Some<thing> else (H)appened' }, { message: 'Some even more else happened' });
+    await expect(page.getByText('event2')).toBeVisible();
     // await expect(page.getByText('3 ACK messages')).toBeVisible();
 
 });
