@@ -60,12 +60,16 @@ class LogSource {
     public records: LogRecord[] = [];
 
     givenRecords(...logRecords: LogRecordSpec[]) {
-        const newRecords = logRecords.map(({ timestamp, message, data }) => ({
+        const newRecords = logRecords.map(({ timestamp, message, data }) => {
+            const timestampString = timestamp || new Date().toISOString()
+            return {
             stream: {
+                timestampString, // need to prevent deduplication
                 ...data,
             },
-            values: [[timestamp || new Date().toISOString(), message || 'a log record']],
-        }))
+            values: [[timestampString, message || 'a log record']],
+        }}
+        );
         this.records.push(...newRecords);
     
     }
