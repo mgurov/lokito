@@ -1,5 +1,6 @@
 import { Page } from '@playwright/test';
 import { test, expect } from '@tests/app/setup/testExtended';
+import { expectTexts } from './util/visualAssertions';
 
 test('find a line create a filter on it', async ({ page, appState }) => {
 
@@ -42,7 +43,9 @@ test('fetching messages', async ({ page, appState }) => {
 
     await page.getByTestId('start-fetching-button').click();
 
-    await expect(page.getByText('event1')).toBeVisible();
+    await expectTexts(page.getByTestId('log-line'), 'event1');
+
+    //await expect(page.getByText('event1')).toBeVisible();
 
     logs.givenRecords({ message: 'event2' }, { message: 'event3' });
 
@@ -51,6 +54,7 @@ test('fetching messages', async ({ page, appState }) => {
     // logs.givenRecords({ message: 'Some<thing> else (H)appened' }, { message: 'Some even more else happened' });
     await expect(page.getByText('event2')).toBeVisible();
     // await expect(page.getByText('3 ACK messages')).toBeVisible();
+    await expectTexts(page.getByTestId('log-line'), 'event1', 'event2', 'event3');
 
 });
 

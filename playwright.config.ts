@@ -17,7 +17,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI ? [["html"], ["line"]] : undefined,
-  timeout: 5000,
+  timeout: 2000,
   use: {
     actionTimeout: 1000,
     navigationTimeout: 1000,
