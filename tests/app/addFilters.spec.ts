@@ -21,9 +21,9 @@ test('find a line create a filter on it', async ({ page, appState }) => {
     await expect(page.getByText('1 ACK messages')).toBeVisible();
 
     //two more new messages should be captured
-    logs.givenRecords({ message: 'Some<thing> (H)appened' }, { message: 'Some<thing> (H)appened' });
+    logs.givenRecords({ message: 'Some<thing> else (H)appened' }, { message: 'Some<thing> (H)appened' });
 
-    await page.clock.runFor('05:00');
+    await page.clock.runFor('01:30');
 
     await expect(page.getByText('Some<thing> (H)appened')).not.toBeVisible();
     await expect(page.getByText('3 ACK messages')).toBeVisible();
