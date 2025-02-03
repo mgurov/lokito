@@ -43,18 +43,13 @@ test('fetching messages', async ({ page, appState }) => {
 
     await page.getByTestId('start-fetching-button').click();
 
-    await expectTexts(page.getByTestId('log-line'), 'event1');
-
-    //await expect(page.getByText('event1')).toBeVisible();
+    await expectTexts(page.getByTestId('log-message'), 'event1');
 
     logs.givenRecords({ message: 'event2' }, { message: 'event3' });
 
     await page.clock.runFor('01:30');
 
-    // logs.givenRecords({ message: 'Some<thing> else (H)appened' }, { message: 'Some even more else happened' });
-    await expect(page.getByText('event2')).toBeVisible();
-    // await expect(page.getByText('3 ACK messages')).toBeVisible();
-    await expectTexts(page.getByTestId('log-line'), 'event1', 'event2', 'event3');
+    await expectTexts(page.getByTestId('log-message'), 'event3', 'event2', 'event1');
 
 });
 

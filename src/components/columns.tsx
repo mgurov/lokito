@@ -56,7 +56,7 @@ export const columns: ColumnDef<Log>[] = [
     accessorKey: 'line',
     header: undefined,
     cell: ({ getValue }) => (
-      <div className="h-full cursor-pointer overflow-auto whitespace-nowrap text-xs font-medium">
+      <div className="h-full cursor-pointer overflow-auto whitespace-nowrap text-xs font-medium" data-testid="log-message">
         {getValue<string>()}
       </div>
     ),
