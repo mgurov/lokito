@@ -26,13 +26,7 @@ export const logDataSlice = createSlice({
     receiveBatch: (state, action: PayloadAction<LogDataReceived>) => {
       const newRecords = [];
       for (const newRecord of action.payload.logs) {
-        //TODO: would be very nice to test this deduplication together with immer and ideally the whole redux-toolkit shebang
         const existingRecordsProxy = state.index[newRecord.id];
-        if (existingRecordsProxy) {
-          console.warn('Duplicate log id; existing. id: ', newRecord.id, existingRecordsProxy, 'new:', newRecord);
-        } else {
-          console.info('wtf? ', newRecord.id);
-        }
         const existingRecords = existingRecordsProxy ? current(existingRecordsProxy) : [];
         const sameStreamRecord = existingRecords.find((r) => _.isEqual(r.stream, newRecord.stream));
         if (!sameStreamRecord) {
