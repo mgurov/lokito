@@ -114,9 +114,10 @@ test('duplications should be filtered out on fetching', async ({ page, appState 
     await appState.givenSources({ name: 'existing' });
 
     const sameTimestamp = '2025-02-04T20:00:00.000Z';
+    const sameData = {'event': 'event1'};
     const anotherTimestamp = '2025-02-04T20:00:00.001Z';
 
-    const logs = await routeLogResponses(page, { message: 'event1', timestamp: sameTimestamp });
+    const logs = await routeLogResponses(page, { message: 'event1', timestamp: sameTimestamp, data: sameData });
 
     await page.goto('/');
 
@@ -124,16 +125,16 @@ test('duplications should be filtered out on fetching', async ({ page, appState 
 
     await expectTexts(page.getByTestId('log-message'), 'event1');
 
-    //NB: the deduplication is quite dumb ATM, only taking the timestamp into account. Should take the rest of the message into account.
+    //NB: the deduplication doesn't care about the message, only the timestamp and the data
     logs.givenRecords(
-        { message: 'event1', timestamp: anotherTimestamp }, // Will be added because of the timestamp
-        { message: 'event1', timestamp: sameTimestamp },
-        { message: 'event2', timestamp: sameTimestamp }, // Will be skipped because of the timestamp?
+        { message: 'event2', timestamp: anotherTimestamp, data: sameData }, // to be added because of the different timestamp
+        { message: 'event3', timestamp: sameTimestamp, data: {'event': 'event3'} }, //to be added because the data differs
+        { message: 'event4', timestamp: sameTimestamp, data: sameData }, // to be skipped
     );
 
     await page.clock.runFor('01:30');
 
-    await expectTexts(page.getByTestId('log-message'), 'event1', 'event1');
+    await expectTexts(page.getByTestId('log-message'), 'event3', 'event2', 'event1');
 });
 
 
