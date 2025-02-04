@@ -85,8 +85,6 @@ test('a non-saved filter should be applied to existing but not following message
 
 });
 
-
-
 test('fetching messages', async ({ page, appState }) => {
 
     await page.clock.install();
