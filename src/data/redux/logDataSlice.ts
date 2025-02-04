@@ -29,6 +29,7 @@ export const logDataSlice = createSlice({
         const existingRecordsProxy = state.index[newRecord.id];
         console.log('existingRecordsProxy', existingRecordsProxy, newRecord.id);
         const existingRecords = existingRecordsProxy ? current(existingRecordsProxy) : [];
+        //const existingRecords = existingRecordsProxy ? current(existingRecordsProxy) : [];
         const sameStreamRecord = existingRecords.find((r) => _.isEqual(r.stream, newRecord.stream));
         if (!sameStreamRecord) {
           state.index[newRecord.id] = [...existingRecords, newRecord];

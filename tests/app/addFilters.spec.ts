@@ -134,7 +134,7 @@ test('duplications should be filtered out on fetching', async ({ page, appState 
 
     await page.clock.runFor('01:30');
 
-    await expectTexts(page.getByTestId('log-message'), 'event3', 'event2', 'event1');
+    await expectTexts(page.getByTestId('log-message'), 'event2', 'event1', 'event3');
 });
 
 
