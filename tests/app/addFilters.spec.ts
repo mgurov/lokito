@@ -174,12 +174,12 @@ class LogSource {
         const newRecords = logRecords.map(logSpec => {
             const logSpecObjectified = typeof logSpec === 'string' ? { message: logSpec } : logSpec;
             const { timestamp, message = 'a log message', data } = logSpecObjectified;
-            const timestampString = timestamp || new Date(nowCounterMillisecs++).toISOString(); //tODO: do the timestamp into the message
+            const timestampString = timestamp ? new Date(timestamp) : new Date(nowCounterMillisecs++); //tODO: do the timestamp into the message
             return {
             stream: {
                 ...data,
             },
-            values: [[timestampString, message]],
+            values: [[`${timestampString.getTime()}000000`, message]],
         }}
         );
         this.records.push(...newRecords);
