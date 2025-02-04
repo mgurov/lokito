@@ -1,4 +1,4 @@
-import { PayloadAction, createSelector, createSlice, current } from '@reduxjs/toolkit';
+import { PayloadAction, createSelector, createSlice, current, isDraft } from '@reduxjs/toolkit';
 import { useSelector } from 'react-redux';
 import { Log } from '@/data/schema';
 import { RootState } from './store';
@@ -27,8 +27,7 @@ export const logDataSlice = createSlice({
       const newRecords = [];
       for (const newRecord of action.payload.logs) {
         const existingRecordsProxy = state.index[newRecord.id];
-        console.log('existingRecordsProxy', existingRecordsProxy, newRecord.id);
-        const existingRecords = existingRecordsProxy ? current(existingRecordsProxy) : [];
+        const existingRecords = existingRecordsProxy ? (isDraft(existingRecordsProxy) ? current(existingRecordsProxy) : existingRecordsProxy)  : [];
         //const existingRecords = existingRecordsProxy ? current(existingRecordsProxy) : [];
         const sameStreamRecord = existingRecords.find((r) => _.isEqual(r.stream, newRecord.stream));
         if (!sameStreamRecord) {
