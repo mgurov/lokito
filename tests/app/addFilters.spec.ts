@@ -125,7 +125,11 @@ test('duplications should be filtered out on fetching', async ({ page, appState 
     await expectTexts(page.getByTestId('log-message'), 'event1');
 
     //NB: the deduplication is quite dumb ATM, only taking the timestamp into account. Should take the rest of the message into account.
-    logs.givenRecords({ message: 'event1', timestamp: anotherTimestamp }, { message: 'event2', timestamp: sameTimestamp });
+    logs.givenRecords(
+        { message: 'event1', timestamp: anotherTimestamp }, // Will be added because of the timestamp
+        { message: 'event1', timestamp: sameTimestamp },
+        { message: 'event2', timestamp: sameTimestamp }, // Will be skipped because of the timestamp?
+    );
 
     await page.clock.runFor('01:30');
 
