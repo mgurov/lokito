@@ -114,7 +114,7 @@ function ShowAllSourcesData() {
       <div className="rounded-md bg-yellow-50 p-4">
         There are hiccups fetching logs. You probably forgot to run the CLI, check the{' '}
         <a
-          href="https://gitlab.com/yusef_habib/remix-test"
+          href="https://github.com/mgurov/lokito"
           target="_blank"
           rel="noreferrer"
           className="text-blue-400 hover:text-blue-600"
