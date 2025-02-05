@@ -2,23 +2,24 @@ import { Page } from '@playwright/test';
 import { test, expect } from '@tests/app/setup/testExtended';
 import { expectTexts } from './util/visualAssertions';
 
-test('find a line create a filter on it', async ({ page, appState }) => {
+test('find a line create a filter on it', async ({ page, appState, mainPage }) => {
 
-    await appState.givenSources({ name: 'existing' });
+
+    await mainPage.open(async () => {
+        await appState.givenSources({ name: 'existing' });
+    });
 
     await routeLogResponses(page, { message: 'Some<thing> 👻 (H)appened' });
 
-    await page.goto('/');
-
-    await page.getByTestId('start-fetching-button').click();
+    await mainPage.startFetchingButton.click();
 
     await page.getByText('Some<thing> 👻 (H)appened').click();
     await page.getByTestId('new-rule-button').click();
     await page.getByTestId('save-rule-button').click();
 
     await expect(page.getByText('Some<thing> 👻 (H)appened')).not.toBeVisible();
-    await expect(page.getByText('1 ACK messages')).toBeVisible();
-    await expect(page.getByText('Clean ✅')).toBeVisible();
+    await mainPage.expectAckMessages(1);
+    await expect(mainPage.cleanBacklogMessage).toBeVisible();
 });
 
 test('a saved filter should be applied to existing and following messages ', async ({ page, appState }) => {
