@@ -52,14 +52,17 @@ export default function NewRule({ log, open, setOpen }: NewRuleProps) {
     errorMessage = (e as {message: string}).message;
   }
 
-  const handleSubmit = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  function handleSubmit({save}: {save: boolean}){ 
+    return (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     event.preventDefault();
     const newFilter: Filter = {
       id: randomId(),
+      transient: !save,
       messageRegex,
     };
     dispatch(createFilter(newFilter));
   };
+}
 
   return (
     <Dialog open onOpenChange={setOpen}>
@@ -80,6 +83,7 @@ export default function NewRule({ log, open, setOpen }: NewRuleProps) {
           </ScrollArea>
           <div className="grid grid-cols-4 items-center gap-4">
             <Input
+              data-testid="rule_regex"
               id="regex"
               value={messageRegex}
               onChange={(e) => setMessageRegex(e.target.value)}
@@ -106,8 +110,11 @@ export default function NewRule({ log, open, setOpen }: NewRuleProps) {
               Close
             </Button>
           </DialogClose>
-          <Button data-testid="save-rule-button" disabled={logLineMatchesRegex != 'yes'} onClick={handleSubmit} type="submit">
-            Save rule
+          <Button data-testid="apply-rule-button" disabled={logLineMatchesRegex != 'yes'} onClick={handleSubmit({save: false})} type="submit">
+            Apply on current
+          </Button>
+          <Button data-testid="save-rule-button" disabled={logLineMatchesRegex != 'yes'} onClick={handleSubmit({save: true})} type="submit">
+            Save for the future
           </Button>
         </DialogFooter>
       </DialogContent>

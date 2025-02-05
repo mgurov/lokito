@@ -18,6 +18,9 @@ export const filtersSlice = createSlice({
     initialState: initialFiltersState,
     reducers: {
         createFilter: (state, action: PayloadAction<Filter>) => {
+            if (action.payload.transient) {
+                return;
+            }
             state.data[action.payload.id] = action.payload
             saveSourcesToStorage(Object.values(state.data))
         },

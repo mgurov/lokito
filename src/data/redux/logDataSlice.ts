@@ -1,4 +1,4 @@
-import { PayloadAction, createSelector, createSlice, current } from '@reduxjs/toolkit';
+import { PayloadAction, createSelector, createSlice, current, isDraft } from '@reduxjs/toolkit';
 import { useSelector } from 'react-redux';
 import { Log } from '@/data/schema';
 import { RootState } from './store';
@@ -26,9 +26,8 @@ export const logDataSlice = createSlice({
     receiveBatch: (state, action: PayloadAction<LogDataReceived>) => {
       const newRecords = [];
       for (const newRecord of action.payload.logs) {
-        //TODO: would be very nice to test this deduplication together with immer and ideally the whole redux-toolkit shebang
         const existingRecordsProxy = state.index[newRecord.id];
-        const existingRecords = existingRecordsProxy ? current(existingRecordsProxy) : [];
+        const existingRecords = existingRecordsProxy ? (isDraft(existingRecordsProxy) ? current(existingRecordsProxy) : existingRecordsProxy) : [];
         const sameStreamRecord = existingRecords.find((r) => _.isEqual(r.stream, newRecord.stream));
         if (!sameStreamRecord) {
           state.index[newRecord.id] = [...existingRecords, newRecord];
