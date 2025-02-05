@@ -54,7 +54,7 @@ test('a saved filter should be applied to existing and following messages ', asy
 
 });
 
-test('a non-saved filter should be applied to existing but not following messages ', async ({ page, appState }) => {
+test('a non-saved filter should be applied to existing but not following messages ', async ({ page, appState, mainPage }) => {
 
     await page.clock.install();
 
@@ -74,7 +74,7 @@ test('a non-saved filter should be applied to existing but not following message
     await page.getByTestId('apply-rule-button').click();
 
     await expectTexts(page.getByTestId('log-message'), 'unrelated 1');
-    await expect(page.getByText('1 ACK messages')).toBeVisible();
+    await mainPage.expectAckMessages(1);
 
     // new messages should NOT be captured
     logs.givenRecords('this_message 2', 'unrelated 2');
@@ -82,11 +82,11 @@ test('a non-saved filter should be applied to existing but not following message
     await page.clock.runFor('01:30');
 
     await expectTexts(page.getByTestId('log-message'), 'unrelated 2', 'this_message 2', 'unrelated 1');
-    await expect(page.getByText('1 ACK messages')).toBeVisible();
+    await mainPage.expectAckMessages(1);
 
 });
 
-test('fetching messages', async ({ page, appState }) => {
+test('fetching messages', async ({ page, appState, mainPage }) => {
 
     await page.clock.install();
 
@@ -94,7 +94,7 @@ test('fetching messages', async ({ page, appState }) => {
 
     const logs = await routeLogResponses(page, { message: 'event1' });
 
-    await page.goto('/');
+    await mainPage.open();
 
     await page.getByTestId('start-fetching-button').click();
 
