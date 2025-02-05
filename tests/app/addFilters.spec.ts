@@ -22,17 +22,17 @@ test('find a line create a filter on it', async ({ page, appState, mainPage }) =
     await expect(mainPage.cleanBacklogMessage).toBeVisible();
 });
 
-test('a saved filter should be applied to existing and following messages ', async ({ page, appState }) => {
+test('a saved filter should be applied to existing and following messages ', async ({ page, appState, mainPage }) => {
 
-    await page.clock.install();
+    await mainPage.open(async () => {
+        await page.clock.install();
 
-    await appState.givenSources({ name: 'existing' });
+        await appState.givenSources({ name: 'existing' });
+    });
 
     const logs = await routeLogResponses(page, 'this_message 1', 'unrelated 1');
 
-    await page.goto('/');
-
-    await page.getByTestId('start-fetching-button').click();
+    await mainPage.startFetchingButton.click();
 
     await expectTexts(page.getByTestId('log-message'), 'unrelated 1', 'this_message 1');
 
@@ -42,7 +42,7 @@ test('a saved filter should be applied to existing and following messages ', asy
     await page.getByTestId('save-rule-button').click();
 
     await expectTexts(page.getByTestId('log-message'), 'unrelated 1');
-    await expect(page.getByText('1 ACK messages')).toBeVisible();
+    await mainPage.expectAckMessages(1);
 
     //two more new messages should be captured
     logs.givenRecords('this_message 2', 'unrelated 2', 'this_message 3');
@@ -50,7 +50,7 @@ test('a saved filter should be applied to existing and following messages ', asy
     await page.clock.runFor('01:30');
 
     await expectTexts(page.getByTestId('log-message'), 'unrelated 2', 'unrelated 1');
-    await expect(page.getByText('3 ACK messages')).toBeVisible();
+    await mainPage.expectAckMessages(3);
 
 });
 
