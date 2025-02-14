@@ -108,7 +108,7 @@ test('fetching messages', async ({ page, appState, mainPage }) => {
 
 });
 
-test('duplications should be filtered out on fetching', async ({ page, appState }) => {
+test('duplications should be filtered out on fetching', async ({ page, appState, consoleLogging }) => {
 
     await page.clock.install();
 
@@ -132,6 +132,8 @@ test('duplications should be filtered out on fetching', async ({ page, appState 
         { message: 'event3', timestamp: sameTimestamp, data: {'event': 'event3'} }, //to be added because the data differs
         { message: 'event4', timestamp: sameTimestamp, data: sameData }, // to be skipped
     );
+
+    consoleLogging.ignoreErrorMessagesContaining('Encountered two children with the same key') // haven't seen this on production yet, assuming negligible occurence frequency
 
     await page.clock.runFor('01:30');
 

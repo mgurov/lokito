@@ -2,7 +2,10 @@ import { Locator, Page } from '@playwright/test';
 import { test, expect } from '@tests/app/setup/testExtended';
 
 
-test('add a source from the sourceless main screen', async ({ page, appState }) => {
+test('add a source from the sourceless main screen', async ({ page, appState, consoleLogging }) => {
+
+    consoleLogging.failImmediately = true
+
     await page.goto('/');
 
     await page.getByTestId('new-source-button').getByText('create a new one').click();

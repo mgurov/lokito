@@ -27,6 +27,8 @@ export default class MainPageFixture {
 
 export const mainPageTest = test.extend<{ mainPage: MainPageFixture }>({
     mainPage: [async ({ page }, use) => {
+
         await use(new MainPageFixture(page)); //TODO: fix the use hint to prod code only.
+
     }, {}],
 });
