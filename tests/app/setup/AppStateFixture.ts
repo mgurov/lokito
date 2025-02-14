@@ -1,3 +1,4 @@
+import { Source } from "@/data/source";
 import { nextId } from "../util/nextId";
 import { StorageFixture, storageTest } from "./StorageFixture";
 
@@ -10,6 +11,12 @@ export class AppStateFixture {
         const sourcesStored = await this.storage.getLocalItem('sources')
         return ((sourcesStored || []) as [{ name: string }]).map(s => s.name);        
     }
+
+    async sources() {
+        const sourcesStored = await this.storage.getLocalItem('sources')
+        return ((sourcesStored || []) as [Source]);
+    }
+
 
     async givenSources(...sourceSpecs: sourceSpec[]) {
         await this.storage.setLocalItem('sources', sourceSpecs.map(toSource));

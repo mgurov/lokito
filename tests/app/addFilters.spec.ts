@@ -108,6 +108,38 @@ test('fetching messages', async ({ page, appState, mainPage }) => {
 
 });
 
+test('should fetch updated query on editing', async ({ page, appState, mainPage }) => {
+
+    await page.clock.install();
+
+    await appState.givenSources({ name: 'existing', query: "{job='test'}" });
+
+    const logs = await routeLogResponses(page);
+
+    await mainPage.open();
+
+    await page.getByTestId('start-fetching-button').click();
+
+    await expect.poll(() => {
+        return logs.requests.map(u => u.searchParams.get('query'))
+    }).toStrictEqual(["{job='test'}"])
+
+    await page.getByTestId('sources-button').click();
+    await page.getByTestId('source-card-filter-textarea').fill('{job="updated query"}')
+    await page.getByTestId('save-query-changes').click();
+
+    await page.clock.runFor('01:30');
+
+    await expect.poll(() => {
+        return logs.requests.map(u => u.searchParams.get('query'))
+    }).toStrictEqual([
+        "{job='test'}", //from before
+        '{job="updated query"}',    
+    ])
+
+});
+
+
 test('duplications should be filtered out on fetching', async ({ page, appState, consoleLogging }) => {
 
     await page.clock.install();
@@ -155,7 +187,8 @@ type LogRecord = { stream: Record<string, string>, values: string[][] };
 async function routeLogResponses(page: Page, ...logRecords: LogRecordSpec[]): Promise<LogSource> {
     const source = new LogSource();
     source.givenRecords(...logRecords);
-    await page.route('/lokiprod/api/v1/query_range?**', (route) => {
+    await page.route('/lokiprod/api/v1/query_range?**', (route, request) => {
+        source.requests.push(new URL(request.url()));
         const json = {
             data: {
                 result: source.records.splice(0, Infinity),
@@ -172,6 +205,8 @@ async function routeLogResponses(page: Page, ...logRecords: LogRecordSpec[]): Pr
 class LogSource {
 
     public records: LogRecord[] = [];
+
+    public requests: URL[] = [];
 
     givenRecords(...logRecords: LogRecordSpec[]) {
         let nowCounterMillisecs = new Date().getTime();

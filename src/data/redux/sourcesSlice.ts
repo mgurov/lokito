@@ -13,6 +13,12 @@ export interface ChangeSourceActive {
   sourceId: string;
   newValue: boolean;
 }
+
+export interface ChangeSourceQuery {
+  sourceId: string;
+  newQueryValue: string;
+}
+
 export interface ChangeSourceColor {
   sourceId: string;
   newValue: string;
@@ -60,6 +66,10 @@ export const sourcesSlice = createSlice({
       state.data[action.payload.sourceId].color = action.payload.newValue;
       saveSourcesToStorage(Object.values(state.data));
     },
+    changeSourceQuery: (state, action: PayloadAction<ChangeSourceQuery>) => {
+      state.data[action.payload.sourceId].query = action.payload.newQueryValue;
+      saveSourcesToStorage(Object.values(state.data));
+    },
     setAllSources: (state, action: PayloadAction<Source[]>) => {
       state.data = _.keyBy(action.payload, 'id');
       saveSourcesToStorage(Object.values(state.data));
@@ -67,7 +77,7 @@ export const sourcesSlice = createSlice({
   },
 });
 
-export const { createNewSource, deleteSource, changeSourceActive, changeSourceColor, setAllSources } =
+export const { createNewSource, deleteSource, changeSourceActive, changeSourceColor, setAllSources, changeSourceQuery } =
   sourcesSlice.actions;
 
 export default sourcesSlice.reducer;
