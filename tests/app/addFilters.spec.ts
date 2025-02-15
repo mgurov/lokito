@@ -1,15 +1,14 @@
-import { Page } from '@playwright/test';
+
 import { test, expect } from '@tests/app/setup/testExtended';
 import { expectTexts } from './util/visualAssertions';
 
-test('find a line create a filter on it', async ({ page, appState, mainPage }) => {
-
+test('find a line create a filter on it', async ({ page, appState, mainPage, logs }) => {
 
     await mainPage.open(async () => {
         await appState.givenSources({ name: 'existing' });
     });
 
-    await routeLogResponses(page, { message: 'Some<thing> 👻 (H)appened' });
+    logs.givenRecords({ message: 'Some<thing> 👻 (H)appened' })
 
     await mainPage.startFetchingButton.click();
 
@@ -22,7 +21,7 @@ test('find a line create a filter on it', async ({ page, appState, mainPage }) =
     await expect(mainPage.cleanBacklogMessage).toBeVisible();
 });
 
-test('a saved filter should be applied to existing and following messages ', async ({ page, appState, mainPage }) => {
+test('a saved filter should be applied to existing and following messages ', async ({ page, appState, mainPage, logs }) => {
 
     await mainPage.open(async () => {
         await page.clock.install();
@@ -30,7 +29,7 @@ test('a saved filter should be applied to existing and following messages ', asy
         await appState.givenSources({ name: 'existing' });
     });
 
-    const logs = await routeLogResponses(page, 'this_message 1', 'unrelated 1');
+    logs.givenRecords('this_message 1', 'unrelated 1');
 
     await mainPage.startFetchingButton.click();
 
@@ -54,13 +53,13 @@ test('a saved filter should be applied to existing and following messages ', asy
 
 });
 
-test('a non-saved filter should be applied to existing but not following messages ', async ({ page, appState, mainPage }) => {
+test('a non-saved filter should be applied to existing but not following messages ', async ({ page, appState, mainPage, logs }) => {
 
     await page.clock.install();
 
     await appState.givenSources({ name: 'existing' });
 
-    const logs = await routeLogResponses(page, 'this_message 1', 'unrelated 1');
+    logs.givenRecords('this_message 1', 'unrelated 1');
 
     await page.goto('/');
 
@@ -86,13 +85,13 @@ test('a non-saved filter should be applied to existing but not following message
 
 });
 
-test('fetching messages', async ({ page, appState, mainPage }) => {
+test('fetching messages', async ({ page, appState, mainPage, logs }) => {
 
     await page.clock.install();
 
     await appState.givenSources({ name: 'existing' });
 
-    const logs = await routeLogResponses(page, { message: 'event1' });
+    logs.givenRecords({ message: 'event1' });
 
     await mainPage.open();
 
@@ -108,13 +107,11 @@ test('fetching messages', async ({ page, appState, mainPage }) => {
 
 });
 
-test('should fetch updated query on editing', async ({ page, appState, mainPage }) => {
+test('should fetch updated query on editing', async ({ page, appState, mainPage, logs }) => {
 
     await page.clock.install();
 
     await appState.givenSources({ name: 'existing', query: "{job='test'}" });
-
-    const logs = await routeLogResponses(page);
 
     await mainPage.open();
 
@@ -124,9 +121,9 @@ test('should fetch updated query on editing', async ({ page, appState, mainPage 
         return logs.requests.map(u => u.searchParams.get('query'))
     }).toStrictEqual(["{job='test'}"])
 
-    await page.getByTestId('sources-button').click();
-    await page.getByTestId('source-card-filter-textarea').fill('{job="updated query"}')
-    await page.getByTestId('save-query-changes').click();
+    const sourceCard = (await mainPage.clickToSources()).sourceCard('existing')
+
+    await sourceCard.changeQuery('{job="updated query"}')
 
     await page.clock.runFor('01:30');
 
@@ -140,7 +137,7 @@ test('should fetch updated query on editing', async ({ page, appState, mainPage 
 });
 
 
-test('duplications should be filtered out on fetching', async ({ page, appState, consoleLogging }) => {
+test('duplications should be filtered out on fetching', async ({ page, appState, consoleLogging, logs }) => {
 
     await page.clock.install();
 
@@ -150,7 +147,7 @@ test('duplications should be filtered out on fetching', async ({ page, appState,
     const sameData = {'event': 'event1'};
     const anotherTimestamp = '2025-02-04T20:00:00.001Z';
 
-    const logs = await routeLogResponses(page, { message: 'event1', timestamp: sameTimestamp, data: sameData });
+    logs.givenRecords({ message: 'event1', timestamp: sameTimestamp, data: sameData });
 
     await page.goto('/');
 
@@ -172,57 +169,4 @@ test('duplications should be filtered out on fetching', async ({ page, appState,
     await expectTexts(page.getByTestId('log-message'), 'event2', 'event1', 'event3');
 });
 
-
 // TODO: show the date time message.
-
-
-type LogRecordSpec = string | {
-    timestamp?: string;
-    message?: string;
-    data?: Record<string, string>;
-}
-
-type LogRecord = { stream: Record<string, string>, values: string[][] };
-
-async function routeLogResponses(page: Page, ...logRecords: LogRecordSpec[]): Promise<LogSource> {
-    const source = new LogSource();
-    source.givenRecords(...logRecords);
-    await page.route('/lokiprod/api/v1/query_range?**', (route, request) => {
-        source.requests.push(new URL(request.url()));
-        const json = {
-            data: {
-                result: source.records.splice(0, Infinity),
-            }
-        }
-        return route.fulfill({
-            status: 200,
-            json,
-        });
-    });
-    return source;
-}
-
-class LogSource {
-
-    public records: LogRecord[] = [];
-
-    public requests: URL[] = [];
-
-    givenRecords(...logRecords: LogRecordSpec[]) {
-        let nowCounterMillisecs = new Date().getTime();
-        const newRecords = logRecords.map(logSpec => {
-            const logSpecObjectified = typeof logSpec === 'string' ? { message: logSpec } : logSpec;
-            const { timestamp, message = 'a log message', data } = logSpecObjectified;
-            const timestampString = timestamp ? new Date(timestamp) : new Date(nowCounterMillisecs++); //tODO: do the timestamp into the message
-            return {
-            stream: {
-                ...data,
-            },
-            values: [[`${timestampString.getTime()}000000`, message]],
-        }}
-        );
-        this.records.push(...newRecords);
-    
-    }
-    
-}

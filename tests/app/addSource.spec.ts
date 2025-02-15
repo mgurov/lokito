@@ -1,5 +1,5 @@
-import { Locator, Page } from '@playwright/test';
 import { test, expect } from '@tests/app/setup/testExtended';
+import { NewSourceRollover } from './setup/pages/SourcesPageFixture';
 
 
 test('add a source from the sourceless main screen', async ({ page, appState, consoleLogging }) => {
@@ -22,15 +22,24 @@ test('add a source from the sourceless main screen', async ({ page, appState, co
     expect(await appState.sourceNames()).toEqual(['Test Source']);
 });
 
-test('add a source to an existing list from main page', async ({ page, appState }) => {
+test('add a source to an existing list from main page', async ({ mainPage, appState }) => {
+
+    await mainPage.open(() => appState.givenSources({name: 'existing'}));
+
+    const newSourceRollover = await mainPage.clickNewSourceButton()
+    await newSourceRollover.fillSourceForm({ name: 'new'});
+    await newSourceRollover.saveSource();
+
+    expect(await appState.sourceNames()).toEqual(['existing', 'new']);
+});
+
+test('add a source to an existing list from sources page', async ({ appState, sourcePage }) => {
 
     await appState.givenSources({name: 'existing'});
 
-    await page.goto('/');
+    await sourcePage.open();
 
-    await page.getByTestId('new-source-button').getByText('New Source').click();
-
-    const newSourceRollover = new NewSourceRollover(page);
+    const newSourceRollover = await sourcePage.clickNewSourceButton();
 
     await newSourceRollover.fillSourceForm({ name: 'new'});
     await newSourceRollover.saveSource();
@@ -38,42 +47,26 @@ test('add a source to an existing list from main page', async ({ page, appState 
     expect(await appState.sourceNames()).toEqual(['existing', 'new']);
 });
 
-test('add a source to an existing list from sources page', async ({ page, appState }) => {
-
-    await appState.givenSources({name: 'existing'});
-
-    await page.goto('/');
-
-    await page.getByTestId('sources-button').click(); 
-
-    await page.getByTestId('new-source-button').getByText('New Source').click();
-
-    const newSourceRollover = new NewSourceRollover(page);
-
-    await newSourceRollover.fillSourceForm({ name: 'new'});
-    await newSourceRollover.saveSource();
-
-    expect(await appState.sourceNames()).toEqual(['existing', 'new']);
-});
-
-test('edit a source query', async ({ page, appState }) => {
+test('edit a source query', async ({ appState, sourcePage }) => {
 
     await appState.givenSources({name: 'existing', query: '{job="initial query"}'});
 
-    await page.goto('/sources');
+    await sourcePage.open()
 
-    await expect(page.getByTestId('source-name-title')).toHaveText('existing')
-    await expect(page.getByTestId('source-card-filter-textarea')).toHaveText('{job="initial query"}')
-    await expect(page.getByTestId('cancel-query-changes')).not.toBeAttached()
-    await expect(page.getByTestId('save-query-changes')).not.toBeAttached()
+    const sourceCard = sourcePage.sourceCard('existing')
 
-    await page.getByTestId('source-card-filter-textarea').fill('{job="updated query"}')
+    await expect(sourceCard.getByTestId('source-name-title')).toHaveText('existing')
+    await expect(sourceCard.filterTextarea).toHaveText('{job="initial query"}')
+    await expect(sourceCard.getByTestId('cancel-query-changes')).not.toBeAttached()
+    await expect(sourceCard.getByTestId('save-query-changes')).not.toBeAttached()
 
-    await expect(page.getByTestId('cancel-query-changes')).toBeVisible()
-    await page.getByTestId('save-query-changes').click();
+    await sourceCard.filterTextarea.fill('{job="updated query"}')
 
-    await expect(page.getByTestId('cancel-query-changes')).not.toBeAttached()
-    await expect(page.getByTestId('save-query-changes')).not.toBeAttached()
+    await expect(sourceCard.getByTestId('cancel-query-changes')).toBeVisible()
+    await sourceCard.getByTestId('save-query-changes').click();
+
+    await expect(sourceCard.getByTestId('cancel-query-changes')).not.toBeAttached()
+    await expect(sourceCard.getByTestId('save-query-changes')).not.toBeAttached()
 
 
     await expect.poll(async ()=> (await appState.sources()).map(s => ([s.name, s.query])))
@@ -87,45 +80,26 @@ test('edit a source query', async ({ page, appState }) => {
     // await expect(page.getByTestId('source-card-filter-textarea')).toHaveText('{job="updated query"}')    
 });
 
-test('should be able to cancel editing a source query', async ({ page, appState }) => {
+test('should be able to cancel editing a source query', async ({ appState, sourcePage }) => {
 
     await appState.givenSources({name: 'existing', query: '{job="initial query"}'});
 
-    await page.goto('/sources');
+    await sourcePage.open()
 
-    await expect(page.getByTestId('source-card-filter-textarea')).toHaveText('{job="initial query"}')
+    const sourceCard = sourcePage.sourceCard('existing')
 
-    await page.getByTestId('source-card-filter-textarea').fill('{job="updated query"}')
+    await expect(sourceCard.filterTextarea).toHaveText('{job="initial query"}')
 
-    await page.getByTestId('cancel-query-changes').click()
+    await sourceCard.filterTextarea.fill('{job="updated query"}')
 
-    await page.getByTestId('source-card-filter-textarea').fill('{job="initial query"}')
+    await sourceCard.getByTestId('cancel-query-changes').click()
 
-    await expect(page.getByTestId('cancel-query-changes')).not.toBeAttached()
-    await expect(page.getByTestId('save-query-changes')).not.toBeAttached()
+    await sourceCard.filterTextarea.fill('{job="initial query"}')
 
-    //reopening the page should show the original value
+    await expect(sourceCard.getByTestId('cancel-query-changes')).not.toBeAttached()
+    await expect(sourceCard.getByTestId('save-query-changes')).not.toBeAttached()
 
-    await page.goto('/sources');
-    await expect(page.getByTestId('source-card-filter-textarea')).toHaveText('{job="initial query"}')    
+    await expect.poll(async ()=> (await appState.sources()).map(s => ([s.name, s.query])))
+    .toStrictEqual([['existing', '{job="initial query"}']])
+
 });
-
-
-
-
-class NewSourceRollover {
-    public locator: Locator;
-
-    constructor(page: Page) {
-        this.locator = page.getByTestId('new-source-sheet')
-    }
-
-    async fillSourceForm(opts: { name?: string; query?: string } = {}) {
-        await this.locator.getByLabel('Name').fill(opts.name ?? 'a source');
-        await this.locator.getByLabel('Loki query').fill(opts.query ?? '{job="test"}');
-    }
-
-    async saveSource() {
-        await this.locator.getByTestId('save-source-button').click();
-    }
-}
