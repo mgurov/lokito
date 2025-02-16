@@ -12,7 +12,7 @@ import {
 import { DataTablePagination } from './data-table-pagination';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import { LogPanel } from '@/components/log-panel';
+import { LogPanel } from '@/components/LogPanel';
 import { Log } from '@/data/schema';
 
 interface DataTableProps<TData, TValue> {

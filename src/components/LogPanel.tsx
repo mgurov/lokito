@@ -4,8 +4,13 @@ import NewRule from '@/components/rule-editor';
 import { Button } from '@/components/ui/button';
 
 import { Log } from '@/data/schema';
+import { useDispatch } from 'react-redux';
+import { logDataSliceActions } from '@/data/redux/logDataSlice';
+import SimpleTooltip from './SimpleTooltip';
 
 export function LogPanel(props: { log: Log }) {
+  const dispatch = useDispatch();
+  const {ackTillThis} = logDataSliceActions;
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isNewRuleDialogOpen, setIsNewRuleDialogOpen] = useState(false);
 
@@ -23,11 +28,27 @@ export function LogPanel(props: { log: Log }) {
     <>
       <div className="space-y-2">
         <div className="flex w-full">
+
+        <SimpleTooltip content={<><p>All messages up to this event will be ACK'ed.</p><p className="">NB: doesn't respect the source selection, so will ack messages from all sources up to this moment when clicked.</p></>}>
+          <Button
+                  size="sm"
+                  variant="outline"
+                  data-testid="ack-till-this"
+                  className="ml-1 mt-1"
+                  onClick={() => {
+                    dispatch(ackTillThis(props.log.id))
+                  }}
+                >
+                  ACK till here
+                </Button>
+
+        </SimpleTooltip>         
+
           <Button
             size="sm"
             variant="outline"
-            className="rounded-none border-r-0"
             data-testid="new-rule-button"
+            className="ml-1 mt-1"
             onClick={() => {
               setIsNewRuleDialogOpen(true);
             }}

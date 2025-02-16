@@ -24,7 +24,7 @@ test('add a source from the sourceless main screen', async ({ page, appState, co
 
 test('add a source to an existing list from main page', async ({ mainPage, appState }) => {
 
-    await mainPage.open(() => appState.givenSources({name: 'existing'}));
+    await mainPage.open({executeBefore: () => appState.givenSources({name: 'existing'})});
 
     const newSourceRollover = await mainPage.clickNewSourceButton()
     await newSourceRollover.fillSourceForm({ name: 'new'});

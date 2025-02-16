@@ -9,9 +9,7 @@ test('fetching messages', async ({ page, appState, mainPage, logs }) => {
 
     logs.givenRecords({ message: 'event1' });
 
-    await mainPage.open();
-
-    await page.getByTestId('start-fetching-button').click();
+    await mainPage.open({startFetch: true});
 
     await expectTexts(page.getByTestId('log-message'), 'event1');
 
@@ -29,9 +27,7 @@ test('should fetch updated query on editing', async ({ page, appState, mainPage,
 
     await appState.givenSources({ name: 'existing', query: "{job='test'}" });
 
-    await mainPage.open();
-
-    await page.getByTestId('start-fetching-button').click();
+    await mainPage.open({startFetch: true});
 
     await expect.poll(() => {
         return logs.requests.map(u => u.searchParams.get('query'))

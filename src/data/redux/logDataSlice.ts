@@ -52,6 +52,17 @@ export const logDataSlice = createSlice({
         console.error("Couldn't find log by id to ack; action: ", action);
       }
      },
+    ackTillThis: (state, action: PayloadAction<string>) => {
+      const lineIndex = state.logs.findIndex((l) => l.id === action.payload);
+      if (lineIndex === -1) {
+        console.error("Couldn't find log by id to ack; action: ", action);
+      }
+      state.logs.forEach((l, index) => {
+        if (index >= lineIndex) {
+          l.acked = true;
+        }
+      })      
+     },
     ackAll: (state, _action: PayloadAction<void>) => {
       state.logs.forEach(l => {
         l.acked = true

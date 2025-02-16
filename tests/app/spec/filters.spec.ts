@@ -3,14 +3,14 @@ import { test, expect } from '@tests/app/setup/testExtended';
 import { expectTexts } from '../util/visualAssertions';
 
 test('find a line create a filter on it', async ({ page, appState, mainPage, logs }) => {
-
-    await mainPage.open(async () => {
-        await appState.givenSources({ name: 'existing' });
+    
+    await mainPage.open({
+        executeBefore: async () => {
+            await appState.givenSources({ name: 'existing' });
+            logs.givenRecords({ message: 'Some<thing> 👻 (H)appened' });
+        },
+        startFetch: true
     });
-
-    logs.givenRecords({ message: 'Some<thing> 👻 (H)appened' })
-
-    await mainPage.startFetchingButton.click();
 
     await page.getByText('Some<thing> 👻 (H)appened').click();
     await page.getByTestId('new-rule-button').click();
@@ -23,24 +23,25 @@ test('find a line create a filter on it', async ({ page, appState, mainPage, log
 
 test('a saved filter should be applied to existing and following messages ', async ({ page, appState, mainPage, logs }) => {
 
-    await mainPage.open(async () => {
-        await page.clock.install();
+    await mainPage.open({
+        executeBefore: async () => {
+            await page.clock.install();
+    
+            await appState.givenSources({ name: 'existing' });
 
-        await appState.givenSources({ name: 'existing' });
-    });
+            logs.givenRecords('this_message 1', 'unrelated 1');
+        },
+        startFetch: true,
+    })
 
-    logs.givenRecords('this_message 1', 'unrelated 1');
-
-    await mainPage.startFetchingButton.click();
-
-    await expectTexts(page.getByTestId('log-message'), 'unrelated 1', 'this_message 1');
+    await mainPage.expectLogMessages('unrelated 1', 'this_message 1');
 
     await page.getByText('this_message 1').click();
     await page.getByTestId('new-rule-button').click();
     await page.getByTestId('rule_regex').fill('this_message');
     await page.getByTestId('save-rule-button').click();
 
-    await expectTexts(page.getByTestId('log-message'), 'unrelated 1');
+    await mainPage.expectLogMessages('unrelated 1');
     await mainPage.expectAckMessages(1);
 
     //two more new messages should be captured
@@ -48,7 +49,7 @@ test('a saved filter should be applied to existing and following messages ', asy
 
     await page.clock.runFor('01:30');
 
-    await expectTexts(page.getByTestId('log-message'), 'unrelated 2', 'unrelated 1');
+    await mainPage.expectLogMessages('unrelated 2', 'unrelated 1');
     await mainPage.expectAckMessages(3);
 
 });

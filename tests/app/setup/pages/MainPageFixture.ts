@@ -1,25 +1,33 @@
 import { test, Page, expect, Locator } from '@playwright/test';
 import SourcePageFixture, { NewSourceRollover } from './SourcesPageFixture';
-//TODO: hide expect from the default visibility. ?
+import { expectTexts } from '@tests/app/util/visualAssertions';
 
-type MainPageOpenProps = {
-    executeBefore?: () => Promise<void>,
-    startFetch?: boolean, //TODO: default to true?
-}
+export const mainPageTest = test.extend<{ mainPage: MainPageFixture }>({
+    mainPage: [async ({ page }, use) => {
+
+        await use(new MainPageFixture(page));
+
+    }, {}],
+});
+
 
 //TODO: decorate the fixture?
 export default class MainPageFixture {
     constructor(readonly page: Page) { }
 
-    async open(preOpts: (() => Promise<void>) | MainPageOpenProps = {}) {
+    async open({
+        executeBefore,
+        startFetch = false,
+    }: {
+        executeBefore?: () => Promise<void>,
+        startFetch?: boolean,
+    } = {}) {
 
-        const opts: MainPageOpenProps = typeof(preOpts) === 'function' ? {executeBefore: preOpts} : preOpts;
-
-        if (opts.executeBefore) {
-            await opts.executeBefore();
+        if (executeBefore) {
+            await executeBefore();
         }
         await this.page.goto('/');
-        if (opts.startFetch === true) {
+        if (startFetch === true) {
             await this.page.getByTestId('start-fetching-button').click(); 
         }
     }
@@ -62,12 +70,27 @@ export default class MainPageFixture {
         }
         await this.ackAllButton.click();
     }
+
+    get logMessage() {
+        return this.page.getByTestId('log-message')
+    }
+
+    async expectLogMessages(...expected: string[]) {
+        await test.step('expectLogMessages', () => expectTexts(this.logMessage, ...expected), {box: true})
+    }
+
+    async expandRow(message: string): Promise<RowLine> {
+        const locator = this.logMessage.getByText(message)
+        await locator.click()
+        return new RowLine(this.page)
+    }
 }
 
-export const mainPageTest = test.extend<{ mainPage: MainPageFixture }>({
-    mainPage: [async ({ page }, use) => {
+//NB: full-page ATM
+class RowLine {
+    constructor(public page: Page) {}
 
-        await use(new MainPageFixture(page));
-
-    }, {}],
-});
+    get ackTillThis() {
+        return this.page.getByTestId('ack-till-this')
+    }
+}

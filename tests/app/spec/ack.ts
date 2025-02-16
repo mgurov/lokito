@@ -34,15 +34,40 @@ test.describe('ack all', () => {
     //TODO: when multiple sources and selected one tag, ack all should only apply to it.
 })
 
+test.describe('ack till this', () => {
+    test('should be able to ack till this message via expanded log line', async ({ page, appState, mainPage, logs }) => {
+
+        await appState.givenSources({}); //TODO: a default state with one given state?
+    
+        logs.givenRecords('event1', 'event2', 'event3');
+    
+        await mainPage.open({startFetch: true});
+        
+        await expectTexts(page.getByTestId('log-message'), 'event3', 'event2', 'event1');
+    
+        //when
+
+        const logRow = await mainPage.expandRow('event2')
+
+        await logRow.ackTillThis.click()
+
+        await expectTexts(page.getByTestId('log-message'), 'event3');
+
+        await mainPage.expectAckMessages(2)
+        
+    });
+
+    //TODO: should work correctly when two sources and one around another
+})
+
+
 test('acked indicator should indicate the number of acked messages', async ({ page, appState, mainPage, logs }) => {
 
     await appState.givenSources({}); //TODO: a default state with one given state
 
     logs.givenRecords('event1', 'event2');
 
-    await mainPage.open();
-
-    await page.getByTestId('start-fetching-button').click();
+    await mainPage.open({startFetch: true});
 
     await mainPage.expectAckMessages(0)
 
