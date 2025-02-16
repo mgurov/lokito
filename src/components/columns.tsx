@@ -11,6 +11,7 @@ function RowAck({ logId }: { logId: string }) {
   const dispatch = useDispatch();
   return (
     <Button
+      data-testid="ack-message-button"
       size="icon"
       variant="ghost"
       className="hover:bg-gray-200"

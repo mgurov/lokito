@@ -1,7 +1,7 @@
-import { Locator, expect } from '@playwright/test';
+import { Locator, expect, test } from '@playwright/test';
 
 export async function expectTexts(locator: Locator, ...expected: string[]) {
-    await expect(locator).toHaveCount(expected.length);
-    expect(await locator.allTextContents()).toStrictEqual(expected);
-  }
-  
+  await test.step('expectTexts', async () => {
+    await expect.poll(() => locator.allTextContents()).toStrictEqual(expected);
+  }, { box: true })
+}

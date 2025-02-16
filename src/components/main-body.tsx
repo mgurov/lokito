@@ -18,7 +18,7 @@ import { Alert } from './ui/alert';
 import { Log } from '@/data/schema';
 import { Badge } from './ui/badge';
 import { Source } from '@/data/source';
-import { CountOfAckMessages } from '@/components/CountOfAckMessages';
+import { StatsLine } from '@/components/StatsLine';
 import { UploadSourcesConfiguration } from '@/components/upload-config';
 
 export function ShowData() {
@@ -127,9 +127,10 @@ function ShowAllSourcesData() {
   }
 
   return (
-    // TODO: Simplify both wrappers into one
     <div className="mt-2 space-y-4">
-      <CountOfAckMessages />
+
+      <StatsLine />
+
       <DataTable data={data} columns={columns} />
     </div>
   );

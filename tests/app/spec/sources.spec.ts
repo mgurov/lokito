@@ -1,5 +1,5 @@
 import { test, expect } from '@tests/app/setup/testExtended';
-import { NewSourceRollover } from './setup/pages/SourcesPageFixture';
+import { NewSourceRollover } from '../setup/pages/SourcesPageFixture';
 
 
 test('add a source from the sourceless main screen', async ({ page, appState, consoleLogging }) => {

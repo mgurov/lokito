@@ -1,16 +1,27 @@
-import { test, Page, expect } from '@playwright/test';
+import { test, Page, expect, Locator } from '@playwright/test';
 import SourcePageFixture, { NewSourceRollover } from './SourcesPageFixture';
-//TODO: hide expect from the default visibility.
+//TODO: hide expect from the default visibility. ?
+
+type MainPageOpenProps = {
+    executeBefore?: () => Promise<void>,
+    startFetch?: boolean, //TODO: default to true?
+}
 
 //TODO: decorate the fixture?
 export default class MainPageFixture {
     constructor(readonly page: Page) { }
 
-    async open(preparation?: () => Promise<void>) {
-        if (preparation) {
-            await preparation();
+    async open(preOpts: (() => Promise<void>) | MainPageOpenProps = {}) {
+
+        const opts: MainPageOpenProps = typeof(preOpts) === 'function' ? {executeBefore: preOpts} : preOpts;
+
+        if (opts.executeBefore) {
+            await opts.executeBefore();
         }
         await this.page.goto('/');
+        if (opts.startFetch === true) {
+            await this.page.getByTestId('start-fetching-button').click(); 
+        }
     }
 
     get startFetchingButton() {
@@ -18,7 +29,8 @@ export default class MainPageFixture {
     }
 
     async expectAckMessages(count: number) {
-        await expect(this.page.getByText(`${count} ACK messages`)).toBeVisible();
+        const ackedMessagesCounter = this.page.getByTestId('acked-messages-count')
+        await expect(ackedMessagesCounter).toHaveText(`${count} ACK'ed`)
     }
 
     get cleanBacklogMessage() {
@@ -37,9 +49,19 @@ export default class MainPageFixture {
 
         await expect(newSourceRollover.locator).toBeVisible();
 
-        return newSourceRollover
-    
-    } 
+        return newSourceRollover    
+    }
+
+    get ackAllButton(): Locator {
+        return this.page.getByTestId('ack-all-button')
+    }
+
+    async clickAckAll(props: {expectedCount?: number} = {}) {
+        if (props.expectedCount) {
+            await expect(this.ackAllButton).toHaveText(`ACK ${props.expectedCount}`)
+        }
+        await this.ackAllButton.click();
+    }
 }
 
 export const mainPageTest = test.extend<{ mainPage: MainPageFixture }>({

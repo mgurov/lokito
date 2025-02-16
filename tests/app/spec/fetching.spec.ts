@@ -1,5 +1,5 @@
 import { test, expect } from '@tests/app/setup/testExtended';
-import { expectTexts } from './util/visualAssertions';
+import { expectTexts } from '../util/visualAssertions';
 
 test('fetching messages', async ({ page, appState, mainPage, logs }) => {
 

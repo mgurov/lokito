@@ -49,8 +49,13 @@ export const logDataSlice = createSlice({
       if (line) {
         line.acked = true;
       } else {
-        console.warn("Couldn't find log by id to ack; action: ", action);
+        console.error("Couldn't find log by id to ack; action: ", action);
       }
+     },
+    ackAll: (state, _action: PayloadAction<void>) => {
+      state.logs.forEach(l => {
+        l.acked = true
+      })
     },
   },
   extraReducers: (builder) => {
@@ -69,6 +74,8 @@ export const logDataSlice = createSlice({
 });
 
 export const { receiveBatch, ack } = logDataSlice.actions;
+
+export const logDataSliceActions = logDataSlice.actions;
 
 export default logDataSlice.reducer;
 
@@ -96,3 +103,12 @@ export const useAckedDataLength = () =>
       (logs) => logs.filter((log) => log.acked).length,
     ),
   );
+
+export const useNotAckedDataLength = () =>
+  useSelector(
+    createSelector(
+      [(state: RootState) => state.logData.logs],
+      (logs) => logs.filter((log) => !log.acked).length,
+    ),
+  );
+  

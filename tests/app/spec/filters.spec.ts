@@ -1,6 +1,6 @@
 
 import { test, expect } from '@tests/app/setup/testExtended';
-import { expectTexts } from './util/visualAssertions';
+import { expectTexts } from '../util/visualAssertions';
 
 test('find a line create a filter on it', async ({ page, appState, mainPage, logs }) => {
 
