@@ -18,6 +18,10 @@ export class AppStateFixture {
     }
 
 
+    async givenSource(sourceSpecs: sourceSpec = {}) {
+        return this.givenSources(...[sourceSpecs]);
+    }
+
     async givenSources(...sourceSpecs: sourceSpec[]) {
         await this.storage.setLocalItem('sources', sourceSpecs.map(toSource));
     }

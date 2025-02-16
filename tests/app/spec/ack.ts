@@ -4,7 +4,7 @@ import { expectTexts } from '../util/visualAssertions';
 test.describe('ack all', () => {
     test('ack all messages', async ({ page, appState, mainPage, logs }) => {
 
-        await appState.givenSources({}); //TODO: a default state with one given state?
+        await appState.givenSource();
     
         logs.givenRecords('event1', 'event2', 'event3');
     
@@ -22,7 +22,7 @@ test.describe('ack all', () => {
 
     test('hide when nothing to ack', async ({ appState, mainPage }) => {
 
-        await appState.givenSources({});
+        await appState.givenSource();
     
         await mainPage.open();
         
@@ -35,15 +35,15 @@ test.describe('ack all', () => {
 })
 
 test.describe('ack till this', () => {
-    test('should be able to ack till this message via expanded log line', async ({ page, appState, mainPage, logs }) => {
+    test('should be able to ack till this message via expanded log line', async ({ appState, mainPage, logs }) => {
 
-        await appState.givenSources({}); //TODO: a default state with one given state?
+        await appState.givenSource();
     
         logs.givenRecords('event1', 'event2', 'event3');
     
         await mainPage.open({startFetch: true});
         
-        await expectTexts(page.getByTestId('log-message'), 'event3', 'event2', 'event1');
+        await mainPage.expectLogMessages('event3', 'event2', 'event1');
     
         //when
 
@@ -51,7 +51,7 @@ test.describe('ack till this', () => {
 
         await logRow.ackTillThis.click()
 
-        await expectTexts(page.getByTestId('log-message'), 'event3');
+        await mainPage.expectLogMessages('event3');
 
         await mainPage.expectAckMessages(2)
         
@@ -61,9 +61,9 @@ test.describe('ack till this', () => {
 })
 
 
-test('acked indicator should indicate the number of acked messages', async ({ page, appState, mainPage, logs }) => {
+test('acked indicator should indicate the number of acked messages', async ({ appState, mainPage, logs }) => {
 
-    await appState.givenSources({}); //TODO: a default state with one given state
+    await appState.givenSource();
 
     logs.givenRecords('event1', 'event2');
 
@@ -71,7 +71,7 @@ test('acked indicator should indicate the number of acked messages', async ({ pa
 
     await mainPage.expectAckMessages(0)
 
-    await expectTexts(page.getByTestId('log-message'), 'event2', 'event1');
+    await mainPage.expectLogMessages('event2', 'event1');
 
     //when
     
@@ -79,12 +79,13 @@ test('acked indicator should indicate the number of acked messages', async ({ pa
 
     //then
     await mainPage.expectAckMessages(1)
-    await expectTexts(page.getByTestId('log-message'), 'event1');
+    await mainPage.expectLogMessages('event1');
 
-    //and then again
-    await mainPage.page.getByTestId('ack-message-button').first().click()
+    await test.step('and then ack once more', async () => {
+        await mainPage.page.getByTestId('ack-message-button').first().click()
 
-    await mainPage.expectAckMessages(2)
-    await expectTexts(page.getByTestId('log-message'), ...[]);
-    
+        await mainPage.expectAckMessages(2)
+        await mainPage.expectLogMessages(...[]);    
+    })
+
 });
