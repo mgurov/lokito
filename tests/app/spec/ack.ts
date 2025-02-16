@@ -1,8 +1,7 @@
 import { expect, test } from '@tests/app/setup/testExtended';
-import { expectTexts } from '../util/visualAssertions';
 
 test.describe('ack all', () => {
-    test('ack all messages', async ({ page, appState, mainPage, logs }) => {
+    test('ack all messages', async ({ appState, mainPage, logs }) => {
 
         await appState.givenSource();
     
@@ -10,13 +9,13 @@ test.describe('ack all', () => {
     
         await mainPage.open({startFetch: true});
         
-        await expectTexts(page.getByTestId('log-message'), 'event3', 'event2', 'event1');
+        await mainPage.expectLogMessages('event3', 'event2', 'event1');
     
         //when
 
         await mainPage.clickAckAll({expectedCount: 3})
         
-        await expectTexts(page.getByTestId('log-message'), ...[]);
+        await mainPage.expectLogMessages(...[]);
     
     });
 
