@@ -29,8 +29,76 @@ test.describe('ack all', () => {
         
     });
 
+    test('should only ack a selected source messages', async ({ appState, mainPage, logs }) => {
 
-    //TODO: when multiple sources and selected one tag, ack all should only apply to it.
+        const [source1, source2] = await appState.givenSources(
+            {name: "source1"},
+            {name: "source2"},
+        );
+        logs.givenSourceRecords(source1, {message: 'source1.1', timestamp: "1"}, {message: 'source1.2', timestamp: "2"});
+        logs.givenSourceRecords(source2, {message: 'source2.1', timestamp: "3"}, {message: 'source2.2', timestamp: "4"});
+        
+        await mainPage.open({startFetch: true});
+        
+        await mainPage.expectLogMessages('source2.2', 'source2.1', 'source1.2', 'source1.1');
+    
+        //when
+
+        await mainPage.selectSourceTab(source1)
+
+        await mainPage.clickAckAll({expectedCount: 2})
+        
+        await mainPage.expectLogMessages(...[]);
+
+        await mainPage.selectAllSourcesTab()
+
+        await mainPage.expectLogMessages('source2.2', 'source2.1');
+
+    
+    });
+
+    test('should ack all messages all sources', async ({ appState, mainPage, logs }) => {
+
+        const [source1, source2] = await appState.givenSources(
+            {name: "source1"},
+            {name: "source2"},
+        );
+        logs.givenSourceRecords(source1, {message: 'source1.1', timestamp: "1"}, {message: 'source1.2', timestamp: "2"});
+        logs.givenSourceRecords(source2, {message: 'source2.1', timestamp: "3"}, {message: 'source2.2', timestamp: "4"});
+        
+        await mainPage.open({startFetch: true});
+        
+        await mainPage.expectLogMessages('source2.2', 'source2.1', 'source1.2', 'source1.1');
+    
+        //when
+
+        await mainPage.clickAckAll({expectedCount: 4})
+        
+        await mainPage.expectLogMessages(...[]);
+    
+    });
+
+    test('should update source count when acking', async ({ appState, mainPage, logs }) => {
+
+        const [source1, source2] = await appState.givenSources(
+            {name: "source1"},
+            {name: "source2"},
+        );
+        logs.givenSourceRecords(source1, {message: 'source1.1', timestamp: "1"}, {message: 'source1.2', timestamp: "2"});
+        logs.givenSourceRecords(source2, {message: 'source2.1', timestamp: "3"}, {message: 'source2.2', timestamp: "4"});
+        
+        await mainPage.open({startFetch: true});
+            
+        await mainPage.selectSourceTab(source1)
+        await mainPage.expectSourceTabCount(source1, 2)
+        //when
+        await mainPage.clickAckAll({expectedCount: 2})
+        //then
+        await mainPage.expectSourceTabCount(source1, undefined)
+        await mainPage.expectSourceTabCount(source2, 2)
+    
+    });
+
 })
 
 test.describe('ack till this', () => {

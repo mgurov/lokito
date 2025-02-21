@@ -84,6 +84,25 @@ export default class MainPageFixture {
         await locator.click()
         return new RowLine(this.page)
     }
+
+    async selectSourceTab(source: {id: string}) {
+        await this.page.getByTestId(`source-tab-${source.id}`).click();
+    }
+
+    async selectAllSourcesTab() {
+        await this.page.getByTestId('all-sources-tab').click();
+    }
+
+    async expectSourceTabCount(source: {id: string}, count: number | undefined) {
+        await test.step('expectSourceTabCount', async() => {
+            const unackCountLocator = this.page.getByTestId(`source-tab-${source.id}`).getByTestId('source-unack-count')
+            if (count === undefined) {
+                await expect(unackCountLocator).not.toBeAttached()
+            } else {
+                await expect(unackCountLocator).toHaveText(`${count}`)
+            }
+        }, {box: true})        
+    }
 }
 
 //NB: full-page ATM

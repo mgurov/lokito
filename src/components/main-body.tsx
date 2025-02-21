@@ -18,7 +18,7 @@ import { Alert } from './ui/alert';
 import { Log } from '@/data/schema';
 import { Badge } from './ui/badge';
 import { Source } from '@/data/source';
-import { StatsLine } from '@/components/StatsLine';
+import { AckAllButton, StatsLine } from '@/components/StatsLine';
 import { UploadSourcesConfiguration } from '@/components/upload-config';
 
 export function ShowData() {
@@ -31,8 +31,8 @@ export function ShowData() {
 
   return (
     <Tabs defaultValue="all">
-      <TabsList>
-        <TabsTrigger value="all" disabled={!doWeHaveData}>
+      <TabsList className='bg-gray-200'>
+        <TabsTrigger data-testid="all-sources-tab" value="all" disabled={!doWeHaveData}>
           All&nbsp;{data.length > 0 && <Badge>{data.length}</Badge>}
         </TabsTrigger>
         {doWeHaveData
@@ -62,10 +62,10 @@ function SourcesTabs(dataFromSources: SourceFetchingState[], data: Log[], source
     // TODO: Discuss w/ Mykola OR refactor, whatever comes first :)
     const bgColor = sources.find((s) => s.id === source.sourceId)?.color;
     tabTriggers.push(
-      <TabsTrigger key={source.sourceId} value={source.sourceId}>
+      <TabsTrigger key={source.sourceId} value={source.sourceId} data-testid={`source-tab-${source.sourceId}`}>
         <div className="flex items-center gap-1">
           <span>{source.sourceName}</span>
-          <Badge style={{ backgroundColor: bgColor }}>{thisSourceUnaccounted.length}</Badge>
+          {thisSourceUnaccounted.length > 0 && <Badge data-testid="source-unack-count" style={{ backgroundColor: bgColor }}>{thisSourceUnaccounted.length}</Badge>}
           {source.state === 'fetching' && <UpdateIcon className="animate-spin" />}
           {source.state === 'error' && (
             <span className="px-1">
@@ -86,10 +86,16 @@ function SourcesTabs(dataFromSources: SourceFetchingState[], data: Log[], source
               Last success fetch {simpleDateTimeFormat(source.lastSuccess)}
             </Alert>
           )}
+          
           {thisSourceUnaccounted.length > 0 && (
-            <DataTable data={thisSourceUnaccounted} columns={columns} />
+            <>
+              <AckAllButton notAckedCount={thisSourceUnaccounted.length} sourceId={source.sourceId} />
+              <DataTable data={thisSourceUnaccounted} columns={columns} />
+            </>
+            
           )}
         </div>
+        
       </TabsContent>,
     );
   }

@@ -18,22 +18,27 @@ export class AppStateFixture {
     }
 
 
+    //NB: discards other sources
     async givenSource(sourceSpecs: sourceSpec = {}) {
-        return this.givenSources(...[sourceSpecs]);
+        const [source] = await this.givenSources(...[sourceSpecs]);
+        return source
     }
 
     async givenSources(...sourceSpecs: sourceSpec[]) {
-        await this.storage.setLocalItem('sources', sourceSpecs.map(toSource));
+        const sources = sourceSpecs.map(toSource);
+        await this.storage.setLocalItem('sources', sources);
+        return sources;
     }
 }
 
 type sourceSpec = { id?: string; name?: string; query?: string; color?: string; active?: boolean };
 
 function toSource(spec: sourceSpec) {
+    const seed = nextId();
     return {
-        id: spec.id ?? nextId({prefix : 'source_'}),
-        name: spec.name ?? 'Test Source',
-        query: spec.query ?? '{job="test"}',
+        id: spec.id ?? `source_${seed}`,
+        name: spec.name ?? `Source ${seed}`,
+        query: spec.query ?? `{job="${seed}"}`,
         color: spec.color ?? '#ff0000',
         active: spec.active ?? true,
     };

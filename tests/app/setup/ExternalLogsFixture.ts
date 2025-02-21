@@ -7,7 +7,7 @@ export const externalLogsTest = test.extend<{ logs: LogSource }>({
 
         await use(logSource);
 
-    }, {auto: true}],
+    }, { auto: true }],
 });
 
 
@@ -17,16 +17,22 @@ export type LogRecordSpec = string | {
     data?: Record<string, string>;
 }
 
-export type LogRecord = { stream: Record<string, string>, values: string[][] };
+export type LogRecord = { stream: Record<string, string>, values: string[][], queryExpected: string | undefined };
 
 export async function routeLogResponses(page: Page, ...logRecords: LogRecordSpec[]): Promise<LogSource> {
     const source = new LogSource();
     source.givenRecords(...logRecords);
     await page.route('/lokiprod/api/v1/query_range?**', (route, request) => {
-        source.requests.push(new URL(request.url()));
+        const url = new URL(request.url());
+        source.requests.push(url);
+        const query = url.searchParams.get('query');
+        if (!query) {
+            return route.fulfill({status: 400, body: 'no query'})
+        }
+
         const json = {
             data: {
-                result: source.records.splice(0, Infinity),
+                result: source.popRecords(query),
             }
         }
         return route.fulfill({
@@ -43,19 +49,42 @@ class LogSource {
 
     public requests: URL[] = [];
 
+    popRecords(query: string) {
+        const [matchingRecords, nonMatchingRecords] = this.records.reduce<[LogRecord[], LogRecord[]]>((acc, record) => {
+            const [matching, nonMatching] = acc;
+            if (!record.queryExpected || record.queryExpected === query) {
+                matching.push(record);
+            } else {
+                nonMatching.push(record);
+            }
+            return acc;
+        }, [[], []]);
+
+        this.records = nonMatchingRecords;
+
+        return matchingRecords;
+    }
+
     givenRecords(...logRecords: LogRecordSpec[]) {
+        this.givenSourceRecords(null, ...logRecords)
+    }
+
+    givenSourceRecords(source: { query: string } | null, ...logRecords: LogRecordSpec[]) {
         let nowCounterMillisecs = new Date().getTime();
         const newRecords = logRecords.map(logSpec => {
             const logSpecObjectified = typeof logSpec === 'string' ? { message: logSpec } : logSpec;
             const { timestamp, message = 'a log message', data } = logSpecObjectified;
             const timestampString = timestamp ? new Date(timestamp) : new Date(nowCounterMillisecs++); //tODO: do the timestamp into the message
             return {
-            stream: {
-                ...data,
-            },
-            values: [[`${timestampString.getTime()}000000`, message]],
-        }}
+                stream: {
+                    ...data,
+                },
+                values: [[`${timestampString.getTime()}000000`, message]],
+                queryExpected: source?.query,
+            }
+        }
         );
         this.records.push(...newRecords);
-    }   
+    }
+
 }
