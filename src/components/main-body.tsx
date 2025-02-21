@@ -31,7 +31,7 @@ export function ShowData() {
 
   return (
     <Tabs defaultValue="all">
-      <TabsList>
+      <TabsList className='bg-gray-200'>
         <TabsTrigger data-testid="all-sources-tab" value="all" disabled={!doWeHaveData}>
           All&nbsp;{data.length > 0 && <Badge>{data.length}</Badge>}
         </TabsTrigger>
