@@ -65,7 +65,7 @@ function SourcesTabs(dataFromSources: SourceFetchingState[], data: Log[], source
       <TabsTrigger key={source.sourceId} value={source.sourceId} data-testid={`source-tab-${source.sourceId}`}>
         <div className="flex items-center gap-1">
           <span>{source.sourceName}</span>
-          <Badge data-testid="source-unack-count" style={{ backgroundColor: bgColor }}>{thisSourceUnaccounted.length}</Badge>
+          {thisSourceUnaccounted.length > 0 && <Badge data-testid="source-unack-count" style={{ backgroundColor: bgColor }}>{thisSourceUnaccounted.length}</Badge>}
           {source.state === 'fetching' && <UpdateIcon className="animate-spin" />}
           {source.state === 'error' && (
             <span className="px-1">
