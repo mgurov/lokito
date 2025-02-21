@@ -92,6 +92,10 @@ export default class MainPageFixture {
     async selectAllSourcesTab() {
         await this.page.getByTestId('all-sources-tab').click();
     }
+
+    async expectSourceTabCount(source: {id: string}, count: number) {
+        await expect(this.page.getByTestId(`source-tab-${source.id}`).getByTestId('source-unack-count')).toHaveText(`${count}`)
+    }
 }
 
 //NB: full-page ATM

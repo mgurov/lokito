@@ -77,6 +77,29 @@ test.describe('ack all', () => {
         await mainPage.expectLogMessages(...[]);
     
     });
+
+    test('should update source count when acking', async ({ appState, mainPage, logs }) => {
+
+        const [source1, source2] = await appState.givenSources(
+            {name: "source1", query: "source1"},
+            {name: "source2", query: "source2"},
+        ); //TODO: don't need the query in the future
+        logs.givenSourceRecords(source1, {message: 'source1.1', timestamp: "1"}, {message: 'source1.2', timestamp: "2"});
+        logs.givenSourceRecords(source2, {message: 'source2.1', timestamp: "3"}, {message: 'source2.2', timestamp: "4"});
+        
+        await mainPage.open({startFetch: true});
+        
+        await mainPage.expectLogMessages('source2.2', 'source2.1', 'source1.2', 'source1.1');
+    
+        //when
+
+        await mainPage.selectSourceTab(source1)
+        await mainPage.expectSourceTabCount(source1, 2)
+        await mainPage.clickAckAll({expectedCount: 2})
+        await mainPage.expectSourceTabCount(source1, 0)        
+    
+    });
+
 })
 
 test.describe('ack till this', () => {
