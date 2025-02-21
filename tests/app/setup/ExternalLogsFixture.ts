@@ -23,12 +23,25 @@ export async function routeLogResponses(page: Page, ...logRecords: LogRecordSpec
     const source = new LogSource();
     source.givenRecords(...logRecords);
     await page.route('/lokiprod/api/v1/query_range?**', (route, request) => {
-        source.requests.push(new URL(request.url()));
+        const url = new URL(request.url());
+        source.requests.push(url);
+        const query = url.searchParams.get('query');
+        const [matchingRecords, nonMatchingRecords] = source.records.reduce<[LogRecord[], LogRecord[]]>((acc, record) => {
+            const [matching, nonMatching] = acc;
+            if (!query || !record.stream.lokitoQuery || record.stream.lokitoQuery === query) {
+                matching.push(record);
+            } else {
+                nonMatching.push(record);
+            }
+            return acc;
+        }, [[], []]);
+
         const json = {
             data: {
-                result: source.records.splice(0, Infinity),
+                result: matchingRecords,
             }
         }
+        source.records = nonMatchingRecords;
         return route.fulfill({
             status: 200,
             json,
@@ -58,4 +71,24 @@ class LogSource {
         );
         this.records.push(...newRecords);
     }   
+
+    //TODO: simplify with the above?
+    givenSourceRecords(source: {query: string},...logRecords: LogRecordSpec[]) {
+        let nowCounterMillisecs = new Date().getTime();
+        const newRecords = logRecords.map(logSpec => {
+            const logSpecObjectified = typeof logSpec === 'string' ? { message: logSpec } : logSpec;
+            const { timestamp, message = 'a log message', data } = logSpecObjectified;
+            const timestampString = timestamp ? new Date(timestamp) : new Date(nowCounterMillisecs++); //tODO: do the timestamp into the message
+            return {
+            stream: {
+                lokitoQuery: source.query,
+                ...data,
+            },
+            values: [[`${timestampString.getTime()}000000`, message]],
+            
+        }}
+        );
+        this.records.push(...newRecords);
+    }   
+
 }

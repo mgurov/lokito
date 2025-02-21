@@ -63,9 +63,11 @@ export const logDataSlice = createSlice({
         }
       })      
      },
-    ackAll: (state, _action: PayloadAction<void>) => {
+    ackAll: (state, {payload: sourceId}: PayloadAction<string | undefined>) => {
       state.logs.forEach(l => {
-        l.acked = true
+        if (sourceId === undefined || l.sourceId === sourceId) {
+          l.acked = true
+        }
       })
     },
   },

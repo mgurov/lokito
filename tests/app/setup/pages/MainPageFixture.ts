@@ -84,6 +84,14 @@ export default class MainPageFixture {
         await locator.click()
         return new RowLine(this.page)
     }
+
+    async selectSourceTab(source: {id: string}) {
+        await this.page.getByTestId(`source-tab-${source.id}`).click();
+    }
+
+    async selectAllSourcesTab() {
+        await this.page.getByTestId('all-sources-tab').click();
+    }
 }
 
 //NB: full-page ATM
