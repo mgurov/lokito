@@ -3,6 +3,8 @@ import { logDataSliceActions, useAckedDataLength, useNotAckedDataLength } from '
 import { Button } from './ui/button';
 import { useDispatch } from 'react-redux';
 import SimpleTooltip from './SimpleTooltip';
+import { useContext } from 'react';
+import { SelectedSourceContext } from './context/SelectedSourceContext';
 
 export function StatsLine() {
   const notAckedDataLength = useNotAckedDataLength();
@@ -17,8 +19,9 @@ function CountOfAckMessages() {
   return <span data-testid="acked-messages-count">{ackedMessagesCount} ACK'ed</span>;
 }
 
-export function AckAllButton({notAckedCount, sourceId}: {notAckedCount: number, sourceId?: string}) {
+export function AckAllButton({notAckedCount}: {notAckedCount: number}) {
   const dispatch = useDispatch()
+  const selectedSource = useContext(SelectedSourceContext)
   const { ackAll } = logDataSliceActions
   if (!notAckedCount) {
     return null;
@@ -26,7 +29,7 @@ export function AckAllButton({notAckedCount, sourceId}: {notAckedCount: number, 
   return (
     <span className="pl-2">
       <SimpleTooltip content={<><p>ACK all pending messages.</p></>}>
-        <Button data-testid="ack-all-button" onClick={() => { dispatch(ackAll(sourceId)) }} variant="secondary" size="sm">ACK {notAckedCount}</Button>
+        <Button data-testid="ack-all-button" onClick={() => { dispatch(ackAll(selectedSource?.sourceId)) }} variant="secondary" size="sm">ACK {notAckedCount}</Button>
 
       </SimpleTooltip>
 

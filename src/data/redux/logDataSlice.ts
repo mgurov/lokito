@@ -52,13 +52,15 @@ export const logDataSlice = createSlice({
         console.error("Couldn't find log by id to ack; action: ", action);
       }
      },
-    ackTillThis: (state, action: PayloadAction<string>) => {
-      const lineIndex = state.logs.findIndex((l) => l.id === action.payload);
+    ackTillThis: (state, action: PayloadAction<{messageId: string, sourceId?: string}>) => {
+      const {sourceId, messageId} = action.payload;
+      const lineIndex = state.logs.findIndex((l) => l.id === messageId);
       if (lineIndex === -1) {
         console.error("Couldn't find log by id to ack; action: ", action);
+        return;
       }
       state.logs.forEach((l, index) => {
-        if (index >= lineIndex) {
+        if (index >= lineIndex && (sourceId === undefined || l.sourceId === sourceId)) {
           l.acked = true;
         }
       })      

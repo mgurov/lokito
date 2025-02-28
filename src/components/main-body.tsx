@@ -20,6 +20,7 @@ import { Badge } from './ui/badge';
 import { Source } from '@/data/source';
 import { AckAllButton, StatsLine } from '@/components/StatsLine';
 import { UploadSourcesConfiguration } from '@/components/upload-config';
+import { SelectedSourceContext } from './context/SelectedSourceContext';
 
 export function ShowData() {
   const fetchingSourceState = useSourcesFetchingState();
@@ -77,25 +78,26 @@ function SourcesTabs(dataFromSources: SourceFetchingState[], data: Log[], source
     );
     tabs.push(
       <TabsContent key={source.sourceId} value={source.sourceId}>
-        {/* // TODO: The other wrapper :) */}
-        <div className="mt-2 space-y-4">
-          {source.err && <Alert variant="destructive">{source.err}</Alert>}
-          {!source.lastSuccess && <Alert variant="destructive">No fetch has ever succeeded</Alert>}
-          {source.lastSuccess && (
-            <Alert className="text-size-min">
-              Last success fetch {simpleDateTimeFormat(source.lastSuccess)}
-            </Alert>
-          )}
-          
-          {thisSourceUnaccounted.length > 0 && (
-            <>
-              <AckAllButton notAckedCount={thisSourceUnaccounted.length} sourceId={source.sourceId} />
-              <DataTable data={thisSourceUnaccounted} columns={columns} />
-            </>
+        <SelectedSourceContext.Provider value={source}>
+          {/* // TODO: The other wrapper :) */}
+          <div className="mt-2 space-y-4">
+            {source.err && <Alert variant="destructive">{source.err}</Alert>}
+            {!source.lastSuccess && <Alert variant="destructive">No fetch has ever succeeded</Alert>}
+            {source.lastSuccess && (
+              <Alert className="text-size-min">
+                Last success fetch {simpleDateTimeFormat(source.lastSuccess)}
+              </Alert>
+            )}
             
-          )}
-        </div>
-        
+            {thisSourceUnaccounted.length > 0 && (
+              <>
+                <AckAllButton notAckedCount={thisSourceUnaccounted.length} />
+                <DataTable data={thisSourceUnaccounted} columns={columns} />
+              </>
+              
+            )}
+          </div>
+        </SelectedSourceContext.Provider>        
       </TabsContent>,
     );
   }

@@ -1,5 +1,5 @@
 import { CheckIcon, CopyIcon } from '@radix-ui/react-icons';
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, useContext } from 'react';
 import NewRule from '@/components/rule-editor';
 import { Button } from '@/components/ui/button';
 
@@ -7,10 +7,9 @@ import { Log } from '@/data/schema';
 import { useDispatch } from 'react-redux';
 import { logDataSliceActions } from '@/data/redux/logDataSlice';
 import SimpleTooltip from './SimpleTooltip';
+import { SelectedSourceContext } from './context/SelectedSourceContext';
 
 export function LogPanel(props: { log: Log }) {
-  const dispatch = useDispatch();
-  const {ackTillThis} = logDataSliceActions;
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isNewRuleDialogOpen, setIsNewRuleDialogOpen] = useState(false);
 
@@ -29,20 +28,7 @@ export function LogPanel(props: { log: Log }) {
       <div className="space-y-2">
         <div className="flex w-full">
 
-        <SimpleTooltip content={<><p>All messages up to this event will be ACK'ed.</p><p className="">NB: doesn't respect the source selection, so will ack messages from all sources up to this moment when clicked.</p></>}>
-          <Button
-                  size="sm"
-                  variant="outline"
-                  data-testid="ack-till-this"
-                  className="ml-1 mt-1"
-                  onClick={() => {
-                    dispatch(ackTillThis(props.log.id))
-                  }}
-                >
-                  ACK till here
-                </Button>
-
-        </SimpleTooltip>         
+          <AckTillThisButton messageId={props.log.id} />
 
           <Button
             size="sm"
@@ -91,4 +77,25 @@ export function LogPanel(props: { log: Log }) {
       <NewRule log={props.log} open={isNewRuleDialogOpen} setOpen={setIsNewRuleDialogOpen} />
     </>
   );
+}
+
+function AckTillThisButton({ messageId }: { messageId: string }) {
+  const selectedSource = useContext(SelectedSourceContext)
+  const dispatch = useDispatch();
+  const { ackTillThis } = logDataSliceActions;
+
+  return <SimpleTooltip content={<p>All messages up to this event will be ACK'ed.</p>}>
+    <Button
+      size="sm"
+      variant="outline"
+      data-testid="ack-till-this"
+      className="ml-1 mt-1"
+      onClick={() => {
+        dispatch(ackTillThis({ messageId, sourceId: selectedSource?.sourceId }))
+      }}
+    >
+      ACK till here
+    </Button>
+
+  </SimpleTooltip>
 }

@@ -124,7 +124,71 @@ test.describe('ack till this', () => {
         
     });
 
-    //TODO: should work correctly when two sources and one around another
+    test('ack till this should only ack the selected source', async ({ appState, mainPage, logs }) => {
+
+        const [source1, source2] = await appState.givenSources({name: "source1"}, {name: "source2"});
+    
+        logs.givenSourceRecords(source1, 
+            {message: 's1.1', timestamp: "1"}, 
+            {message: 's1.2', timestamp: "3"},
+            {message: 's1.3', timestamp: "5"},
+        );
+        logs.givenSourceRecords(source2, 
+            {message: 's2.1', timestamp: "2"}, 
+            {message: 's2.2', timestamp: "4"}
+        );
+    
+        await mainPage.open({startFetch: true});
+        
+        await mainPage.expectLogMessages('s1.3', 's2.2', 's1.2', 's2.1', 's1.1');
+    
+        //when
+
+        await mainPage.selectSourceTab(source1)
+
+        const logRow = await mainPage.expandRow('s1.2')
+
+        await logRow.ackTillThis.click()
+
+        await mainPage.expectLogMessages('s1.3');
+
+        //and then back to the all sources
+
+        await mainPage.selectAllSourcesTab()
+
+        await mainPage.expectLogMessages('s1.3', 's2.2', 's2.1');
+        
+    });
+
+
+    test('ack till this should ack from all source when on all sources page', async ({ appState, mainPage, logs }) => {
+
+        const [source1, source2] = await appState.givenSources({name: "source1"}, {name: "source2"});
+    
+        logs.givenSourceRecords(source1, 
+            {message: 's1.1', timestamp: "1"}, 
+            {message: 's1.2', timestamp: "3"},
+            {message: 's1.3', timestamp: "5"},
+        );
+        logs.givenSourceRecords(source2, 
+            {message: 's2.1', timestamp: "2"}, 
+            {message: 's2.2', timestamp: "4"}
+        );
+    
+        await mainPage.open({startFetch: true});
+        
+        await mainPage.expectLogMessages('s1.3', 's2.2', 's1.2', 's2.1', 's1.1');
+    
+        //when
+
+        const logRow = await mainPage.expandRow('s1.2')
+
+        await logRow.ackTillThis.click()
+
+        await mainPage.expectLogMessages('s1.3', 's2.2');
+        
+    });
+
 })
 
 
