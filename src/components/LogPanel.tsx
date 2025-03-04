@@ -11,7 +11,6 @@ import { SelectedSourceContext } from './context/SelectedSourceContext';
 
 export function LogPanel(props: { log: Log }) {
   const [copiedField, setCopiedField] = useState<string | null>(null);
-  const [isNewRuleDialogOpen, setIsNewRuleDialogOpen] = useState(false);
 
   function handleCopyToClipboard(value: string, field: string) {
     navigator.clipboard
@@ -29,18 +28,7 @@ export function LogPanel(props: { log: Log }) {
         <div className="flex w-full">
 
           <AckTillThisButton messageId={props.log.id} />
-
-          <Button
-            size="sm"
-            variant="outline"
-            data-testid="new-rule-button"
-            className="ml-1 mt-1"
-            onClick={() => {
-              setIsNewRuleDialogOpen(true);
-            }}
-          >
-            New Rule
-          </Button>
+          <NewRule log={props.log} />
         </div>
         <div className="space-y-1 px-3 py-2">
           <h3 className="text-sm font-semibold">Fields</h3>
@@ -73,8 +61,7 @@ export function LogPanel(props: { log: Log }) {
             ))}
           </div>
         </div>
-      </div>
-      <NewRule log={props.log} open={isNewRuleDialogOpen} setOpen={setIsNewRuleDialogOpen} />
+      </div>      
     </>
   );
 }

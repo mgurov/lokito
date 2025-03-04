@@ -22,25 +22,38 @@ import { ScrollArea, ScrollBar } from './ui/scroll-area';
 
 interface NewRuleProps {
   log: Log;
-  open: boolean;
-  setOpen: (open: boolean) => void;
 }
 
-export default function NewRule({ log, open, setOpen }: NewRuleProps) {
+export default function NewRule({ log }: NewRuleProps) {
   //TODO: in the future, we might want to allow for field selection, not only the line
   //TODO: ux-wise would be nice to delay while user typing; also do animations to show the alerts
   //TODO: how could we make this all wider?
 
   const logLine = log.line;
 
-  const [messageRegex, setMessageRegex] = useState<string>(escapeRegExp(logLine));
-
   const dispatch = useAppDispatch();
 
-  if (!open) {
-    return null;
+
+  function handleSubmit({ save, messageRegex }: SaveRuleProps) {
+    const newFilter: Filter = {
+      id: randomId(),
+      transient: !save,
+      messageRegex,
+    };
+    dispatch(createFilter(newFilter));
   }
 
+  return <RuleDialog logLine={logLine} handleSubmit={handleSubmit} />;
+}
+
+type SaveRuleProps = {
+  save: boolean;
+  messageRegex: string;
+}
+
+export function RuleDialog({ logLine, handleSubmit }: { logLine: string, handleSubmit: (p: SaveRuleProps) => void }) {
+
+  const [messageRegex, setMessageRegex] = useState<string>(escapeRegExp(logLine));
   let logLineMatchesRegex: 'yes' | 'no' | 'err' = 'no';
   let errorMessage: string | null = null;
   try {
@@ -49,20 +62,25 @@ export default function NewRule({ log, open, setOpen }: NewRuleProps) {
     }
   } catch (e: unknown) {
     logLineMatchesRegex = 'err';
-    errorMessage = (e as {message: string}).message;
+    errorMessage = (e as { message: string }).message;
   }
 
-  function handleSubmit({save}: {save: boolean}){ 
-    return (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    event.preventDefault();
-    const newFilter: Filter = {
-      id: randomId(),
-      transient: !save,
-      messageRegex,
-    };
-    dispatch(createFilter(newFilter));
-  };
-}
+
+  const [open, setOpen] = useState(false);
+  if (!open) {
+    return <Button
+      size="sm"
+      variant="outline"
+      data-testid="new-rule-button"
+      className="ml-1 mt-1"
+      onClick={() => {
+        setOpen(true);
+      }}
+    >
+      New Rule
+    </Button>
+      ;
+  }
 
   return (
     <Dialog open onOpenChange={setOpen}>
@@ -73,12 +91,14 @@ export default function NewRule({ log, open, setOpen }: NewRuleProps) {
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <ScrollArea className="rounded bg-muted ">
-            <code
+            <div
               id="line"
-              className="relative px-[0.3rem] py-[0.2rem] font-mono text-sm"
+              className="relative px-[0.3rem] py-[0.2rem] font-mono text-sm max-h-80"
             >
+              <pre>
               {logLine}
-            </code>
+              </pre>
+            </div>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -110,10 +130,10 @@ export default function NewRule({ log, open, setOpen }: NewRuleProps) {
               Close
             </Button>
           </DialogClose>
-          <Button data-testid="apply-rule-button" disabled={logLineMatchesRegex != 'yes'} onClick={handleSubmit({save: false})} type="submit">
+          <Button data-testid="apply-rule-button" disabled={logLineMatchesRegex != 'yes'} onClick={() => handleSubmit({ save: false, messageRegex })} type="submit">
             Apply on current
           </Button>
-          <Button data-testid="save-rule-button" disabled={logLineMatchesRegex != 'yes'} onClick={handleSubmit({save: true})} type="submit">
+          <Button data-testid="save-rule-button" disabled={logLineMatchesRegex != 'yes'} onClick={() => handleSubmit({ save: true, messageRegex })} type="submit">
             Save for the future
           </Button>
         </DialogFooter>
