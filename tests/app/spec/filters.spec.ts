@@ -69,6 +69,7 @@ test('should be able to see messages acked by a filter', async ({ appState, main
     await mainPage.expectAckMessages(1)
 
     await mainPage.ackedMessagesCount.click();
+    await mainPage.expectLogMessages('m 1');
 });
 
 
