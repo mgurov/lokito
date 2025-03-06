@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "validate:static": "npm run lint && npx tsc -b",
-    "validate": "npm run validate && npx playwright test",
+    "validate": "npm run validate:static && npx playwright test",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -23,6 +23,7 @@
     "@radix-ui/react-separator": "^1.1.1",
     "@radix-ui/react-switch": "^1.1.2",
     "@radix-ui/react-tabs": "^1.1.2",
+    "@radix-ui/react-toggle": "^1.1.2",
     "@radix-ui/react-tooltip": "^1.1.6",
     "@reduxjs/toolkit": "^2.5.0",
     "@remix-run/react": "^2.15.2",

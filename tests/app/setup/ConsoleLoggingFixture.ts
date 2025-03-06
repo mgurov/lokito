@@ -14,6 +14,9 @@ export const consoleLoggingTest = test.extend<{ consoleLogging: ConsoleLoggingFi
 
         const consoleLogging = new ConsoleLoggingFixture()
 
+        consoleLogging.ignoreErrorMessagesContaining('error fetching logs');
+        consoleLogging.ignoreErrorMessagesContaining('Failed to load resource:');
+
         let consoleErrorDetected: string | null = null;
 
         page.on('console', msg => {

@@ -1,5 +1,6 @@
 import { test, expect } from '@tests/app/setup/testExtended';
-import { expectTexts } from '../util/visualAssertions';
+import { routes } from '../setup/ExternalLogsFixture';
+import { Deferred } from '../util/promises';
 
 test('fetching messages', async ({ page, appState, mainPage, logs }) => {
 
@@ -11,13 +12,13 @@ test('fetching messages', async ({ page, appState, mainPage, logs }) => {
 
     await mainPage.open({startFetch: true});
 
-    await expectTexts(page.getByTestId('log-message'), 'event1');
+    await mainPage.expectLogMessages('event1');
 
     logs.givenRecords({ message: 'event2' }, { message: 'event3' });
 
     await page.clock.runFor('01:30');
 
-    await expectTexts(page.getByTestId('log-message'), 'event3', 'event2', 'event1');
+    await mainPage.expectLogMessages('event3', 'event2', 'event1');
 
 });
 
@@ -49,7 +50,7 @@ test('should fetch updated query on editing', async ({ page, appState, mainPage,
 });
 
 
-test('duplications should be filtered out on fetching', async ({ page, appState, consoleLogging, logs }) => {
+test('duplications should be filtered out on fetching', async ({ page, mainPage, appState, consoleLogging, logs }) => {
 
     await page.clock.install();
 
@@ -65,7 +66,7 @@ test('duplications should be filtered out on fetching', async ({ page, appState,
 
     await page.getByTestId('start-fetching-button').click();
 
-    await expectTexts(page.getByTestId('log-message'), 'event1');
+    await mainPage.expectLogMessages('event1');
 
     //NB: the deduplication doesn't care about the message, only the timestamp and the data
     logs.givenRecords(
@@ -78,7 +79,50 @@ test('duplications should be filtered out on fetching', async ({ page, appState,
 
     await page.clock.runFor('01:30');
 
-    await expectTexts(page.getByTestId('log-message'), 'event2', 'event1', 'event3');
+    await mainPage.expectLogMessages('event2', 'event1', 'event3');
 });
 
-// TODO: show the date time message.
+
+test.skip('should keep fetching after a delayed response', async ({ page, appState, mainPage, logs }) => {
+
+    await page.clock.install();
+
+    await appState.givenSources({ name: 'existing'});
+
+    logs.givenRecords({ message: 'e1' });
+
+    await mainPage.open({startFetch: true});
+
+    await mainPage.expectLogMessages('e1');
+
+    // next cycle
+    logs.givenRecords({ message: 'e2' });
+
+    const delayedResponse = new Deferred<void>();
+    await page.route(routes.loki, async (request) => {
+        await delayedResponse.promise;
+        await request.abort();
+    }, {times: 1});
+
+    await page.clock.runFor('01:30');
+
+    await mainPage.expectLogMessages('e1');
+
+    await page.clock.runFor('01:30');
+
+    await mainPage.expectLogMessages('e2', 'e1');
+
+    delayedResponse.resolve();
+});
+
+test('should show error on no responses', async ({ page, appState, mainPage }) => {
+
+    await appState.givenSources({ name: 'existing'});
+
+    await page.route(routes.loki, async (request) => {
+        await request.abort();
+    });
+    await mainPage.open({startFetch: true});
+    //NB: shouldn't actually be clean on error, but never mind for now.
+    await expect(page.getByText('Clean ✅')).toBeVisible();
+});

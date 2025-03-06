@@ -7,10 +7,9 @@ import { Link } from '@remix-run/react';
 import { Button } from './ui/button';
 import {
   SourceFetchingState,
-  useOverallFetchingState,
   useSourcesFetchingState,
 } from '@/data/fetching/fetchingSlice';
-import { useUnackedData } from '@/data/redux/logDataSlice';
+import { useData } from '@/data/redux/logDataSlice';
 import { Tabs, TabsTrigger } from './ui/tabs';
 import { TabsContent, TabsList } from '@radix-ui/react-tabs';
 import { ExclamationTriangleIcon, UpdateIcon } from '@radix-ui/react-icons';
@@ -21,11 +20,13 @@ import { Source } from '@/data/source';
 import { AckAllButton, StatsLine } from '@/components/StatsLine';
 import { UploadSourcesConfiguration } from '@/components/upload-config';
 import { SelectedSourceContext } from './context/SelectedSourceContext';
+import { useAckNack } from './context/AckNackContext';
 
 export function ShowData() {
   const fetchingSourceState = useSourcesFetchingState();
   const sources = useSources();
-  const data = useUnackedData();
+  const ackNack = useAckNack();
+  const data = useData(ackNack === 'ack');
 
   const [tabTriggers, tabs] = SourcesTabs(Object.values(fetchingSourceState), data, sources);
   const doWeHaveData = tabTriggers.length > 0;
@@ -48,7 +49,7 @@ export function ShowData() {
         <NewSource />
       </TabsList>
       <TabsContent value="all">
-        <ShowAllSourcesData />
+        <ShowAllSourcesData data={data} />
       </TabsContent>
       {tabs}
     </Tabs>
@@ -104,36 +105,7 @@ function SourcesTabs(dataFromSources: SourceFetchingState[], data: Log[], source
   return [tabTriggers, tabs];
 }
 
-function ShowAllSourcesData() {
-  const overallFetchingState = useOverallFetchingState();
-  const data = useUnackedData();
-  const sourcesFetchingState = useSourcesFetchingState();
-
-  /**
-   * cases: started fetching and waiting; have some non-ack data; have no non-ack data and we're happy
-   */
-
-  if (overallFetchingState.firstFetchInProgress) {
-    return <div className="rounded-md bg-green-50 p-4">Fetching data...</div>;
-  }
-
-  if (Object.values(sourcesFetchingState).filter((source) => source.state === 'error').length > 0) {
-    return (
-      <div className="rounded-md bg-yellow-50 p-4">
-        There are hiccups fetching logs. You probably forgot to run the CLI, check the{' '}
-        <a
-          href="https://github.com/mgurov/lokito"
-          target="_blank"
-          rel="noreferrer"
-          className="text-blue-400 hover:text-blue-600"
-        >
-          readme
-        </a>{' '}
-        on how to run it
-      </div>
-    );
-  }
-
+function ShowAllSourcesData({data}: {data: Log[]}) {
   return (
     <div className="mt-2 space-y-4">
 

@@ -19,21 +19,35 @@ export class AppStateFixture {
 
 
     //NB: discards other sources
-    async givenSource(sourceSpecs: sourceSpec = {}) {
+    async givenSource(sourceSpecs: SourceSpec = {}) {
         const [source] = await this.givenSources(...[sourceSpecs]);
         return source
     }
 
-    async givenSources(...sourceSpecs: sourceSpec[]) {
+    async givenSources(...sourceSpecs: SourceSpec[]) {
         const sources = sourceSpecs.map(toSource);
         await this.storage.setLocalItem('sources', sources);
         return sources;
     }
+    
+    //NB: discards other sources
+    async givenFilter(messageRegex: string) {
+        const seed = nextId();
+        const filter = {
+            id: seed,
+            messageRegex,
+            transient: false,
+        }
+
+        await this.storage.setLocalItem('filters', [filter]);
+        return filter;
+    }
 }
 
-type sourceSpec = { id?: string; name?: string; query?: string; color?: string; active?: boolean };
 
-function toSource(spec: sourceSpec) {
+type SourceSpec = { id?: string; name?: string; query?: string; color?: string; active?: boolean };
+
+function toSource(spec: SourceSpec) {
     const seed = nextId();
     return {
         id: spec.id ?? `source_${seed}`,

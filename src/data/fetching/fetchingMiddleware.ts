@@ -6,6 +6,8 @@ import axios from "axios";
 import { receiveBatch } from "../redux/logDataSlice";
 import { Log } from "../schema";
 
+const REFETCH_DELAY = 60000;
+
 const fetchingMiddleware = createListenerMiddleware()
 export default fetchingMiddleware
 
@@ -37,7 +39,7 @@ fetchingMiddleware.startListening({
                     listenerApi.dispatch(fetchingActions.firstFetchCompleted())
                 }
                 // TODO: move this to state then we can make it configurable like in Grafana
-                await forkApi.delay(60000) //polling every minute after the last fetch
+                await forkApi.delay(REFETCH_DELAY) //polling every minute after the last fetch
             }
         })
         await task.result
@@ -45,6 +47,7 @@ fetchingMiddleware.startListening({
 })
 
 async function processSourceFetching(sourceState: SourceFetchingState, listenerApi: ListenerEffectAPI<RootState, AppDispatch>) {
+
     if (sourceState.state === 'fetching') {
         console.error('source is already fetching', sourceState)
     }
@@ -104,7 +107,7 @@ async function fetchLokiLogs(params: { query: string, from: string, sourceId: st
     const url = buildLokiUrl(params.query, params.from);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return axios.get<{data: {result: any[]}}>(url)
+    return axios.get<{data: {result: any[]} }>(url, /*{timeout: 1000}*/)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .then(response => response.data.data.result.map((l: any) => ({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -117,5 +120,5 @@ async function fetchLokiLogs(params: { query: string, from: string, sourceId: st
             timestamp: new Date(parseInt(l.values?.[0]?.[0].slice(0, -6))).toISOString(),
             sourceId: params.sourceId,
             acked: false,
-        } as Log)))
+        } as Log)));
 }

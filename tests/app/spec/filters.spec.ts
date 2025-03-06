@@ -1,6 +1,5 @@
 
 import { test, expect } from '@tests/app/setup/testExtended';
-import { expectTexts } from '../util/visualAssertions';
 
 test('find a line create a filter on it', async ({ page, appState, mainPage, logs }) => {
     
@@ -54,6 +53,24 @@ test('a saved filter should be applied to existing and following messages ', asy
 
 });
 
+test('should be able to see messages acked by a filter', async ({ appState, mainPage, logs }) => {
+
+    await appState.givenSources({ name: 'existing' });
+
+    await appState.givenFilter('1');
+
+    logs.givenRecords('m 1', 'm 2');
+
+    await mainPage.open({startFetch: true})
+
+    await mainPage.expectLogMessages('m 2');
+    await mainPage.expectAckMessages(1)
+
+    await mainPage.ackedMessagesCount.click();
+    await mainPage.expectLogMessages('m 1');
+});
+
+
 test('a non-saved filter should be applied to existing but not following messages ', async ({ page, appState, mainPage, logs }) => {
 
     await page.clock.install();
@@ -66,14 +83,14 @@ test('a non-saved filter should be applied to existing but not following message
 
     await page.getByTestId('start-fetching-button').click();
 
-    await expectTexts(page.getByTestId('log-message'), 'unrelated 1', 'this_message 1');
+    await mainPage.expectLogMessages('unrelated 1', 'this_message 1');
 
     await page.getByText('this_message 1').click();
     await page.getByTestId('new-rule-button').click();
     await page.getByTestId('rule_regex').fill('this_message');
     await page.getByTestId('apply-rule-button').click();
 
-    await expectTexts(page.getByTestId('log-message'), 'unrelated 1');
+    await mainPage.expectLogMessages('unrelated 1');
     await mainPage.expectAckMessages(1);
 
     // new messages should NOT be captured
@@ -81,7 +98,7 @@ test('a non-saved filter should be applied to existing but not following message
 
     await page.clock.runFor('01:30');
 
-    await expectTexts(page.getByTestId('log-message'), 'unrelated 2', 'this_message 2', 'unrelated 1');
+    await mainPage.expectLogMessages('unrelated 2', 'this_message 2', 'unrelated 1');
     await mainPage.expectAckMessages(1);
 
 });
