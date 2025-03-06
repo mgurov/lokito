@@ -59,7 +59,7 @@ test('should be able to see messages acked by a filter', async ({ appState, main
 
     await appState.givenSources({ name: 'existing' });
 
-    await appState.givenFilter({ query: '1' });
+    await appState.givenFilter('1');
 
     logs.givenRecords('m 1', 'm 2');
 
