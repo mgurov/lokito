@@ -36,8 +36,12 @@ export default class MainPageFixture {
         return this.page.getByTestId('start-fetching-button');
     }
 
+    get ackedMessagesCount() {
+        return this.page.getByTestId('acked-messages-count')
+    }
+
     async expectAckMessages(count: number) {
-        const ackedMessagesCounter = this.page.getByTestId('acked-messages-count')
+        const ackedMessagesCounter = this.ackedMessagesCount
         await expect(ackedMessagesCounter).toHaveText(`${count} ACK'ed`)
     }
 
