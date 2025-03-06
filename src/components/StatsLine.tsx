@@ -16,7 +16,7 @@ export function StatsLine() {
 
 function CountOfAckMessages() {
   const ackedMessagesCount: number = useAckedDataLength();
-  return <span data-testid="acked-messages-count">{ackedMessagesCount} ACK'ed</span>;
+  return <Button data-testid="acked-messages-count">{ackedMessagesCount} ACK'ed</Button>;
 }
 
 export function AckAllButton({notAckedCount}: {notAckedCount: number}) {
