@@ -29,6 +29,10 @@ export class AppStateFixture {
         await this.storage.setLocalItem('sources', sources);
         return sources;
     }
+    
+    async givenFilter(filter: unknown) {
+        
+    }
 }
 
 type sourceSpec = { id?: string; name?: string; query?: string; color?: string; active?: boolean };
