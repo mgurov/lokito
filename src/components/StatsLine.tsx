@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 import SimpleTooltip from './SimpleTooltip';
 import { useContext } from 'react';
 import { SelectedSourceContext } from './context/SelectedSourceContext';
+import { useToggleAckNack } from './context/AckNackContext';
 
 export function StatsLine() {
   const notAckedDataLength = useNotAckedDataLength();
@@ -15,8 +16,9 @@ export function StatsLine() {
 }
 
 function CountOfAckMessages() {
+  const toggleAckNack = useToggleAckNack();
   const ackedMessagesCount: number = useAckedDataLength();
-  return <Button data-testid="acked-messages-count">{ackedMessagesCount} ACK'ed</Button>;
+  return <Button data-testid="acked-messages-count" onClick={toggleAckNack}>{ackedMessagesCount} ACK'ed</Button>;
 }
 
 export function AckAllButton({notAckedCount}: {notAckedCount: number}) {
