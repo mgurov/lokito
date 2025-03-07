@@ -94,23 +94,6 @@ export const logDataSliceActions = logDataSlice.actions;
 
 export default logDataSlice.reducer;
 
-export const useUnackedData = () =>
-  useSelector(
-    createSelector(
-      [(state: RootState) => state.logData.logs, (state: RootState) => state.sources.data],
-      (logs, sources) =>
-        logs
-          .filter((log) => !log.acked)
-          .map((log) => ({
-            ...log,
-            source: {
-              id: sources[log.sourceId].id,
-              color: sources[log.sourceId].color,
-            },
-          })),
-    ),
-  );
-
 export const useData = (acked: boolean) =>
   useSelector(
     createSelector(
