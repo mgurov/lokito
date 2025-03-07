@@ -1,4 +1,4 @@
-import { createContext, Dispatch, useReducer } from 'react';
+import { createContext, Dispatch, useContext, useReducer } from 'react';
 
 type AckNack = 'ack' | 'nack';
 
@@ -22,6 +22,12 @@ function ackNackReducer(_current: AckNack, action: AckNackAction): AckNack {
     }
   }
 }
+
+export function useAckNack() {
+  const context = useContext(AckNackContext);
+  return context;
+}
+
 
 export function AckNackProvider({ children }: { children: React.ReactNode }) {
   const [tasks, dispatch] = useReducer(
