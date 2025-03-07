@@ -2,9 +2,9 @@ import { createContext, Dispatch, useReducer } from 'react';
 
 type AckNack = 'ack' | 'nack';
 
-const AckNonackContext = createContext<AckNack>('nack');
+const AckNackContext = createContext<AckNack>('nack');
 
-const AckNonackDispatchContext = createContext<Dispatch<AckNackAction>>(() => {});
+const AckNackDispatchContext = createContext<Dispatch<AckNackAction>>(() => {});
 
 type AckNackAction =
   | { type: 'ack' }
@@ -23,18 +23,18 @@ function ackNackReducer(_current: AckNack, action: AckNackAction): AckNack {
   }
 }
 
-export function TasksProvider({ children }: { children: React.ReactNode }) {
+export function AckNackProvider({ children }: { children: React.ReactNode }) {
   const [tasks, dispatch] = useReducer(
     ackNackReducer,
     initialState
   );
 
   return (
-    <AckNonackContext.Provider value={tasks}>
-      <AckNonackDispatchContext.Provider value={dispatch}>
+    <AckNackContext.Provider value={tasks}>
+      <AckNackDispatchContext.Provider value={dispatch}>
         {children}
-      </AckNonackDispatchContext.Provider>
-    </AckNonackContext.Provider>
+      </AckNackDispatchContext.Provider>
+    </AckNackContext.Provider>
   );
 }
 
