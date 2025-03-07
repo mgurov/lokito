@@ -10,7 +10,7 @@ import {
   useOverallFetchingState,
   useSourcesFetchingState,
 } from '@/data/fetching/fetchingSlice';
-import { useData, useUnackedData } from '@/data/redux/logDataSlice';
+import { useData } from '@/data/redux/logDataSlice';
 import { Tabs, TabsTrigger } from './ui/tabs';
 import { TabsContent, TabsList } from '@radix-ui/react-tabs';
 import { ExclamationTriangleIcon, UpdateIcon } from '@radix-ui/react-icons';
