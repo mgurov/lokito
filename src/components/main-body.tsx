@@ -28,7 +28,6 @@ export function ShowData() {
   const sources = useSources();
   const ackNack = useAckNack();
   const data = useData(ackNack === 'ack');
-  console.log('ackNack', ackNack, ackNack === 'ack');
 
   const [tabTriggers, tabs] = SourcesTabs(Object.values(fetchingSourceState), data, sources);
   const doWeHaveData = tabTriggers.length > 0;
@@ -51,7 +50,7 @@ export function ShowData() {
         <NewSource />
       </TabsList>
       <TabsContent value="all">
-        <ShowAllSourcesData />
+        <ShowAllSourcesData data={data} />
       </TabsContent>
       {tabs}
     </Tabs>
@@ -107,9 +106,8 @@ function SourcesTabs(dataFromSources: SourceFetchingState[], data: Log[], source
   return [tabTriggers, tabs];
 }
 
-function ShowAllSourcesData() {
+function ShowAllSourcesData({data}: {data: Log[]}) {
   const overallFetchingState = useOverallFetchingState();
-  const data = useUnackedData();
   const sourcesFetchingState = useSourcesFetchingState();
 
   /**
