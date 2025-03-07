@@ -14,7 +14,6 @@ type AckNackAction =
 const initialState: AckNack = 'nack';
 
 function ackNackReducer(current: AckNack, action: AckNackAction): AckNack {
-  console.log('got action', action, 'current state', current);
   switch (action.type) {
     case 'ack': {
       return 'ack';
