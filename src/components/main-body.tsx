@@ -21,6 +21,7 @@ import { Source } from '@/data/source';
 import { AckAllButton, StatsLine } from '@/components/StatsLine';
 import { UploadSourcesConfiguration } from '@/components/upload-config';
 import { SelectedSourceContext } from './context/SelectedSourceContext';
+import { AckNackProvider } from './context/AckNackContext';
 
 export function ShowData() {
   const fetchingSourceState = useSourcesFetchingState();
@@ -31,27 +32,29 @@ export function ShowData() {
   const doWeHaveData = tabTriggers.length > 0;
 
   return (
-    <Tabs defaultValue="all">
-      <TabsList className='bg-gray-200'>
-        <TabsTrigger data-testid="all-sources-tab" value="all" disabled={!doWeHaveData}>
-          All&nbsp;{data.length > 0 && <Badge>{data.length}</Badge>}
-        </TabsTrigger>
-        {doWeHaveData
-          ? tabTriggers
-          : sources
-            .filter((source) => source.active)
-            .map((source) => (
-              <TabsTrigger key={source.id} value={source.id} disabled>
-                {source.name}
-              </TabsTrigger>
-            ))}
-        <NewSource />
-      </TabsList>
-      <TabsContent value="all">
-        <ShowAllSourcesData />
-      </TabsContent>
-      {tabs}
-    </Tabs>
+    <AckNackProvider>
+      <Tabs defaultValue="all">
+        <TabsList className='bg-gray-200'>
+          <TabsTrigger data-testid="all-sources-tab" value="all" disabled={!doWeHaveData}>
+            All&nbsp;{data.length > 0 && <Badge>{data.length}</Badge>}
+          </TabsTrigger>
+          {doWeHaveData
+            ? tabTriggers
+            : sources
+              .filter((source) => source.active)
+              .map((source) => (
+                <TabsTrigger key={source.id} value={source.id} disabled>
+                  {source.name}
+                </TabsTrigger>
+              ))}
+          <NewSource />
+        </TabsList>
+        <TabsContent value="all">
+          <ShowAllSourcesData />
+        </TabsContent>
+        {tabs}
+      </Tabs>
+    </AckNackProvider>
   );
 }
 
