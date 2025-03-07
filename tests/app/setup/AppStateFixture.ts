@@ -1,7 +1,6 @@
 import { Source } from "@/data/source";
 import { nextId } from "../util/nextId";
 import { StorageFixture, storageTest } from "./StorageFixture";
-import { Filter } from "@/data/filters/filter";
 
 export class AppStateFixture {
     constructor(private storage: StorageFixture) {
