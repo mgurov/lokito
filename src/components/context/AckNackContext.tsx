@@ -8,17 +8,21 @@ const AckNackDispatchContext = createContext<Dispatch<AckNackAction>>(() => {});
 
 type AckNackAction =
   | { type: 'ack' }
-  | { type: 'nack' };
+  | { type: 'nack' }
+  | { type: 'toggle' };
 
 const initialState: AckNack = 'nack';
 
-function ackNackReducer(_current: AckNack, action: AckNackAction): AckNack {
+function ackNackReducer(current: AckNack, action: AckNackAction): AckNack {
   switch (action.type) {
     case 'ack': {
       return 'ack';
     }
     case 'nack': {
       return 'nack';
+    }
+    case 'toggle': {
+      return current === 'ack' ? 'nack' : 'ack';
     }
   }
 }
@@ -28,6 +32,10 @@ export function useAckNack() {
   return context;
 }
 
+export function useToggleAckNack() {
+  const dispatch = useContext(AckNackDispatchContext);
+  return () => dispatch({ type: 'toggle' });
+}
 
 export function AckNackProvider({ children }: { children: React.ReactNode }) {
   const [tasks, dispatch] = useReducer(

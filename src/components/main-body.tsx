@@ -10,7 +10,7 @@ import {
   useOverallFetchingState,
   useSourcesFetchingState,
 } from '@/data/fetching/fetchingSlice';
-import { useUnackedData } from '@/data/redux/logDataSlice';
+import { useData, useUnackedData } from '@/data/redux/logDataSlice';
 import { Tabs, TabsTrigger } from './ui/tabs';
 import { TabsContent, TabsList } from '@radix-ui/react-tabs';
 import { ExclamationTriangleIcon, UpdateIcon } from '@radix-ui/react-icons';
@@ -21,12 +21,13 @@ import { Source } from '@/data/source';
 import { AckAllButton, StatsLine } from '@/components/StatsLine';
 import { UploadSourcesConfiguration } from '@/components/upload-config';
 import { SelectedSourceContext } from './context/SelectedSourceContext';
-import { AckNackProvider } from './context/AckNackContext';
+import { AckNackProvider, useAckNack } from './context/AckNackContext';
 
 export function ShowData() {
   const fetchingSourceState = useSourcesFetchingState();
   const sources = useSources();
-  const data = useUnackedData();
+  const ackNack = useAckNack();
+  const data = useData(ackNack === 'ack');
 
   const [tabTriggers, tabs] = SourcesTabs(Object.values(fetchingSourceState), data, sources);
   const doWeHaveData = tabTriggers.length > 0;
