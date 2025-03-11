@@ -17,7 +17,7 @@ jobs:
     - name: Install dependencies
       run: npm ci
     - name: Validate the build statically
-      run: npm run validate
+      run: npm run validate:static
     - name: Install Chromium
       run: npx playwright install chromium
     - name: Run Playwright tests

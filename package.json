@@ -7,8 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "validate": "npm run lint && npx tsc -b",
-    "validate:full": "npm run validate && npx playwright test",
+    "validate:static": "npm run lint && npx tsc -b",
+    "validate": "npm run validate && npx playwright test",
     "preview": "vite preview"
   },
   "dependencies": {
