@@ -8,6 +8,8 @@ import { useDispatch } from 'react-redux';
 import { logDataSliceActions } from '@/data/redux/logDataSlice';
 import SimpleTooltip from './SimpleTooltip';
 import { SelectedSourceContext } from './context/SelectedSourceContext';
+import React from 'react';
+import { TRACE_ID_FIELDS } from '@/hardcodes';
 
 export function LogPanel(props: { log: Log }) {
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -34,31 +36,30 @@ export function LogPanel(props: { log: Log }) {
           <h3 className="text-sm font-semibold">Fields</h3>
 
           <div className="grid rounded-sm bg-white shadow">
-            {fields.map((field) => (
-              <div
-                key={field}
-                className="grid cursor-default grid-cols-[120px_auto_20px] gap-4 px-4 py-2 text-xs"
-              >
-                <div className="overflow-hidden text-ellipsis" title={field}>
-                  {field}
-                </div>
-                <div className="group flex space-x-2">
-                  <span>{props.log.stream?.[field] as ReactNode} </span>
+            <div className="grid cursor-default grid-cols-[auto_1fr] gap-4 px-4 py-2 text-xs">
+              {fields.map((field) => (
+                <React.Fragment key={field}>
+                  <div className={"overflow-hidden text-ellipsis" + (TRACE_ID_FIELDS.includes(field) ? " font-semibold" : "" )} title={field}>
+                    {field}
+                  </div>
+                  <div className="group flex">
                   {props.log.stream?.[field] !== undefined && (
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => handleCopyToClipboard(props.log.stream?.[field] as string, field)}
-                      className="h-4 w-4 border-none bg-transparent text-gray-600 opacity-0 transition-opacity group-hover:opacity-100"
-                      title={copiedField === field ? 'Copied!' : 'Copy'}
-                    >
-                      {copiedField === field ? <CheckIcon /> : <CopyIcon />}
-                      <span className="sr-only">Copy Order ID</span>
-                    </Button>
-                  )}
-                </div>
-              </div>
-            ))}
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => handleCopyToClipboard(props.log.stream?.[field] as string, field)}
+                        className="h-4 w-0 border-none bg-transparent text-gray-600 opacity-0 transition-opacity group-hover:opacity-100 group-hover:w-4"
+                        title={copiedField === field ? 'Copied!' : 'Copy'}
+                      >
+                        {copiedField === field ? <CheckIcon /> : <CopyIcon />}
+                        <span className="sr-only">Copy Order ID</span>
+                      </Button>
+                    )}
+                    <span>{props.log.stream?.[field] as ReactNode} </span>                  
+                  </div>
+                </React.Fragment>
+              ))}
+            </div>
           </div>
         </div>
       </div>      
