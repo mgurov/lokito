@@ -48,8 +48,6 @@ fetchingMiddleware.startListening({
 
 async function processSourceFetching(sourceState: SourceFetchingState, listenerApi: ListenerEffectAPI<RootState, AppDispatch>) {
 
-    //console.log('fetch cycle', sourceState);
-
     if (sourceState.state === 'fetching') {
         console.error('source is already fetching', sourceState)
     }
