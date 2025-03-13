@@ -109,7 +109,7 @@ async function fetchLokiLogs(params: { query: string, from: string, sourceId: st
     const url = buildLokiUrl(params.query, params.from);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return axios.get<{data: {result: any[]} }>(url, {timeout: 1000})
+    return axios.get<{data: {result: any[]} }>(url, /*{timeout: 1000}*/)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .then(response => response.data.data.result.map((l: any) => ({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

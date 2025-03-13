@@ -116,5 +116,17 @@ test('should keep fetching after a delayed response', async ({ page, appState, m
     delayedResponse.resolve();
 });
 
+test('should show error on no responses', async ({ page, appState, mainPage }) => {
+
+    await appState.givenSources({ name: 'existing'});
+
+    await page.route(routes.loki, async (request) => {
+        await request.abort();
+    });
+    await mainPage.open({startFetch: true});
+    await mainPage.expectLogMessages('e2', 'e1');
+});
+
+
 
 // TODO: show the date time message.

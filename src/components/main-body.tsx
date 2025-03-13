@@ -108,7 +108,6 @@ function SourcesTabs(dataFromSources: SourceFetchingState[], data: Log[], source
 
 function ShowAllSourcesData({data}: {data: Log[]}) {
   const overallFetchingState = useOverallFetchingState();
-  const sourcesFetchingState = useSourcesFetchingState();
 
   /**
    * cases: started fetching and waiting; have some non-ack data; have no non-ack data and we're happy
@@ -116,23 +115,6 @@ function ShowAllSourcesData({data}: {data: Log[]}) {
 
   if (overallFetchingState.firstFetchInProgress) {
     return <div className="rounded-md bg-green-50 p-4">Fetching data...</div>;
-  }
-
-  if (Object.values(sourcesFetchingState).filter((source) => source.state === 'error').length > 0) {
-    return (
-      <div className="rounded-md bg-yellow-50 p-4">
-        There are hiccups fetching logs. You probably forgot to run the CLI, check the{' '}
-        <a
-          href="https://github.com/mgurov/lokito"
-          target="_blank"
-          rel="noreferrer"
-          className="text-blue-400 hover:text-blue-600"
-        >
-          readme
-        </a>{' '}
-        on how to run it
-      </div>
-    );
   }
 
   return (
