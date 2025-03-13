@@ -124,6 +124,7 @@ test('should show error on no responses', async ({ page, appState, mainPage }) =
         await request.abort();
     });
     await mainPage.open({startFetch: true});
+    //NB: shouldn't actually be clean on error, but never mind for now.
     await expect(page.getByText('Clean ✅')).toBeVisible();
 });
 

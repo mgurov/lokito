@@ -121,4 +121,8 @@ async function fetchLokiLogs(params: { query: string, from: string, sourceId: st
             sourceId: params.sourceId,
             acked: false,
         } as Log)))
+        .catch(e => {
+            console.error('error fetching logs', e)
+            return null;
+        });
 }
