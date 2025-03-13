@@ -13,13 +13,13 @@ test('fetching messages', async ({ page, appState, mainPage, logs }) => {
 
     await mainPage.open({startFetch: true});
 
-    await expectTexts(page.getByTestId('log-message'), 'event1');
+    await mainPage.expectLogMessages('event1');
 
     logs.givenRecords({ message: 'event2' }, { message: 'event3' });
 
     await page.clock.runFor('01:30');
 
-    await expectTexts(page.getByTestId('log-message'), 'event3', 'event2', 'event1');
+    await mainPage.expectLogMessages('event3', 'event2', 'event1');
 
 });
 
@@ -51,7 +51,7 @@ test('should fetch updated query on editing', async ({ page, appState, mainPage,
 });
 
 
-test('duplications should be filtered out on fetching', async ({ page, appState, consoleLogging, logs }) => {
+test('duplications should be filtered out on fetching', async ({ page, mainPage, appState, consoleLogging, logs }) => {
 
     await page.clock.install();
 
@@ -67,7 +67,7 @@ test('duplications should be filtered out on fetching', async ({ page, appState,
 
     await page.getByTestId('start-fetching-button').click();
 
-    await expectTexts(page.getByTestId('log-message'), 'event1');
+    await mainPage.expectLogMessages('event1');
 
     //NB: the deduplication doesn't care about the message, only the timestamp and the data
     logs.givenRecords(
@@ -80,7 +80,7 @@ test('duplications should be filtered out on fetching', async ({ page, appState,
 
     await page.clock.runFor('01:30');
 
-    await expectTexts(page.getByTestId('log-message'), 'event2', 'event1', 'event3');
+    await mainPage.expectLogMessages('event2', 'event1', 'event3');
 });
 
 
