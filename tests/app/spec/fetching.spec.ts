@@ -1,5 +1,7 @@
 import { test, expect } from '@tests/app/setup/testExtended';
 import { expectTexts } from '../util/visualAssertions';
+import { routes } from '../setup/ExternalLogsFixture';
+import { Deferred } from '../util/promises';
 
 test('fetching messages', async ({ page, appState, mainPage, logs }) => {
 
@@ -94,15 +96,24 @@ test('should keep fetching after a delayed response', async ({ page, appState, m
 
     await mainPage.expectLogMessages('e1');
 
+    // next cycle
+    logs.givenRecords({ message: 'e2' });
+
+    const delayedResponse = new Deferred<void>();
+    await page.route(routes.loki, async (request) => {
+        await delayedResponse.promise;
+        await request.abort();
+    }, {times: 1});
+
     await page.clock.runFor('01:30');
 
-    await expect.poll(() => {
-        return logs.requests.map(u => u.searchParams.get('query'))
-    }).toStrictEqual([
-        "{job='test'}", //from before
-        '{job="updated query"}',    
-    ])
+    await mainPage.expectLogMessages('e1');
 
+    await page.clock.runFor('01:30');
+
+    await mainPage.expectLogMessages('e2', 'e1');
+
+    delayedResponse.resolve();
 });
 
 

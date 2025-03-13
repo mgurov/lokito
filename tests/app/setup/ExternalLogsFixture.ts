@@ -1,5 +1,9 @@
 import { Page, test } from '@playwright/test';
 
+export const routes = {
+    loki: '/lokiprod/api/v1/query_range?**',
+}
+
 export const externalLogsTest = test.extend<{ logs: LogSource }>({
     logs: [async ({ page }, use) => {
 
@@ -22,7 +26,7 @@ export type LogRecord = { stream: Record<string, string>, values: string[][], qu
 export async function routeLogResponses(page: Page, ...logRecords: LogRecordSpec[]): Promise<LogSource> {
     const source = new LogSource();
     source.givenRecords(...logRecords);
-    await page.route('/lokiprod/api/v1/query_range?**', (route, request) => {
+    await page.route(routes.loki, (route, request) => {
         const url = new URL(request.url());
         source.requests.push(url);
         const query = url.searchParams.get('query');
