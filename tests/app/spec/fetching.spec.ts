@@ -7,7 +7,7 @@ test('fetching messages', async ({ page, appState, mainPage, logs }) => {
 
     await appState.givenSources({ name: 'existing' });
 
-    logs.givenRecords({ message: 'event1' });
+    logs.givenRecords({ message: 'event1' }); //tODO: unify
 
     await mainPage.open({startFetch: true});
 
@@ -80,5 +80,30 @@ test('duplications should be filtered out on fetching', async ({ page, appState,
 
     await expectTexts(page.getByTestId('log-message'), 'event2', 'event1', 'event3');
 });
+
+
+test('should keep fetching after a delayed response', async ({ page, appState, mainPage, logs }) => {
+
+    await page.clock.install();
+
+    await appState.givenSources({ name: 'existing'});
+
+    logs.givenRecords({ message: 'e1' });
+
+    await mainPage.open({startFetch: true});
+
+    await mainPage.expectLogMessages('e1');
+
+    await page.clock.runFor('01:30');
+
+    await expect.poll(() => {
+        return logs.requests.map(u => u.searchParams.get('query'))
+    }).toStrictEqual([
+        "{job='test'}", //from before
+        '{job="updated query"}',    
+    ])
+
+});
+
 
 // TODO: show the date time message.
