@@ -120,9 +120,5 @@ async function fetchLokiLogs(params: { query: string, from: string, sourceId: st
             timestamp: new Date(parseInt(l.values?.[0]?.[0].slice(0, -6))).toISOString(),
             sourceId: params.sourceId,
             acked: false,
-        } as Log)))
-        .catch(e => {
-            console.error('error fetching logs', e)
-            return null;
-        });
+        } as Log)));
 }
