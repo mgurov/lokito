@@ -8,7 +8,7 @@ test('fetching messages', async ({ page, appState, mainPage, logs }) => {
 
     await appState.givenSources({ name: 'existing' });
 
-    logs.givenRecords({ message: 'event1' }); //tODO: unify
+    logs.givenRecords({ message: 'event1' });
 
     await mainPage.open({startFetch: true});
 
@@ -126,7 +126,3 @@ test('should show error on no responses', async ({ page, appState, mainPage }) =
     //NB: shouldn't actually be clean on error, but never mind for now.
     await expect(page.getByText('Clean ✅')).toBeVisible();
 });
-
-
-
-// TODO: show the date time message.
