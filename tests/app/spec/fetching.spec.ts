@@ -1,5 +1,4 @@
 import { test, expect } from '@tests/app/setup/testExtended';
-import { expectTexts } from '../util/visualAssertions';
 import { routes } from '../setup/ExternalLogsFixture';
 import { Deferred } from '../util/promises';
 
