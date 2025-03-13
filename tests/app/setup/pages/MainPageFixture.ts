@@ -42,7 +42,7 @@ export default class MainPageFixture {
 
     async expectAckMessages(count: number) {
         const ackedMessagesCounter = this.ackedMessagesCount
-        await expect(ackedMessagesCounter).toHaveText(`${count} ACK'ed`)
+        await expect(ackedMessagesCounter).toHaveText(`ACK'ed ${count}`)
     }
 
     get cleanBacklogMessage() {
