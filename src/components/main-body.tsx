@@ -107,16 +107,6 @@ function SourcesTabs(dataFromSources: SourceFetchingState[], data: Log[], source
 }
 
 function ShowAllSourcesData({data}: {data: Log[]}) {
-  const overallFetchingState = useOverallFetchingState();
-
-  /**
-   * cases: started fetching and waiting; have some non-ack data; have no non-ack data and we're happy
-   */
-
-  if (overallFetchingState.firstFetchInProgress) {
-    return <div className="rounded-md bg-green-50 p-4">Fetching data...</div>;
-  }
-
   return (
     <div className="mt-2 space-y-4">
 
