@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "validate:static": "npm run lint && npx tsc -b",
     "validate": "npm run validate:static && npx playwright test",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "boot": "./boot.sh"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.1.3",
