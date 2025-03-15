@@ -5,6 +5,7 @@ import { buildLokiUrl } from "@/lib/utils";
 import axios from "axios";
 import { receiveBatch } from "../redux/logDataSlice";
 import { Log } from "../schema";
+import { createNewSource } from "../redux/sourcesSlice";
 
 const REFETCH_DELAY = 60000;
 
@@ -19,7 +20,7 @@ fetchingMiddleware.startListening({
                 continue
             }
             listenerApi.dispatch(fetchingActions.initSourceFetching({
-                source: source,
+                source,
                 from: action.payload.from,
             }))
         }
@@ -40,6 +41,25 @@ fetchingMiddleware.startListening({
             }
         })
         await task.result
+    },
+})
+
+fetchingMiddleware.startListening({
+    actionCreator: createNewSource,
+    effect: (_action, listenerApi) => {
+        const beforeSources = (listenerApi.getOriginalState() as RootState).sources.data;
+        const afterSources = (listenerApi.getState() as RootState).sources.data;
+        const newSource = Object.values(afterSources).find(source => !beforeSources[source.id])
+        if (!newSource) {
+            return
+        }
+        if (!newSource.active) {
+            return
+        }
+        listenerApi.dispatch(fetchingActions.initSourceFetching({
+            source: newSource,
+            from: new Date().toISOString(),
+        }))
     },
 })
 
