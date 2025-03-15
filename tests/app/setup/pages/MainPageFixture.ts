@@ -28,12 +28,12 @@ export default class MainPageFixture {
         }
         await this.page.goto('/');
         if (startFetch === true) {
-            await this.page.getByTestId('start-fetching-button').click(); 
+            await this.page.getByTestId('fetch-option').getByText('now').click(); 
         }
     }
 
-    get startFetchingButton() {
-        return this.page.getByTestId('start-fetching-button');
+    startFetchingButton(from: string = 'now') {
+        return this.page.getByTestId('fetch-option').getByText(from);
     }
 
     get ackedMessagesCount() {
@@ -66,6 +66,10 @@ export default class MainPageFixture {
 
     get ackAllButton(): Locator {
         return this.page.getByTestId('ack-all-button')
+    }
+
+    get cleanCheck(): Locator {
+        return this.page.getByText('Clean ✅')
     }
 
     async clickAckAll(props: {expectedCount?: number} = {}) {
@@ -106,6 +110,14 @@ export default class MainPageFixture {
                 await expect(unackCountLocator).toHaveText(`${count}`)
             }
         }, {box: true})        
+    }
+
+    get clock() {
+        return this.page.clock
+    }
+
+    getByTestId(testId: string) {
+        return this.page.getByTestId(testId)
     }
 }
 

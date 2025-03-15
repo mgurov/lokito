@@ -4,6 +4,7 @@ export const routes = {
     loki: '/lokiprod/api/v1/query_range?**',
 }
 
+//TODO: rename loki logs?
 export const externalLogsTest = test.extend<{ logs: LogSource }>({
     logs: [async ({ page }, use) => {
 

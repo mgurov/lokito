@@ -62,9 +62,7 @@ test('duplications should be filtered out on fetching', async ({ page, mainPage,
 
     logs.givenRecords({ message: 'event1', timestamp: sameTimestamp, data: sameData });
 
-    await page.goto('/');
-
-    await page.getByTestId('start-fetching-button').click();
+    await mainPage.open({startFetch: true});
 
     await mainPage.expectLogMessages('event1');
 
@@ -124,5 +122,5 @@ test('should show error on no responses', async ({ page, appState, mainPage }) =
     });
     await mainPage.open({startFetch: true});
     //NB: shouldn't actually be clean on error, but never mind for now.
-    await expect(page.getByText('Clean ✅')).toBeVisible();
+    await expect(mainPage.cleanCheck).toBeVisible();
 });

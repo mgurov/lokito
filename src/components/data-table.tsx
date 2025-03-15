@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { LogPanel } from '@/components/LogPanel';
 import { Log } from '@/data/schema';
+import { useOverallFetchingState } from '@/data/fetching/fetchingSlice';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -95,16 +96,23 @@ export function DataTable({ columns, data }: DataTableProps<Log, Log>) {
                 </React.Fragment>
               ))
             ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Clean ✅
-                </TableCell>
-              </TableRow>
+              <NoData />
             )}
           </TableBody>
         </Table>
       </div>
       {table.getRowModel().rows?.length > 0 && <DataTablePagination table={table} />}
     </div>
+  );
+}
+
+function NoData() {
+  const overallState = useOverallFetchingState();
+  return (
+    <TableRow>
+      <TableCell colSpan={4} className="h-24 text-center">
+        {overallState.from !== null && "Clean ✅"}
+      </TableCell>
+    </TableRow>
   );
 }

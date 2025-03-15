@@ -79,9 +79,7 @@ test('a non-saved filter should be applied to existing but not following message
 
     logs.givenRecords('this_message 1', 'unrelated 1');
 
-    await page.goto('/');
-
-    await page.getByTestId('start-fetching-button').click();
+    await mainPage.open({startFetch: true});
 
     await mainPage.expectLogMessages('unrelated 1', 'this_message 1');
 

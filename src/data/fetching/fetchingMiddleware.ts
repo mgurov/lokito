@@ -35,9 +35,6 @@ fetchingMiddleware.startListening({
                 for (const sourceState of Object.values(fetchingState.sourcesState)) {
                     await processSourceFetching(sourceState, listenerApi as ListenerEffectAPI<RootState, AppDispatch>)
                 }
-                if (fetchingState.overallState.firstFetchInProgress) {
-                    listenerApi.dispatch(fetchingActions.firstFetchCompleted())
-                }
                 // TODO: move this to state then we can make it configurable like in Grafana
                 await forkApi.delay(REFETCH_DELAY) //polling every minute after the last fetch
             }

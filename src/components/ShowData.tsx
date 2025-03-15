@@ -7,6 +7,7 @@ import { Link } from '@remix-run/react';
 import { Button } from './ui/button';
 import {
   SourceFetchingState,
+  useOverallFetchingState,
   useSourcesFetchingState,
 } from '@/data/fetching/fetchingSlice';
 import { useData } from '@/data/redux/logDataSlice';
@@ -21,6 +22,7 @@ import { AckAllButton, StatsLine } from '@/components/StatsLine';
 import { UploadSourcesConfiguration } from '@/components/upload-config';
 import { SelectedSourceContext } from './context/SelectedSourceContext';
 import { useAckNack } from './context/AckNackContext';
+import { StartFetchingPanel } from './StartFetchingPanel';
 
 export function ShowData() {
   const fetchingSourceState = useSourcesFetchingState();
@@ -33,7 +35,7 @@ export function ShowData() {
 
   return (
     <Tabs defaultValue="all">
-      <TabsList className='bg-gray-200'>
+      <TabsList className='bg-gray-200 rounded-lg border border-gray-300'>
         <TabsTrigger data-testid="all-sources-tab" value="all" disabled={!doWeHaveData}>
           All&nbsp;{data.length > 0 && <Badge>{data.length}</Badge>}
         </TabsTrigger>
@@ -61,7 +63,6 @@ function SourcesTabs(dataFromSources: SourceFetchingState[], data: Log[], source
   const tabs = [];
   for (const source of dataFromSources) {
     const thisSourceUnaccounted = data.filter((log) => log.sourceId === source.sourceId);
-    // TODO: Discuss w/ Mykola OR refactor, whatever comes first :)
     const bgColor = sources.find((s) => s.id === source.sourceId)?.color;
     tabTriggers.push(
       <TabsTrigger key={source.sourceId} value={source.sourceId} data-testid={`source-tab-${source.sourceId}`}>
@@ -80,7 +81,6 @@ function SourcesTabs(dataFromSources: SourceFetchingState[], data: Log[], source
     tabs.push(
       <TabsContent key={source.sourceId} value={source.sourceId}>
         <SelectedSourceContext.Provider value={source}>
-          {/* // TODO: The other wrapper :) */}
           <div className="mt-2 space-y-4">
             {source.err && <Alert variant="destructive">{source.err}</Alert>}
             {!source.lastSuccess && <Alert variant="destructive">No fetch has ever succeeded</Alert>}
@@ -89,23 +89,27 @@ function SourcesTabs(dataFromSources: SourceFetchingState[], data: Log[], source
                 Last success fetch {simpleDateTimeFormat(source.lastSuccess)}
               </Alert>
             )}
-            
+
             {thisSourceUnaccounted.length > 0 && (
               <>
                 <AckAllButton notAckedCount={thisSourceUnaccounted.length} />
                 <DataTable data={thisSourceUnaccounted} columns={columns} />
               </>
-              
+
             )}
           </div>
-        </SelectedSourceContext.Provider>        
+        </SelectedSourceContext.Provider>
       </TabsContent>,
     );
   }
   return [tabTriggers, tabs];
 }
 
-function ShowAllSourcesData({data}: {data: Log[]}) {
+function ShowAllSourcesData({ data }: { data: Log[] }) {
+  const overallFetchingState = useOverallFetchingState();
+  if (overallFetchingState.from === null) {
+    return <StartFetchingPanel />;
+  }
   return (
     <div className="mt-2 space-y-4">
 

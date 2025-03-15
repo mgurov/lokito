@@ -1,12 +1,11 @@
 import { test, expect } from '@tests/app/setup/testExtended';
 import { NewSourceRollover } from '../setup/pages/SourcesPageFixture';
 
-
-test('add a source from the sourceless main screen', async ({ page, appState, consoleLogging }) => {
-
-    consoleLogging.failImmediately = true
+test('add a source from the sourceless main screen', async ({ page, appState }) => {
 
     await page.goto('/');
+
+    await expect(page.getByText(/There are no active sources/)).toBeVisible();
 
     await page.getByTestId('new-source-button').getByText('create a new one').click();
 

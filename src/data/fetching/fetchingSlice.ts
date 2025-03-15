@@ -39,8 +39,7 @@ export interface SourceFetchingState {
 
 interface OverallFetchingState {
   status: 'idle' | 'active';
-  firstFetchInProgress: boolean; // On UI we might want to display different when nothing to worry about v we are still fetching for the first time
-  from: string | null;
+  from: string | null; // where null means no fetch has yet been performed
 }
 
 export interface FetchingState {
@@ -51,7 +50,6 @@ export interface FetchingState {
 const initialState: FetchingState = {
   overallState: {
     status: 'idle',
-    firstFetchInProgress: false,
     from: null,
   },
   sourcesState: {},
@@ -64,12 +62,8 @@ export const fetchingSlice = createSlice({
     startFetching: (state, action: PayloadAction<StartFetching>) => {
       state.overallState = {
         status: 'active',
-        firstFetchInProgress: true, //TODO: technically we could've already tried fetching so might refine this later
         from: action.payload.from,
       };
-    },
-    firstFetchCompleted: (state) => {
-      state.overallState.firstFetchInProgress = false;
     },
     stopFetching: (state) => {
       state.overallState.status = 'idle';

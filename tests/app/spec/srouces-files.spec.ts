@@ -1,12 +1,6 @@
 import { Download, Page } from '@playwright/test';
 import { test, expect } from '@tests/app/setup/testExtended';
 
-test('should show help text on no active sources when opening the page for the first time', async ({ page }) => {
-  await page.goto('/');
-
-  await expect(page.getByText(/There are no active sources/)).toBeVisible();
-});
-
 test('add source', async ({ page, appState }) => {
     await page.goto('/');
     
