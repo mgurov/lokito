@@ -33,6 +33,25 @@ test('add a source to an existing list from main page', async ({ mainPage, appSt
     expect(await appState.sourceNames()).toEqual(['existing', 'new']);
 });
 
+test('add a source should have immediate effect on fetching', async ({ mainPage, appState, logs }) => {
+
+    await mainPage.clock.install();
+
+    const existingSource = await appState.givenSources({name: 'existing'});
+    await mainPage.open({startFetch: true});
+
+    await expect.poll(() => logs.requests).toHaveLength(1);
+
+    const newSourceRollover = await mainPage.clickNewSourceButton()
+    await newSourceRollover.fillSourceForm({ name: 'new'});
+    await newSourceRollover.saveSource();
+
+    await mainPage.clock.runFor('01:01'); //next cycle
+
+    await expect.poll(() => logs.requests).toHaveLength(3);
+});
+
+
 test('add a source to an existing list from sources page', async ({ appState, sourcePage }) => {
 
     await appState.givenSources({name: 'existing'});
