@@ -1,4 +1,4 @@
-import { Page, test } from '@playwright/test';
+import { Page, test, expect } from '@playwright/test';
 
 export const routes = {
     loki: '/lokiprod/api/v1/query_range?**',
@@ -32,7 +32,7 @@ export async function routeLogResponses(page: Page, ...logRecords: LogRecordSpec
         source.requests.push(url);
         const query = url.searchParams.get('query');
         if (!query) {
-            return route.fulfill({status: 400, body: 'no query'})
+            return route.fulfill({ status: 400, body: 'no query' })
         }
 
         const json = {
@@ -90,6 +90,14 @@ class LogSource {
         }
         );
         this.records.push(...newRecords);
+    }
+
+    async expectQueries(...sources: { query: string }[]) {
+        await test.step('expectQueries', async () => {
+            await expect.poll(
+                () => this.requests.map(r => r.searchParams.get('query'))
+            ).toStrictEqual(sources.map(s => s.query));
+        }, {box: true})
     }
 
 }
