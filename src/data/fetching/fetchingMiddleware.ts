@@ -5,7 +5,7 @@ import { buildLokiUrl } from "@/lib/utils";
 import axios from "axios";
 import { receiveBatch } from "../redux/logDataSlice";
 import { Log } from "../schema";
-import { createNewSource } from "../redux/sourcesSlice";
+import { createNewSource, deleteSource } from "../redux/sourcesSlice";
 
 const REFETCH_DELAY = 60000;
 
@@ -34,9 +34,17 @@ fetchingMiddleware.startListening({
                 }
 
                 for (const sourceState of Object.values(fetchingState.sourcesState)) {
-                    await processSourceFetching(sourceState, listenerApi as ListenerEffectAPI<RootState, AppDispatch>)
+                    try {
+                        await processSourceFetching(sourceState, listenerApi as ListenerEffectAPI<RootState, AppDispatch>)
+                    } catch (e: unknown) {
+                        const errMessage = e instanceof Error ? e.message : JSON.stringify(e);
+                        console.error('unexpected middleware error fetching source', e)
+                        listenerApi.dispatch(fetchingActions.sourceFetchErr({
+                            sourceId: sourceState.sourceId,
+                            err: errMessage,
+                        }))
+                    }
                 }
-                // TODO: move this to state then we can make it configurable like in Grafana
                 await forkApi.delay(REFETCH_DELAY) //polling every minute after the last fetch
             }
         })
@@ -53,7 +61,7 @@ fetchingMiddleware.startListening({
         if (!newSource) {
             return
         }
-        if (!newSource.active) {
+        if (!newSource.active) { //TODO: this needs to be tested.
             return
         }
         listenerApi.dispatch(fetchingActions.initSourceFetching({
@@ -63,13 +71,25 @@ fetchingMiddleware.startListening({
     },
 })
 
+fetchingMiddleware.startListening({
+    actionCreator: deleteSource,
+    effect: (_action, listenerApi) => {
+        const beforeSources = (listenerApi.getOriginalState() as RootState).sources.data;
+        const afterSources = (listenerApi.getState() as RootState).sources.data;
+        const deletedSource = Object.values(beforeSources).find(source => !afterSources[source.id])
+        if (deletedSource) {
+            listenerApi.dispatch(fetchingActions.removeSourceFetching(deletedSource.id))
+        }
+    },
+})
+
 async function processSourceFetching(sourceState: SourceFetchingState, listenerApi: ListenerEffectAPI<RootState, AppDispatch>) {
 
     if (sourceState.state === 'fetching') {
         console.error('source is already fetching', sourceState)
     }
     const source = listenerApi.getState().sources.data[sourceState.sourceId]
-    if (!source.active) {
+    if (!source?.active) {
         return
     }
     let newFetchStart = sourceState.from
@@ -107,11 +127,9 @@ async function processSourceFetching(sourceState: SourceFetchingState, listenerA
 
         listenerApi.dispatch(receiveBatch({ logs }));
         listenerApi.dispatch(fetchingActions.sourceFetchedOk(sourceState.sourceId))
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e: any) {
+    } catch (e: unknown) {
         console.error('error fetching logs', e)
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const errMessage = 'message' in e ? e.message : JSON.stringify(e)
+        const errMessage = e instanceof Error ? e.message : JSON.stringify(e);
         listenerApi.dispatch(fetchingActions.sourceFetchErr({
             sourceId: sourceState.sourceId,
             err: errMessage,

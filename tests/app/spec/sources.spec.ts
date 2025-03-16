@@ -37,7 +37,7 @@ test('add a source should have immediate effect on fetching', async ({ mainPage,
 
     await mainPage.clock.install();
 
-    const existingSource = await appState.givenSources({name: 'existing'});
+    await appState.givenSources({});
     await mainPage.open({startFetch: true});
 
     await expect.poll(() => logs.requests).toHaveLength(1);
@@ -49,6 +49,41 @@ test('add a source should have immediate effect on fetching', async ({ mainPage,
     await mainPage.clock.runFor('01:01'); //next cycle
 
     await expect.poll(() => logs.requests).toHaveLength(3);
+});
+
+test('delete a source should have immediate effect on fetching', async ({ mainPage, appState, logs }) => {
+
+    await mainPage.clock.install();
+
+    const [toBeRemoved, toBeKept] = await appState.givenSources({name: 'to be removed'}, {});
+    await mainPage.open({startFetch: true});
+
+    await expect.poll(
+        () => logs.requests.map(r => r.searchParams.get('query'))
+    ).toStrictEqual([
+        toBeRemoved.query,
+        toBeKept.query,
+    ]);
+
+    await expect(mainPage.page.getByText(toBeRemoved.name)).toBeVisible();
+
+    const sourcesPage = await mainPage.clickToSources()
+    await expect(sourcesPage.page.getByText(toBeRemoved.name)).toBeVisible();
+    await sourcesPage.deleteSource(toBeRemoved.id)
+    await expect(sourcesPage.page.getByText(toBeRemoved.name)).not.toBeVisible();
+
+    await mainPage.homeLogo.click();
+    await expect(mainPage.page.getByText(toBeRemoved.name)).not.toBeVisible();
+
+    await mainPage.clock.runFor('01:01'); //next cycle
+
+    await expect.poll(
+        () => logs.requests.map(r => r.searchParams.get('query'))
+    ).toStrictEqual([
+        toBeRemoved.query,
+        toBeKept.query,
+        toBeKept.query,
+    ]);
 });
 
 

@@ -15,6 +15,10 @@ export default class SourcePageFixture {
         await this.page.getByTestId('new-source-button').getByText('New Source').click();
         return new NewSourceRollover(this.page)
     }
+
+    async deleteSource(sourceId: string) {
+        await this.page.getByTestId(`delete-source-${sourceId}`).click();
+    }
 }
 
 export const sourcePageTest = test.extend<{ sourcePage: SourcePageFixture }>({

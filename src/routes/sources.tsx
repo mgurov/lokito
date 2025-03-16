@@ -100,6 +100,7 @@ function SourceCard({source}: {source: Source}) {
                         }
                     />
                     <Button
+                        data-testid={`delete-source-${source.id}`}
                         size="sm"
                         variant="destructive"
                         onClick={() => dispatch(deleteSource(source.id))}

@@ -54,6 +54,10 @@ export default class MainPageFixture {
         return new SourcePageFixture(this.page);
     }
 
+    get homeLogo() {
+        return this.page.getByTestId('home-page-logo');
+    }
+
     async clickNewSourceButton() {
         await this.page.getByTestId('new-source-button').getByText('New Source').click();
 
