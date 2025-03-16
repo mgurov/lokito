@@ -81,6 +81,9 @@ export const fetchingSlice = createSlice({
       };
       state.sourcesState[source.id] = newFetchingState;
     },
+    removeSourceFetching: (state, action: PayloadAction<string>) => {
+      delete state.sourcesState[action.payload]
+    },
     startedSourceFetching: (state, action: PayloadAction<StartingSourceFetching>) => {
       const sourceState = state.sourcesState[action.payload.sourceId];
       if (!sourceState) {

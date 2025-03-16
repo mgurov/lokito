@@ -27,7 +27,7 @@ function Layout() {
         <div className="flex h-full flex-1 flex-col px-8 py-4">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold tracking-tight">
-              <Link to="/">
+              <Link to="/" data-testid="home-page-logo">
                 <div className="h-auto w-14 p-0">
                   <LokitoLogo />
                 </div>
