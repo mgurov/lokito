@@ -1,27 +1,6 @@
 import { Download, Page } from '@playwright/test';
 import { test, expect } from '@tests/app/setup/testExtended';
 
-test('add source', async ({ page, appState }) => {
-    await page.goto('/');
-    
-    await page.click('text="create a new one"');
-    
-    await page.fill('text=Name', 'Test Source');
-    await page.fill('text=Loki query', '{job="test"}');
-
-    
-    await page.click('text=Save changes');
-    
-    await expect(page.getByText(/Test Source/)).toBeVisible();
-
-    //and then should persist the page reopens
-    expect(await appState.sourceNames()).toEqual(['Test Source']);
-
-    await page.goto('/');
-
-    await expect(page.getByText(/Test Source/)).toBeVisible();
-});
-
 test('download sources', async ({ page }) => {
 
     await page.goto('/');

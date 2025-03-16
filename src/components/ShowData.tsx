@@ -30,25 +30,19 @@ export function ShowData() {
   const ackNack = useAckNack();
   const data = useData(ackNack === 'ack');
 
-  const [tabTriggers, tabs] = SourcesTabs(Object.values(fetchingSourceState), data, sources);
-  const doWeHaveData = tabTriggers.length > 0;
+  const overallFetchingState = useOverallFetchingState();
+  const showDisabledSources = overallFetchingState.from === null; 
+
+  const [tabTriggers, tabs] = SourcesTabs(fetchingSourceState, data, sources, showDisabledSources);
 
   return (
     <Tabs defaultValue="all">
       <TabsList className='bg-gray-200 rounded-lg border border-gray-300'>
-        <TabsTrigger data-testid="all-sources-tab" value="all" disabled={!doWeHaveData}>
+        <TabsTrigger data-testid="all-sources-tab" value="all" disabled={showDisabledSources}>
           All&nbsp;{data.length > 0 && <Badge>{data.length}</Badge>}
         </TabsTrigger>
-        {doWeHaveData
-          ? tabTriggers
-          : sources
-            .filter((source) => source.active)
-            .map((source) => (
-              <TabsTrigger key={source.id} value={source.id} disabled>
-                {source.name}
-              </TabsTrigger>
-            ))}
-        <NewSource />
+        {tabTriggers}
+        <NewSource buttonSize='tab' />
       </TabsList>
       <TabsContent value="all">
         <ShowAllSourcesData data={data} />
@@ -58,19 +52,22 @@ export function ShowData() {
   );
 }
 
-function SourcesTabs(dataFromSources: SourceFetchingState[], data: Log[], sources: Source[]) {
+function SourcesTabs(dataFromSources: { [sourceId: string]: SourceFetchingState }, data: Log[], sources: Source[], disabled: boolean) {
   const tabTriggers = [];
   const tabs = [];
-  for (const source of dataFromSources) {
-    const thisSourceUnaccounted = data.filter((log) => log.sourceId === source.sourceId);
-    const bgColor = sources.find((s) => s.id === source.sourceId)?.color;
+  for (const source of sources) {
+    const thisSourceUnaccounted = data.filter((log) => log.sourceId === source.id);
+    const sourceFetchingState = dataFromSources[source.id]
+    if (!source) {
+      continue; // potential data inconsistency safety precaution
+    }
     tabTriggers.push(
-      <TabsTrigger key={source.sourceId} value={source.sourceId} data-testid={`source-tab-${source.sourceId}`}>
+      <TabsTrigger key={source.id} value={source.id} data-testid={`source-tab-${source.id}`} disabled={disabled}>
         <div className="flex items-center gap-1">
-          <span>{source.sourceName}</span>
-          {thisSourceUnaccounted.length > 0 && <Badge data-testid="source-unack-count" style={{ backgroundColor: bgColor }}>{thisSourceUnaccounted.length}</Badge>}
-          {source.state === 'fetching' && <UpdateIcon className="animate-spin" />}
-          {source.state === 'error' && (
+          <span className={source.active ? '' : 'text-neutral-500'}>{source.name}</span>
+          {thisSourceUnaccounted.length > 0 && <Badge data-testid="source-unack-count" style={{ backgroundColor: source.color }}>{thisSourceUnaccounted.length}</Badge>}
+          {sourceFetchingState?.state === 'fetching' && <UpdateIcon className="animate-spin" />}
+          {sourceFetchingState?.state === 'error' && (
             <span className="px-1">
               <ExclamationTriangleIcon className="size-2 animate-ping text-orange-400" />
             </span>
@@ -79,14 +76,14 @@ function SourcesTabs(dataFromSources: SourceFetchingState[], data: Log[], source
       </TabsTrigger>,
     );
     tabs.push(
-      <TabsContent key={source.sourceId} value={source.sourceId}>
-        <SelectedSourceContext.Provider value={source}>
+      <TabsContent key={source.id} value={source.id}>
+        <SelectedSourceContext.Provider value={{sourceId: source.id}}>
           <div className="mt-2 space-y-4">
-            {source.err && <Alert variant="destructive">{source.err}</Alert>}
-            {!source.lastSuccess && <Alert variant="destructive">No fetch has ever succeeded</Alert>}
-            {source.lastSuccess && (
+            {sourceFetchingState?.err && <Alert variant="destructive">{sourceFetchingState?.err}</Alert>}
+            {!sourceFetchingState?.lastSuccess && <Alert variant="destructive">No fetch has ever succeeded</Alert>}
+            {sourceFetchingState?.lastSuccess && (
               <Alert className="text-size-min">
-                Last success fetch {simpleDateTimeFormat(source.lastSuccess)}
+                Last success fetch {simpleDateTimeFormat(sourceFetchingState?.lastSuccess)}
               </Alert>
             )}
 

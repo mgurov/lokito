@@ -25,7 +25,6 @@ fetchingMiddleware.startListening({
             }))
         }
 
-        //TODO: before declaring released, need to sort out working with mutating sources
         const task = listenerApi.fork(async (forkApi) => {
             while (true) {
                 const fetchingState = (listenerApi.getState() as RootState).fetching
@@ -61,7 +60,7 @@ fetchingMiddleware.startListening({
         if (!newSource) {
             return
         }
-        if (!newSource.active) { //TODO: this needs to be tested.
+        if (!newSource.active) {
             return
         }
         listenerApi.dispatch(fetchingActions.initSourceFetching({

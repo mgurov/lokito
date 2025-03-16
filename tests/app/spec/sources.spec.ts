@@ -1,6 +1,28 @@
 import { test, expect } from '@tests/app/setup/testExtended';
 import { NewSourceRollover } from '../setup/pages/SourcesPageFixture';
 
+test('add source', async ({ page, appState }) => {
+    await page.goto('/');
+    
+    await page.click('text="create a new one"');
+    
+    await page.fill('text=Name', 'Test Source');
+    await page.fill('text=Loki query', '{job="test"}');
+
+    
+    await page.click('text=Save changes');
+    
+    await expect(page.getByText(/Test Source/)).toBeVisible();
+
+    //and then should persist the page reopens
+    expect(await appState.sourceNames()).toEqual(['Test Source']);
+
+    await page.goto('/');
+
+    await expect(page.getByText(/Test Source/)).toBeVisible();
+});
+
+
 test('add a source from the sourceless main screen', async ({ page, appState }) => {
 
     await page.goto('/');
@@ -58,12 +80,10 @@ test('delete a source should have immediate effect on fetching', async ({ mainPa
     const [toBeRemoved, toBeKept] = await appState.givenSources({name: 'to be removed'}, {});
     await mainPage.open({startFetch: true});
 
-    await expect.poll(
-        () => logs.requests.map(r => r.searchParams.get('query'))
-    ).toStrictEqual([
-        toBeRemoved.query,
-        toBeKept.query,
-    ]);
+    await logs.expectQueries(
+        toBeRemoved,
+        toBeKept,
+    )
 
     await expect(mainPage.page.getByText(toBeRemoved.name)).toBeVisible();
 
@@ -77,15 +97,54 @@ test('delete a source should have immediate effect on fetching', async ({ mainPa
 
     await mainPage.clock.runFor('01:01'); //next cycle
 
-    await expect.poll(
-        () => logs.requests.map(r => r.searchParams.get('query'))
-    ).toStrictEqual([
-        toBeRemoved.query,
-        toBeKept.query,
-        toBeKept.query,
-    ]);
+    await logs.expectQueries(
+        toBeRemoved,
+        toBeKept,
+        toBeKept,
+    )
 });
 
+test('deactivate and then activate', async ({ mainPage, appState, logs }) => {
+
+    await mainPage.clock.install();
+
+    const [toBeDeactivated, toBeKept] = await appState.givenSources({name: 'deactivate me'}, {});
+    await mainPage.open({startFetch: true});
+
+    await logs.expectQueries(toBeDeactivated, toBeKept)
+
+    await expect(mainPage.page.getByText(toBeDeactivated.name)).toBeVisible();
+
+    const sourcesPage = await mainPage.clickToSources()
+    await sourcesPage.toggleActiveSource(toBeDeactivated.id)
+
+    await mainPage.homeLogo.click();
+    await expect(mainPage.page.getByText(toBeDeactivated.name)).toHaveClass('text-neutral-500')
+
+    await mainPage.clock.runFor('01:01'); //next cycle
+
+    await logs.expectQueries(
+        toBeDeactivated,
+        toBeKept,
+        toBeKept,
+    );
+
+    await mainPage.clickToSources()
+    await sourcesPage.toggleActiveSource(toBeDeactivated.id)
+    await mainPage.clock.runFor('01:01'); //next cycle
+
+    await logs.expectQueries(
+        toBeDeactivated,
+        toBeKept,
+        toBeKept,
+        toBeDeactivated,
+        toBeKept,
+    );
+
+    await mainPage.homeLogo.click();
+    await expect(mainPage.page.getByText(toBeDeactivated.name)).not.toHaveClass('text-neutral-500')
+
+});
 
 test('add a source to an existing list from sources page', async ({ appState, sourcePage }) => {
 

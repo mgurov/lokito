@@ -19,6 +19,10 @@ export default class SourcePageFixture {
     async deleteSource(sourceId: string) {
         await this.page.getByTestId(`delete-source-${sourceId}`).click();
     }
+
+    async toggleActiveSource(sourceId: string) {
+        await this.page.getByTestId(`toggle-active-${sourceId}`).click();
+    }
 }
 
 export const sourcePageTest = test.extend<{ sourcePage: SourcePageFixture }>({

@@ -109,6 +109,7 @@ function SourceCard({source}: {source: Source}) {
                         <TrashIcon />
                     </Button>
                     <Switch
+                        data-testid={`toggle-active-${source.id}`}
                         checked={source.active}
                         title="Active/deactivate the source"
                         onClick={() =>
