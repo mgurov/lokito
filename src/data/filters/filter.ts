@@ -2,11 +2,9 @@ export type Filter = {
     id: string;
     messageRegex: string;
     transient?: boolean;
-    //TODO: do we want to make Filters specific to sources? Maybe list of sourceIds to apply to.
 };
 
 
-//TODO: unify with sources?
 const IS_SERVER = typeof window === 'undefined';
 const FILTERS_STORAGE_KEY = 'filters';
 export function loadSourcesFromStorage(): Filter[] {
