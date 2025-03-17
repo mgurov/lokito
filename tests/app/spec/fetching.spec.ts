@@ -94,9 +94,7 @@ test('should show error upon failure to fetch', async ({ page, appState, mainPag
     await expect(mainPage.sourceTabHeader(source).getByTestId('source-in-error-indicator')).toBeVisible()
 });
 
-
-
-test.skip('should keep fetching after a delayed response', async ({ page, appState, mainPage, logs }) => {
+test('should keep fetching after a delayed response', async ({ page, appState, mainPage, logs }) => {
 
     await page.clock.install();
 
@@ -121,11 +119,16 @@ test.skip('should keep fetching after a delayed response', async ({ page, appSta
 
     await mainPage.expectLogMessages('e1');
 
+    delayedResponse.resolve();
+
     await page.clock.runFor('01:30');
 
     await mainPage.expectLogMessages('e2', 'e1');
 
-    delayedResponse.resolve();
+    // next cycle
+    logs.givenRecords({ message: 'e3' });
+    await page.clock.runFor('01:30');
+    await mainPage.expectLogMessages('e3', 'e2', 'e1');
 });
 
 test('should show error on no responses', async ({ page, appState, mainPage }) => {
