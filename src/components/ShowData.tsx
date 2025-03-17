@@ -61,16 +61,22 @@ function SourcesTabs(dataFromSources: { [sourceId: string]: SourceFetchingState 
     if (!source) {
       continue; // potential data inconsistency safety precaution
     }
+    let tabTextClass = "";
+    if (source.active) {
+      if (sourceFetchingState?.state === 'error') {
+        tabTextClass = "animate-pulse"
+      }
+    } else {
+      tabTextClass = 'text-neutral-500'
+    }
     tabTriggers.push(
       <TabsTrigger key={source.id} value={source.id} data-testid={`source-tab-${source.id}`} disabled={disabled}>
         <div className="flex items-center gap-1">
-          <span className={source.active ? '' : 'text-neutral-500'}>{source.name}</span>
+          <span className={tabTextClass} data-testid="source-name">{source.name}</span>
           {thisSourceUnaccounted.length > 0 && <Badge data-testid="source-unack-count" style={{ backgroundColor: source.color }}>{thisSourceUnaccounted.length}</Badge>}
           {sourceFetchingState?.state === 'fetching' && <UpdateIcon className="animate-spin" />}
           {sourceFetchingState?.state === 'error' && (
-            <span className="px-1">
-              <ExclamationTriangleIcon className="size-2 animate-ping text-orange-400" />
-            </span>
+              <ExclamationTriangleIcon data-testid="source-in-error-indicator" className="animate-pulse text-red-800" />
           )}
         </div>
       </TabsTrigger>,

@@ -80,6 +80,21 @@ test('duplications should be filtered out on fetching', async ({ page, mainPage,
     await mainPage.expectLogMessages('event2', 'event1', 'event3');
 });
 
+test('should show error upon failure to fetch', async ({ page, appState, mainPage }) => {
+
+    await page.route(routes.loki, async (request) => {
+        await request.abort();
+    });
+
+    const source = await appState.givenSource();
+
+    await mainPage.open({startFetch: true});
+
+    await expect(mainPage.sourceTabHeader(source).getByTestId('source-name')).toHaveClass('animate-pulse')
+    await expect(mainPage.sourceTabHeader(source).getByTestId('source-in-error-indicator')).toBeVisible()
+});
+
+
 
 test.skip('should keep fetching after a delayed response', async ({ page, appState, mainPage, logs }) => {
 

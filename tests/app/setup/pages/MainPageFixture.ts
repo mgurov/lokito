@@ -97,8 +97,12 @@ export default class MainPageFixture {
         return new RowLine(this.page)
     }
 
+    sourceTabHeader(source: {id: string}) {
+        return this.page.getByTestId(`source-tab-${source.id}`)
+    }
+
     async selectSourceTab(source: {id: string}) {
-        await this.page.getByTestId(`source-tab-${source.id}`).click();
+        await this.sourceTabHeader(source).click();
     }
 
     async selectAllSourcesTab() {
@@ -107,7 +111,7 @@ export default class MainPageFixture {
 
     async expectSourceTabCount(source: {id: string}, count: number | undefined) {
         await test.step('expectSourceTabCount', async() => {
-            const unackCountLocator = this.page.getByTestId(`source-tab-${source.id}`).getByTestId('source-unack-count')
+            const unackCountLocator = this.sourceTabHeader(source).getByTestId('source-unack-count')
             if (count === undefined) {
                 await expect(unackCountLocator).not.toBeAttached()
             } else {
