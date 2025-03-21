@@ -34,6 +34,7 @@ export const columns: ColumnDef<Log>[] = [
       console.log('got the value ', getValue())
       return (
         <div
+          data-testid="log-row-source-marker"
           className="absolute left-0 top-0 h-full w-[3px]"
           // limitation of tailwind
           style={{ backgroundColor: getValue<{ color: string }>().color }}

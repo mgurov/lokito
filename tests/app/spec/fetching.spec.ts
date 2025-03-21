@@ -154,12 +154,15 @@ test('should mark fetched messages with their source names in the all tab but no
 
     await mainPage.expectLogMessages('m2', 'm1');
 
-    await expect(mainPage.logMessage.locator('log-table-row').
-        filter({hasText: 'm1'})
-        .getByTestId('log-row-source-marker')).toHaveText('s1')
+    await expect(mainPage.page.getByTestId('log-table-row').
+        filter({hasText: /m1/})
+        .getByTestId('log-row-source-marker')
+        ).toHaveText('s1')
 
-    await expect(mainPage.logMessage.locator('log-table-row').
-        filter({hasText: 'm2'})
-        .getByTestId('log-row-source-marker')).toHaveText('s2')
+    await expect(mainPage.page.getByTestId('log-table-row').
+        filter({hasText: /m2/})
+        .getByTestId('log-row-source-marker')
+        ).toHaveText('s2')
+
 
 });
