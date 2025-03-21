@@ -142,3 +142,15 @@ test('should show error on no responses', async ({ page, appState, mainPage }) =
     //NB: shouldn't actually be clean on error, but never mind for now.
     await expect(mainPage.cleanCheck).toBeVisible();
 });
+
+test('should mark fetched messages with their source names', async ({ page, appState, mainPage, logs }) => {
+
+    const [s1, s2] = await appState.givenSources({ name: 's1' }, {name: 's2'});
+
+    logs.givenSourceRecords(s1, 'm1');
+    logs.givenSourceRecords(s2, 'm2');
+
+    await mainPage.open({startFetch: true});
+
+    await mainPage.expectLogMessages('m2', 'm1');
+});
