@@ -30,13 +30,14 @@ export const columns: ColumnDef<Log>[] = [
     id: 'source',
     accessorKey: 'source',
     cell: ({ getValue }) => {
+      //TODO: better typing bitter
       console.log('got the value ', getValue())
       return (
         <div
           className="absolute left-0 top-0 h-full w-[3px]"
           // limitation of tailwind
           style={{ backgroundColor: getValue<{ color: string }>().color }}
-        >{getValue<{ id: string }>().id}</div>
+        >{getValue<{ name: string }>().name}</div>
       )
     },
   },

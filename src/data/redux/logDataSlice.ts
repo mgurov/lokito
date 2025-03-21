@@ -106,6 +106,7 @@ export const useData = (acked: boolean) =>
             source: {
               id: sources[log.sourceId].id,
               color: sources[log.sourceId].color,
+              name: sources[log.sourceId].name,
             },
           })),
     ),
