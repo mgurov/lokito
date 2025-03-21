@@ -11,11 +11,11 @@ import {
   useSourcesFetchingState,
 } from '@/data/fetching/fetchingSlice';
 import { useData } from '@/data/redux/logDataSlice';
-import { Tabs, TabsTrigger } from './ui/tabs';
+import { TabsTrigger } from './ui/tabs';
 import { TabsContent, TabsList } from '@radix-ui/react-tabs';
 import { ExclamationTriangleIcon, UpdateIcon } from '@radix-ui/react-icons';
 import { Alert } from './ui/alert';
-import { Log } from '@/data/schema';
+import { LogWithSource } from '@/data/schema';
 import { Badge } from './ui/badge';
 import { Source } from '@/data/source';
 import { AckAllButton, StatsLine } from '@/components/StatsLine';
@@ -23,6 +23,7 @@ import { UploadSourcesConfiguration } from '@/components/upload-config';
 import { SelectedSourceContext } from './context/SelectedSourceContext';
 import { useAckNack } from './context/AckNackContext';
 import { StartFetchingPanel } from './StartFetchingPanel';
+import { TabsWithSelectedContext } from './context/SelectedDataTabContext';
 
 export function ShowData() {
   const fetchingSourceState = useSourcesFetchingState();
@@ -33,10 +34,10 @@ export function ShowData() {
   const overallFetchingState = useOverallFetchingState();
   const showDisabledSources = overallFetchingState.from === null; 
 
-  const [tabTriggers, tabs] = SourcesTabs(fetchingSourceState, data, sources, showDisabledSources);
+  const [tabTriggers, tabs] = SourcesTabs({dataFromSources: fetchingSourceState, data, sources, disabled: showDisabledSources});
 
   return (
-    <Tabs defaultValue="all">
+    <TabsWithSelectedContext>
       <TabsList className='bg-gray-200 rounded-lg border border-gray-300'>
         <TabsTrigger data-testid="all-sources-tab" value="all" disabled={showDisabledSources}>
           All&nbsp;{data.length > 0 && <Badge>{data.length}</Badge>}
@@ -48,11 +49,13 @@ export function ShowData() {
         <ShowAllSourcesData data={data} />
       </TabsContent>
       {tabs}
-    </Tabs>
+    </TabsWithSelectedContext>
   );
 }
 
-function SourcesTabs(dataFromSources: { [sourceId: string]: SourceFetchingState }, data: Log[], sources: Source[], disabled: boolean) {
+function SourcesTabs({dataFromSources, data, sources, disabled}: 
+  {dataFromSources: { [sourceId: string]: SourceFetchingState }, data: LogWithSource[], sources: Source[], disabled: boolean}
+) {
   const tabTriggers = [];
   const tabs = [];
   for (const source of sources) {
@@ -96,7 +99,7 @@ function SourcesTabs(dataFromSources: { [sourceId: string]: SourceFetchingState 
             {thisSourceUnaccounted.length > 0 && (
               <>
                 <AckAllButton notAckedCount={thisSourceUnaccounted.length} />
-                <DataTable data={thisSourceUnaccounted} columns={columns} />
+                <DataTable data={thisSourceUnaccounted} columns={columns(false)} />
               </>
 
             )}
@@ -108,7 +111,7 @@ function SourcesTabs(dataFromSources: { [sourceId: string]: SourceFetchingState 
   return [tabTriggers, tabs];
 }
 
-function ShowAllSourcesData({ data }: { data: Log[] }) {
+function ShowAllSourcesData({ data }: { data: LogWithSource[] }) {
   const overallFetchingState = useOverallFetchingState();
   if (overallFetchingState.from === null) {
     return <StartFetchingPanel />;
@@ -118,7 +121,7 @@ function ShowAllSourcesData({ data }: { data: Log[] }) {
 
       <StatsLine />
 
-      <DataTable data={data} columns={columns} />
+      <DataTable data={data} columns={columns(true)} />
     </div>
   );
 }

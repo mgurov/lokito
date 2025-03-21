@@ -1,6 +1,6 @@
 import { PayloadAction, createSelector, createSlice, current, isDraft } from '@reduxjs/toolkit';
 import { useSelector } from 'react-redux';
-import { Log } from '@/data/schema';
+import { Log, LogWithSource } from '@/data/schema';
 import { RootState } from './store';
 import { createFilter } from '../filters/filtersSlice';
 import _ from 'lodash';
@@ -94,7 +94,7 @@ export const logDataSliceActions = logDataSlice.actions;
 
 export default logDataSlice.reducer;
 
-export const useData = (acked: boolean) =>
+export const useData = (acked: boolean): LogWithSource[] =>
   useSelector(
     createSelector(
       [(state: RootState) => state.logData.logs, (state: RootState) => state.sources.data],
@@ -106,6 +106,7 @@ export const useData = (acked: boolean) =>
             source: {
               id: sources[log.sourceId].id,
               color: sources[log.sourceId].color,
+              name: sources[log.sourceId].name,
             },
           })),
     ),

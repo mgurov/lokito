@@ -38,13 +38,13 @@ export function useToggleAckNack() {
 }
 
 export function AckNackProvider({ children }: { children: React.ReactNode }) {
-  const [tasks, dispatch] = useReducer(
+  const [value, dispatch] = useReducer(
     ackNackReducer,
     initialState
   );
 
   return (
-    <AckNackContext.Provider value={tasks}>
+    <AckNackContext.Provider value={value}>
       <AckNackDispatchContext.Provider value={dispatch}>
         {children}
       </AckNackDispatchContext.Provider>

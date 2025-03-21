@@ -2,3 +2,7 @@
   flex: 1;
   height: 100vh;
 }
+
+.interpolate-keywords-size {
+  interpolate-size: allow-keywords;
+}

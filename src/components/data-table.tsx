@@ -13,22 +13,22 @@ import { DataTablePagination } from './data-table-pagination';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { LogPanel } from '@/components/LogPanel';
-import { Log } from '@/data/schema';
+import { Log, LogWithSource } from '@/data/schema';
 import { useOverallFetchingState } from '@/data/fetching/fetchingSlice';
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
+interface DataTableProps {
+  columns: ColumnDef<LogWithSource>[];
+  data: LogWithSource[];
 }
 
 // TODO: move to redux together with interceptor logic
 const REFRESH_RATE = 60;
 
-export function DataTable({ columns, data }: DataTableProps<Log, Log>) {
+export function DataTable({ columns, data }: DataTableProps) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
-  const table = useReactTable({
-    data: data as unknown as Log[],
+  const table = useReactTable<LogWithSource>({
+    data,
     columns,
     initialState: {
       pagination: {
@@ -59,6 +59,7 @@ export function DataTable({ columns, data }: DataTableProps<Log, Log>) {
               table.getRowModel().rows.map((row) => (
                 <React.Fragment key={row.id}>
                   <TableRow
+                    data-testid="log-table-row"
                     data-state={row.getIsSelected() && 'selected'}
                     className={cn(
                       now - new Date(row.original.timestamp).getTime() < 1000 * REFRESH_RATE &&

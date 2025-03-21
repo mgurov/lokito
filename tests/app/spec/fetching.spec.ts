@@ -142,3 +142,60 @@ test('should show error on no responses', async ({ page, appState, mainPage }) =
     //NB: shouldn't actually be clean on error, but never mind for now.
     await expect(mainPage.cleanCheck).toBeVisible();
 });
+
+test('should mark fetched messages with their source names in the all tab but not in the source one', async ({ appState, mainPage, logs }) => {
+
+    const [s1, s2] = await appState.givenSources({ name: 's1' }, {name: 's2'});
+
+    logs.givenSourceRecords(s1, 'm1');
+    logs.givenSourceRecords(s2, 'm2');
+
+    await mainPage.open({startFetch: true});
+
+    await mainPage.expectLogMessages('m2', 'm1');
+
+    const firstSourceMaker = mainPage.page.getByTestId('log-table-row').
+        filter({hasText: /m1/})
+        .getByTestId('log-row-source-marker')
+    await expect(firstSourceMaker).toHaveText('s1')
+
+    await expect(mainPage.page.getByTestId('log-table-row').
+        filter({hasText: /m2/})
+        .getByTestId('log-row-source-marker')
+        ).toHaveText('s2')
+
+    // and then when switched to the source - no need to show it
+
+
+    await mainPage.selectSourceTab(s1)
+
+    await expect(firstSourceMaker).not.toBeAttached();
+
+
+});
+
+test('should open source tab when clicking on row source indicator', async ({ appState, mainPage, logs }) => {
+
+    const [s1, s2] = await appState.givenSources({ name: 's1' }, {name: 's2'});
+
+    logs.givenSourceRecords(s1, 'm1');
+    logs.givenSourceRecords(s2, 'm2');
+
+    await mainPage.open({startFetch: true});
+
+    await mainPage.expectLogMessages('m2', 'm1');
+
+    const firstSourceMaker = mainPage.page.getByTestId('log-table-row').
+        filter({hasText: /m1/})
+        .getByTestId('log-row-source-marker')
+    await expect(firstSourceMaker).toHaveText('s1')
+
+    await firstSourceMaker.click()
+
+    //then we're on the s1 source page
+
+    await expect(firstSourceMaker).not.toBeAttached();
+
+    await mainPage.expectLogMessages('m1');
+
+});

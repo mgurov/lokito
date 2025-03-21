@@ -50,6 +50,8 @@ export async function routeLogResponses(page: Page, ...logRecords: LogRecordSpec
 
 class LogSource {
 
+    private nowCounterMillisecs = new Date().getTime();
+
     public records: LogRecord[] = [];
 
     public requests: URL[] = [];
@@ -75,16 +77,26 @@ class LogSource {
     }
 
     givenSourceRecords(source: { query: string } | null, ...logRecords: LogRecordSpec[]) {
-        let nowCounterMillisecs = new Date().getTime();
         const newRecords = logRecords.map(logSpec => {
             const logSpecObjectified = typeof logSpec === 'string' ? { message: logSpec } : logSpec;
             const { timestamp, message = 'a log message', data } = logSpecObjectified;
-            const timestampString = timestamp ? new Date(timestamp) : new Date(nowCounterMillisecs++); //tODO: do the timestamp into the message
+            let timestampDate: Date
+            if (timestamp) {
+                timestampDate = new Date(timestamp)
+                if (timestampDate.getTime() > this.nowCounterMillisecs) {
+                    //advance "now" further.
+                    this.nowCounterMillisecs = timestampDate.getTime()
+                }
+            } else {
+                this.nowCounterMillisecs += 1
+                timestampDate = new Date(this.nowCounterMillisecs)
+            }
+            //tODO: do the timestamp into the message
             return {
                 stream: {
                     ...data,
                 },
-                values: [[`${timestampString.getTime()}000000`, message]],
+                values: [[`${timestampDate.getTime()}000000`, message]],
                 queryExpected: source?.query,
             }
         }
