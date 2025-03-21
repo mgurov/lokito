@@ -59,6 +59,7 @@ export function DataTable({ columns, data }: DataTableProps<Log, Log>) {
               table.getRowModel().rows.map((row) => (
                 <React.Fragment key={row.id}>
                   <TableRow
+                    data-testid="log-table-row"
                     data-state={row.getIsSelected() && 'selected'}
                     className={cn(
                       now - new Date(row.original.timestamp).getTime() < 1000 * REFRESH_RATE &&
