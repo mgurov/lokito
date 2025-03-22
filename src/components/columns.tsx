@@ -46,8 +46,7 @@ const columnsTemplate: ColumnDef<Log>[] = [
             style={{ backgroundColor: value.color }}
             
           />
-          <Button variant="ghost" size="sm" data-testid="log-row-source-marker" onClick={e => {
-              e.preventDefault();
+          <Button variant="ghost" size="sm" data-testid="log-row-source-marker" onClick={_e => {
               selectTab(value.id);
             }}>{value.name}</Button>
         </>
