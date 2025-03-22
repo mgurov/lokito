@@ -53,7 +53,6 @@ export function ShowData() {
   );
 }
 
-//TODO: extract type;
 function SourcesTabs(dataFromSources: { [sourceId: string]: SourceFetchingState }, data: Log[], sources: Source[], disabled: boolean) {
   const tabTriggers = [];
   const tabs = [];
