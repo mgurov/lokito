@@ -1,4 +1,5 @@
 import { createContext, Dispatch, useContext, useReducer } from 'react'
+import { Tabs } from '../ui/tabs';
 
 type SelectedTab = string; //TODO: diff with the source ones
 
@@ -41,3 +42,25 @@ export function SelectedDataTabProvider({ children }: { children: React.ReactNod
   );
 }
 
+export function TabsWithSelectedContext({ children }: { children: React.ReactNode }) {
+  return (
+    <SelectedDataTabProvider>
+      <InnerTabs>
+        {children}
+      </InnerTabs>
+    </SelectedDataTabProvider>
+  )
+}
+
+function InnerTabs({ children }: { children: React.ReactNode }) {
+  
+  const tabSelected = useSelectedTab();
+  const setTabSelected = useSelectTab();
+
+  return (
+    <Tabs value={tabSelected} onValueChange={setTabSelected}>
+      {children}
+    </Tabs>
+  )
+  
+}

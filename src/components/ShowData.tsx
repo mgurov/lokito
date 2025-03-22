@@ -11,7 +11,7 @@ import {
   useSourcesFetchingState,
 } from '@/data/fetching/fetchingSlice';
 import { useData } from '@/data/redux/logDataSlice';
-import { Tabs, TabsTrigger } from './ui/tabs';
+import { TabsTrigger } from './ui/tabs';
 import { TabsContent, TabsList } from '@radix-ui/react-tabs';
 import { ExclamationTriangleIcon, UpdateIcon } from '@radix-ui/react-icons';
 import { Alert } from './ui/alert';
@@ -23,7 +23,7 @@ import { UploadSourcesConfiguration } from '@/components/upload-config';
 import { SelectedSourceContext } from './context/SelectedSourceContext';
 import { useAckNack } from './context/AckNackContext';
 import { StartFetchingPanel } from './StartFetchingPanel';
-import { useState } from 'react';
+import { TabsWithSelectedContext } from './context/SelectedDataTabContext';
 
 export function ShowData() {
   const fetchingSourceState = useSourcesFetchingState();
@@ -33,12 +33,11 @@ export function ShowData() {
 
   const overallFetchingState = useOverallFetchingState();
   const showDisabledSources = overallFetchingState.from === null; 
-  const [tabSelected, setTabSelected] = useState("all")
 
-  const [tabTriggers, tabs] = SourcesTabs(fetchingSourceState, data, sources, showDisabledSources, setTabSelected);
+  const [tabTriggers, tabs] = SourcesTabs(fetchingSourceState, data, sources, showDisabledSources);
 
   return (
-    <Tabs defaultValue={tabSelected} onValueChange={setTabSelected}>
+    <TabsWithSelectedContext>
       <TabsList className='bg-gray-200 rounded-lg border border-gray-300'>
         <TabsTrigger data-testid="all-sources-tab" value="all" disabled={showDisabledSources}>
           All&nbsp;{data.length > 0 && <Badge>{data.length}</Badge>}
@@ -50,12 +49,12 @@ export function ShowData() {
         <ShowAllSourcesData data={data} />
       </TabsContent>
       {tabs}
-    </Tabs>
+    </TabsWithSelectedContext>
   );
 }
 
 //TODO: extract type;
-function SourcesTabs(dataFromSources: { [sourceId: string]: SourceFetchingState }, data: Log[], sources: Source[], disabled: boolean, setTabSelected: (tab: string) => void) {
+function SourcesTabs(dataFromSources: { [sourceId: string]: SourceFetchingState }, data: Log[], sources: Source[], disabled: boolean) {
   const tabTriggers = [];
   const tabs = [];
   for (const source of sources) {
