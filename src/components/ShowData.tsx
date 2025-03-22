@@ -15,7 +15,7 @@ import { TabsTrigger } from './ui/tabs';
 import { TabsContent, TabsList } from '@radix-ui/react-tabs';
 import { ExclamationTriangleIcon, UpdateIcon } from '@radix-ui/react-icons';
 import { Alert } from './ui/alert';
-import { Log, LogWithSource } from '@/data/schema';
+import { LogWithSource } from '@/data/schema';
 import { Badge } from './ui/badge';
 import { Source } from '@/data/source';
 import { AckAllButton, StatsLine } from '@/components/StatsLine';
@@ -54,7 +54,7 @@ export function ShowData() {
 }
 
 function SourcesTabs({dataFromSources, data, sources, disabled}: 
-  {dataFromSources: { [sourceId: string]: SourceFetchingState }, data: Log[], sources: Source[], disabled: boolean}
+  {dataFromSources: { [sourceId: string]: SourceFetchingState }, data: LogWithSource[], sources: Source[], disabled: boolean}
 ) {
   const tabTriggers = [];
   const tabs = [];
