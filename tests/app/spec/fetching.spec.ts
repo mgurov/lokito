@@ -173,3 +173,5 @@ test('should mark fetched messages with their source names in the all tab but no
 
 
 });
+
+// todo: should open the source tab by the click on the source indicator
