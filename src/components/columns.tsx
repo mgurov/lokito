@@ -6,6 +6,8 @@ import { Button } from './ui/button';
 import { ack } from '@/data/redux/logDataSlice';
 import { simpleDateTimeFormat } from '@/lib/utils';
 import { CheckIcon } from '@radix-ui/react-icons';
+import { useContext } from 'react';
+import { SelectedSourceContext } from './context/SelectedSourceContext';
 
 function RowAck({ logId }: { logId: string }) {
   const dispatch = useDispatch();
@@ -30,8 +32,11 @@ export const columns: ColumnDef<Log>[] = [
     id: 'source',
     accessorKey: 'source',
     cell: ({ getValue }) => {
-      //TODO: better typing bitter
-      console.log('got the value ', getValue())
+      const selectedSource = useContext(SelectedSourceContext)
+      if (null !== selectedSource) {
+        return null;
+      }
+      //TODO: better typing bitte
       return (
         <div
           data-testid="log-row-source-marker"

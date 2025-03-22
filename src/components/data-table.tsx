@@ -50,8 +50,6 @@ export function DataTable({ columns, data }: DataTableProps<Log, Log>) {
   });
   const now = new Date().getTime();
 
-  console.log('data-datable data', data);
-
   return (
     <div className="space-y-4">
       <div className="rounded-md border">
