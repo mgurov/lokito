@@ -33,7 +33,8 @@ export const columns: ColumnDef<Log>[] = [
     accessorKey: 'source',
     cell: ({ getValue }) => {
       const selectedSource = useContext(SelectedSourceContext)
-      if (null !== selectedSource) {
+      console.log('selected source', selectedSource);
+      if (undefined !== selectedSource) {
         return null;
       }
       //TODO: better typing bitte
