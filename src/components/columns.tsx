@@ -6,6 +6,7 @@ import { Button } from './ui/button';
 import { ack } from '@/data/redux/logDataSlice';
 import { simpleDateTimeFormat } from '@/lib/utils';
 import { CheckIcon } from '@radix-ui/react-icons';
+import { useSelectTab } from './context/SelectedDataTabContext';
 
 function RowAck({ logId }: { logId: string }) {
   const dispatch = useDispatch();
@@ -34,14 +35,20 @@ const columnsTemplate: ColumnDef<Log>[] = [
     id: 'source',
     accessorKey: 'source',
     cell: ({ getValue }) => {
+      const selectTab = useSelectTab();
+      const value = getValue<{ color: string, name: string, id: string }>();
       //TODO: better typing bitte
       return (
         <div
           data-testid="log-row-source-marker"
           className="absolute left-0 top-0 h-full w-[3px]"
           // limitation of tailwind
-          style={{ backgroundColor: getValue<{ color: string }>().color }}
-        >{getValue<{ name: string }>().name}</div>
+          style={{ backgroundColor: value.color }}
+          onClick={e => {
+            e.preventDefault();
+            selectTab(value.id);
+          }}
+        >{value.name}</div>
       )
     },
   },
