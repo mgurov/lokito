@@ -1,6 +1,6 @@
 import { ColumnDef } from '@tanstack/react-table';
 
-import { Log } from '../data/schema';
+import { LogWithSource, LogSource } from '../data/schema';
 import { useDispatch } from 'react-redux';
 import { Button } from './ui/button';
 import { ack } from '@/data/redux/logDataSlice';
@@ -8,11 +8,6 @@ import { simpleDateTimeFormat } from '@/lib/utils';
 import { CheckIcon } from '@radix-ui/react-icons';
 import { useSelectTab } from './context/SelectedDataTabContext';
 
-type LogSource = {
-  color: string, name: string, id: string
-}
-
-type LogWithSource = Log & {source: LogSource}
 
 function RowAck({ logId }: { logId: string }) {
   const dispatch = useDispatch();

@@ -13,22 +13,22 @@ import { DataTablePagination } from './data-table-pagination';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { LogPanel } from '@/components/LogPanel';
-import { Log } from '@/data/schema';
+import { Log, LogWithSource } from '@/data/schema';
 import { useOverallFetchingState } from '@/data/fetching/fetchingSlice';
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
+interface DataTableProps {
+  columns: ColumnDef<LogWithSource>[];
+  data: LogWithSource[];
 }
 
 // TODO: move to redux together with interceptor logic
 const REFRESH_RATE = 60;
 
-export function DataTable({ columns, data }: DataTableProps<Log, Log>) {
+export function DataTable({ columns, data }: DataTableProps) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
-  const table = useReactTable({
-    data: data as unknown as Log[],
+  const table = useReactTable<LogWithSource>({
+    data,
     columns,
     initialState: {
       pagination: {

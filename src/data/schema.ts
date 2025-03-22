@@ -11,3 +11,9 @@ export type Log = {
     color: string;
   };
 };
+
+export type LogSource = {
+  color: string, name: string, id: string
+}
+
+export type LogWithSource = Log & {source: LogSource}

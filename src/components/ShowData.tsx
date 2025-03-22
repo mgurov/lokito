@@ -15,7 +15,7 @@ import { TabsTrigger } from './ui/tabs';
 import { TabsContent, TabsList } from '@radix-ui/react-tabs';
 import { ExclamationTriangleIcon, UpdateIcon } from '@radix-ui/react-icons';
 import { Alert } from './ui/alert';
-import { Log } from '@/data/schema';
+import { Log, LogWithSource } from '@/data/schema';
 import { Badge } from './ui/badge';
 import { Source } from '@/data/source';
 import { AckAllButton, StatsLine } from '@/components/StatsLine';
@@ -111,7 +111,7 @@ function SourcesTabs({dataFromSources, data, sources, disabled}:
   return [tabTriggers, tabs];
 }
 
-function ShowAllSourcesData({ data }: { data: Log[] }) {
+function ShowAllSourcesData({ data }: { data: LogWithSource[] }) {
   const overallFetchingState = useOverallFetchingState();
   if (overallFetchingState.from === null) {
     return <StartFetchingPanel />;
