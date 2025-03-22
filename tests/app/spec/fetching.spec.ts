@@ -154,15 +154,22 @@ test('should mark fetched messages with their source names in the all tab but no
 
     await mainPage.expectLogMessages('m2', 'm1');
 
-    await expect(mainPage.page.getByTestId('log-table-row').
+    const firstSourceMaker = mainPage.page.getByTestId('log-table-row').
         filter({hasText: /m1/})
         .getByTestId('log-row-source-marker')
-        ).toHaveText('s1')
+    await expect(firstSourceMaker).toHaveText('s1')
 
     await expect(mainPage.page.getByTestId('log-table-row').
         filter({hasText: /m2/})
         .getByTestId('log-row-source-marker')
         ).toHaveText('s2')
+
+    // and then when switched to the source - no need to show it
+
+
+    await mainPage.selectSourceTab(s1)
+
+    await expect(firstSourceMaker).not.toBeAttached();
 
 
 });
