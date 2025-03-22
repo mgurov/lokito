@@ -39,16 +39,18 @@ const columnsTemplate: ColumnDef<Log>[] = [
       const value = getValue<{ color: string, name: string, id: string }>();
       //TODO: better typing bitte
       return (
-        <div
-          data-testid="log-row-source-marker"
-          className="absolute left-0 top-0 h-full w-[3px]"
-          // limitation of tailwind
-          style={{ backgroundColor: value.color }}
-          onClick={e => {
-            e.preventDefault();
-            selectTab(value.id);
-          }}
-        >{value.name}</div>
+        <>
+          <div
+            className="absolute left-0 top-0 h-full w-[3px]"
+            // limitation of tailwind
+            style={{ backgroundColor: value.color }}
+            
+          />
+          <Button variant="ghost" size="sm" data-testid="log-row-source-marker" onClick={e => {
+              e.preventDefault();
+              selectTab(value.id);
+            }}>{value.name}</Button>
+        </>
       )
     },
   },
