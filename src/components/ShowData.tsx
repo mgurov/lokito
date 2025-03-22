@@ -23,6 +23,7 @@ import { UploadSourcesConfiguration } from '@/components/upload-config';
 import { SelectedSourceContext } from './context/SelectedSourceContext';
 import { useAckNack } from './context/AckNackContext';
 import { StartFetchingPanel } from './StartFetchingPanel';
+import { useState } from 'react';
 
 export function ShowData() {
   const fetchingSourceState = useSourcesFetchingState();
@@ -32,11 +33,12 @@ export function ShowData() {
 
   const overallFetchingState = useOverallFetchingState();
   const showDisabledSources = overallFetchingState.from === null; 
+  const [tabSelected, setTabSelected] = useState("all")
 
-  const [tabTriggers, tabs] = SourcesTabs(fetchingSourceState, data, sources, showDisabledSources);
+  const [tabTriggers, tabs] = SourcesTabs(fetchingSourceState, data, sources, showDisabledSources, setTabSelected);
 
   return (
-    <Tabs defaultValue="all">
+    <Tabs defaultValue={tabSelected} onValueChange={setTabSelected}>
       <TabsList className='bg-gray-200 rounded-lg border border-gray-300'>
         <TabsTrigger data-testid="all-sources-tab" value="all" disabled={showDisabledSources}>
           All&nbsp;{data.length > 0 && <Badge>{data.length}</Badge>}
@@ -52,7 +54,8 @@ export function ShowData() {
   );
 }
 
-function SourcesTabs(dataFromSources: { [sourceId: string]: SourceFetchingState }, data: Log[], sources: Source[], disabled: boolean) {
+//TODO: extract type;
+function SourcesTabs(dataFromSources: { [sourceId: string]: SourceFetchingState }, data: Log[], sources: Source[], disabled: boolean, setTabSelected: (tab: string) => void) {
   const tabTriggers = [];
   const tabs = [];
   for (const source of sources) {
