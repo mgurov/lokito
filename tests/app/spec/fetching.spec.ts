@@ -199,6 +199,3 @@ test('should open source tab when clicking on row source indicator', async ({ ap
     await mainPage.expectLogMessages('m1');
 
 });
-
-
-// todo: should open the source tab by the click on the source indicator
