@@ -96,7 +96,7 @@ function SourcesTabs(dataFromSources: { [sourceId: string]: SourceFetchingState 
             {thisSourceUnaccounted.length > 0 && (
               <>
                 <AckAllButton notAckedCount={thisSourceUnaccounted.length} />
-                <DataTable data={thisSourceUnaccounted} columns={columns} />
+                <DataTable data={thisSourceUnaccounted} columns={columns(false)} />
               </>
 
             )}
@@ -118,7 +118,7 @@ function ShowAllSourcesData({ data }: { data: Log[] }) {
 
       <StatsLine />
 
-      <DataTable data={data} columns={columns} />
+      <DataTable data={data} columns={columns(true)} />
     </div>
   );
 }

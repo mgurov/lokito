@@ -6,8 +6,6 @@ import { Button } from './ui/button';
 import { ack } from '@/data/redux/logDataSlice';
 import { simpleDateTimeFormat } from '@/lib/utils';
 import { CheckIcon } from '@radix-ui/react-icons';
-import { useContext } from 'react';
-import { SelectedSourceContext } from './context/SelectedSourceContext';
 
 function RowAck({ logId }: { logId: string }) {
   const dispatch = useDispatch();
@@ -27,16 +25,15 @@ function RowAck({ logId }: { logId: string }) {
   );
 }
 
-export const columns: ColumnDef<Log>[] = [
+export function columns(showSource: boolean): ColumnDef<Log>[] {
+  return columnsTemplate.filter(c => showSource || c.id !== "source")
+}
+
+const columnsTemplate: ColumnDef<Log>[] = [
   {
     id: 'source',
     accessorKey: 'source',
     cell: ({ getValue }) => {
-      const selectedSource = useContext(SelectedSourceContext)
-      console.log('selected source', selectedSource);
-      if (undefined !== selectedSource) {
-        return null;
-      }
       //TODO: better typing bitte
       return (
         <div
