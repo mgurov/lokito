@@ -36,7 +36,7 @@ const columnsTemplate: ColumnDef<LogWithSource>[] = [
     id: 'source',
     accessorKey: 'source',
     cell: ({ getValue }) => {
-      const selectTab = useSelectTab();
+      
       const value = getValue<LogSource>();
       return (
         <>
@@ -46,9 +46,7 @@ const columnsTemplate: ColumnDef<LogWithSource>[] = [
             style={{ backgroundColor: value.color }}
             
           />
-          <Button variant="ghost" size="sm" data-testid="log-row-source-marker" onClick={_e => {
-              selectTab(value.id);
-            }}>{value.name}</Button>
+          <SourceIndicator source={value} />
         </>
       )
     },
@@ -79,3 +77,12 @@ const columnsTemplate: ColumnDef<LogWithSource>[] = [
     ),
   },
 ];
+
+function SourceIndicator({source}: {source: LogSource}) {
+  const selectTab = useSelectTab();
+  return (
+    <Button variant="ghost" size="sm" data-testid="log-row-source-marker" onClick={_e => {
+      selectTab(source.id);
+    }}>{source.name}</Button>
+  );
+}
