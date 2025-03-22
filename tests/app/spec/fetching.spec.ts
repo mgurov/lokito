@@ -143,7 +143,7 @@ test('should show error on no responses', async ({ page, appState, mainPage }) =
     await expect(mainPage.cleanCheck).toBeVisible();
 });
 
-test('should mark fetched messages with their source names in the all tab but not in the source one', async ({ page, appState, mainPage, logs }) => {
+test('should mark fetched messages with their source names in the all tab but not in the source one', async ({ appState, mainPage, logs }) => {
 
     const [s1, s2] = await appState.givenSources({ name: 's1' }, {name: 's2'});
 
@@ -173,5 +173,32 @@ test('should mark fetched messages with their source names in the all tab but no
 
 
 });
+
+test('should open source tab when clicking on row source indicator', async ({ appState, mainPage, logs }) => {
+
+    const [s1, s2] = await appState.givenSources({ name: 's1' }, {name: 's2'});
+
+    logs.givenSourceRecords(s1, 'm1');
+    logs.givenSourceRecords(s2, 'm2');
+
+    await mainPage.open({startFetch: true});
+
+    await mainPage.expectLogMessages('m2', 'm1');
+
+    const firstSourceMaker = mainPage.page.getByTestId('log-table-row').
+        filter({hasText: /m1/})
+        .getByTestId('log-row-source-marker')
+    await expect(firstSourceMaker).toHaveText('s1')
+
+    await firstSourceMaker.click()
+
+    //then we're on the s1 source page
+
+    await expect(firstSourceMaker).not.toBeAttached();
+
+    await mainPage.expectLogMessages('m1');
+
+});
+
 
 // todo: should open the source tab by the click on the source indicator
