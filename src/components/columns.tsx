@@ -8,6 +8,12 @@ import { simpleDateTimeFormat } from '@/lib/utils';
 import { CheckIcon } from '@radix-ui/react-icons';
 import { useSelectTab } from './context/SelectedDataTabContext';
 
+type LogSource = {
+  color: string, name: string, id: string
+}
+
+type LogWithSource = Log & {source: LogSource}
+
 function RowAck({ logId }: { logId: string }) {
   const dispatch = useDispatch();
   return (
@@ -26,18 +32,17 @@ function RowAck({ logId }: { logId: string }) {
   );
 }
 
-export function columns(showSource: boolean): ColumnDef<Log>[] {
+export function columns(showSource: boolean): ColumnDef<LogWithSource>[] {
   return columnsTemplate.filter(c => showSource || c.id !== "source")
 }
 
-const columnsTemplate: ColumnDef<Log>[] = [
+const columnsTemplate: ColumnDef<LogWithSource>[] = [
   {
     id: 'source',
     accessorKey: 'source',
     cell: ({ getValue }) => {
       const selectTab = useSelectTab();
-      const value = getValue<{ color: string, name: string, id: string }>();
-      //TODO: better typing bitte
+      const value = getValue<LogSource>();
       return (
         <>
           <div
