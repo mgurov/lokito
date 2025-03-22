@@ -34,7 +34,7 @@ export function ShowData() {
   const overallFetchingState = useOverallFetchingState();
   const showDisabledSources = overallFetchingState.from === null; 
 
-  const [tabTriggers, tabs] = SourcesTabs(fetchingSourceState, data, sources, showDisabledSources);
+  const [tabTriggers, tabs] = SourcesTabs({dataFromSources: fetchingSourceState, data, sources, disabled: showDisabledSources});
 
   return (
     <TabsWithSelectedContext>
@@ -53,7 +53,9 @@ export function ShowData() {
   );
 }
 
-function SourcesTabs(dataFromSources: { [sourceId: string]: SourceFetchingState }, data: Log[], sources: Source[], disabled: boolean) {
+function SourcesTabs({dataFromSources, data, sources, disabled}: 
+  {dataFromSources: { [sourceId: string]: SourceFetchingState }, data: Log[], sources: Source[], disabled: boolean}
+) {
   const tabTriggers = [];
   const tabs = [];
   for (const source of sources) {
