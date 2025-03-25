@@ -10,6 +10,11 @@ export default defineConfig({
       '/lokiprod': {
         target: 'http://localhost:9996/api/datasources/proxy/13/loki',
         rewrite: (path) => path.replace(/^\/lokiprod/, ''),
+      },
+      '/ollama': {
+        target: 'http://localhost:11434/api',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/ollama/, ''),
       }
     }
   },

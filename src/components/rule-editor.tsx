@@ -12,6 +12,7 @@ import { Log } from '@/data/schema';
 import { Button } from './ui/button';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Input } from './ui/input';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { useAppDispatch } from '@/data/redux/reduxhooks';
@@ -19,6 +20,7 @@ import { Filter } from '@/data/filters/filter';
 import { createFilter } from '@/data/filters/filtersSlice';
 import { randomId } from '@/lib/utils';
 import { ScrollArea, ScrollBar } from './ui/scroll-area';
+import axios from 'axios';
 
 interface NewRuleProps {
   log: Log;
@@ -54,16 +56,7 @@ type SaveRuleProps = {
 export function RuleDialog({ logLine, handleSubmit }: { logLine: string, handleSubmit: (p: SaveRuleProps) => void }) {
 
   const [messageRegex, setMessageRegex] = useState<string>(escapeRegExp(logLine));
-  let logLineMatchesRegex: 'yes' | 'no' | 'err' = 'no';
-  let errorMessage: string | null = null;
-  try {
-    if (RegExp(messageRegex).test(logLine)) {
-      logLineMatchesRegex = 'yes';
-    }
-  } catch (e: unknown) {
-    logLineMatchesRegex = 'err';
-    errorMessage = (e as { message: string }).message;
-  }
+  const logLineMatchesRegex = patternMatches(messageRegex, logLine)
 
 
   const [open, setOpen] = useState(false);
@@ -116,13 +109,14 @@ export function RuleDialog({ logLine, handleSubmit }: { logLine: string, handleS
               <AlertTitle>The regular expression doesn't match the line</AlertTitle>
             </Alert>
           )}
-          {logLineMatchesRegex === 'err' && (
+          {typeof(logLineMatchesRegex) === 'object'  && (
             <Alert variant="destructive">
               <ExclamationTriangleIcon className="h-4 w-4" />
               <AlertTitle>Can't compile the regular expression</AlertTitle>
-              <AlertDescription>{errorMessage}</AlertDescription>
+              <AlertDescription>{logLineMatchesRegex.errorMessage}</AlertDescription>
             </Alert>
           )}
+          <AskTheRobot line={logLine} useSuggestion={setMessageRegex} />
         </div>
         <DialogFooter className="space-x-4">
           <DialogClose asChild>
@@ -140,6 +134,62 @@ export function RuleDialog({ logLine, handleSubmit }: { logLine: string, handleS
       </DialogContent>
     </Dialog>
   );
+}
+
+function AskTheRobot({line, useSuggestion}: {line: string, useSuggestion: (suggestion: string) => void}) {
+
+  const request = useQuery<any>({
+    queryKey: ['regex', line],
+    retry: false,
+    queryFn: () => {
+      return axios.post('/ollama/chat', {
+        "stream": false,
+        "model": "codellama-regex",
+        "messages": [
+          { "role": "user", "content": line }
+        ]
+      });
+    }
+  })
+
+  if (request.isFetching) {
+    return <div>
+      About to ask robots for an advice...
+    </div>    
+  }
+
+  if (request.isError) {
+    return <div>
+      Error {JSON.stringify(request.error, null, 2)}
+    </div>
+  }
+
+  const suggestion = request.data?.data?.message?.content; 
+  //TODO: empty suggestion handling
+  //const suggestionMatches = patternMatches(suggestion, line)
+
+  return <><ScrollArea className="rounded bg-muted ">
+  <div
+    className="relative px-[0.3rem] py-[0.2rem] font-mono text-sm max-h-80"
+  >
+    <pre>
+    {suggestion}
+    </pre>
+  </div>
+  <ScrollBar orientation="horizontal" />
+</ScrollArea>
+  <Button data-testid="use-suggestion" onClick={() => useSuggestion(suggestion)}>Use suggestion</Button>
+</>
+}
+
+
+type PatternTestResult = 'yes' | 'no' | {errorMessage: string}
+function patternMatches(pattern: string, line: string): PatternTestResult {
+  try {
+    return (RegExp(pattern).test(line)) ? 'yes' : 'no'
+  } catch (e: unknown) {
+    return {errorMessage: (e as { message: string }).message};
+  }
 }
 
 function escapeRegExp(text: string): string {

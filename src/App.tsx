@@ -6,16 +6,24 @@ import { Provider } from 'react-redux';
 import { store } from '@/data/redux/store';
 import { Toaster } from "@/components/ui/sonner";
 import {LokitoLogo} from "./components/ui/lokito-logo";
+import {
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query'
 
+
+const queryClient = new QueryClient()
 
 function App() {
   const router = createRouter({ layout: <Layout /> })
 
   return (
     <>
-      <Provider store={store}>
-        <RouterProvider router={router} />
-      </Provider>
+       <QueryClientProvider client={queryClient}>
+          <Provider store={store}>
+            <RouterProvider router={router} />
+          </Provider>
+      </QueryClientProvider>    
     </>
   )
 }
