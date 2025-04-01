@@ -19,17 +19,10 @@ import { Filter } from '@/data/filters/filter';
 import { createFilter } from '@/data/filters/filtersSlice';
 import { randomId } from '@/lib/utils';
 import { ScrollArea, ScrollBar } from './ui/scroll-area';
+import { useSelectedSourceMessageLine } from './context/SelectedSourceContext';
 
-interface NewRuleProps {
-  log: Log;
-}
-
-export default function NewRule({ log }: NewRuleProps) {
-  //TODO: in the future, we might want to allow for field selection, not only the line
-  //TODO: ux-wise would be nice to delay while user typing; also do animations to show the alerts
-  //TODO: how could we make this all wider?
-
-  const logLine = log.line;
+export default function NewRule({ logEntry }: {logEntry: Log}) {
+  const logLine = useSelectedSourceMessageLine(logEntry)
 
   const dispatch = useAppDispatch();
 
@@ -126,7 +119,7 @@ export function RuleDialog({ logLine, handleSubmit }: { logLine: string, handleS
         </div>
         <DialogFooter className="space-x-4">
           <DialogClose asChild>
-            <Button type="button" variant="secondary">
+            <Button data-testid="close-rule-button" type="button" variant="secondary">
               Close
             </Button>
           </DialogClose>

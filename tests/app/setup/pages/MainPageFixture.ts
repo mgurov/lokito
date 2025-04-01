@@ -77,10 +77,12 @@ export default class MainPageFixture {
     }
 
     async clickAckAll(props: {expectedCount?: number} = {}) {
-        if (props.expectedCount) {
-            await expect(this.ackAllButton).toHaveText(`ACK ${props.expectedCount}`)
-        }
-        await this.ackAllButton.click();
+        await test.step('clickAckAll', async () => {
+            if (props.expectedCount) {
+                await expect(this.ackAllButton).toHaveText(`ACK ${props.expectedCount}`)
+            }
+            await this.ackAllButton.click();
+        }, {box: true})
     }
 
     get logMessage() {
