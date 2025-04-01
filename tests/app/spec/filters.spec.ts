@@ -101,3 +101,42 @@ test('a non-saved filter should be applied to existing but not following message
 
 });
 
+test('same message should show use first line from all and respective from source tab on filter creation', async ({ page, mainPage, appState, logs }) => {
+
+    const [s1, s2] = await appState.givenSources({ name: 's1' }, {name: 's2'});
+
+    const sameTimestamp = '2025-02-04T20:00:00.000Z';
+    const sameData = {'event': 'event1'};
+
+    logs.givenSourceRecords(s1, { message: 's1 event1', timestamp: sameTimestamp, data: sameData });
+     // NB: message can be formatted differently different sources
+    logs.givenSourceRecords(s2, { message: 's2 event1', timestamp: sameTimestamp, data: sameData });
+
+    await mainPage.open({startFetch: true});
+
+    await test.step('from main page use the first source message', async () => {
+        await mainPage.expandRow('s1 event1')
+        await page.getByTestId('new-rule-button').click();
+        await expect(page.getByTestId('rule_regex')).toHaveValue('s1 event1');
+        await page.getByTestId('close-rule-button').click();
+    })
+
+    await test.step('from s1 page use the first source message', async () => {
+        await mainPage.selectSourceTab(s1)
+        await mainPage.expandRow('s1 event1')
+        await page.getByTestId('new-rule-button').click();
+        await expect(page.getByTestId('rule_regex')).toHaveValue('s1 event1');
+        await page.getByTestId('close-rule-button').click();
+    })
+
+    await test.step('from s2 page use the second source message', async () => {
+        await mainPage.selectSourceTab(s2)
+        await mainPage.expandRow('s2 event1')
+        await page.getByTestId('new-rule-button').click();
+        await expect(page.getByTestId('rule_regex')).toHaveValue('s2 event1');
+        await page.getByTestId('apply-rule-button').click();
+    })
+
+    await mainPage.selectAllSourcesTab()
+    await mainPage.expectAckMessages(1)
+});
