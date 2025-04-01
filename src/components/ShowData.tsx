@@ -59,10 +59,11 @@ function SourcesTabs({dataFromSources, data, sources, disabled}:
   const tabTriggers = [];
   const tabs = [];
   for (const source of sources) {
-    const thisSourceUnaccounted = data.filter((log) => log.sourceId === source.id);
+    const thisSourceUnaccounted = data.filter(log => log.sourcesAndMessages.find(s => s.sourceId === source.id));
     const sourceFetchingState = dataFromSources[source.id]
     if (!source) {
-      continue; // potential data inconsistency safety precaution
+      console.warn('unlikely event when source was empty 🤔'); // potential data inconsistency safety precaution
+      continue; 
     }
     let tabTextClass = "";
     if (source.active) {
@@ -99,7 +100,7 @@ function SourcesTabs({dataFromSources, data, sources, disabled}:
             {thisSourceUnaccounted.length > 0 && (
               <>
                 <AckAllButton notAckedCount={thisSourceUnaccounted.length} />
-                <DataTable data={thisSourceUnaccounted} columns={columns(false)} />
+                <DataTable data={thisSourceUnaccounted} columns={columns()} />
               </>
 
             )}
@@ -121,7 +122,7 @@ function ShowAllSourcesData({ data }: { data: LogWithSource[] }) {
 
       <StatsLine />
 
-      <DataTable data={data} columns={columns(true)} />
+      <DataTable data={data} columns={columns()} />
     </div>
   );
 }

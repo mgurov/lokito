@@ -1,6 +1,7 @@
 import { test, expect } from '@tests/app/setup/testExtended';
 import { routes } from '../setup/ExternalLogsFixture';
 import { Deferred } from '../util/promises';
+import { expectTexts } from '../util/visualAssertions';
 
 test('fetching messages', async ({ page, appState, mainPage, logs }) => {
 
@@ -89,12 +90,41 @@ test('duplications should be filtered out on fetching', async ({ page, mainPage,
         { message: 'event4', timestamp: sameTimestamp, data: sameData }, // to be skipped
     );
 
-    consoleLogging.ignoreErrorMessagesContaining('Encountered two children with the same key') // haven't seen this on production yet, assuming negligible occurence frequency
+     // haven't seen this on production yet, assuming negligible occurence frequency
+    consoleLogging.ignoreErrorMessagesContaining('Encountered two children with the same key')
+    consoleLogging.ignoreErrorMessagesContaining('Duplicate log id with different stream')
 
     await page.clock.runFor('01:30');
 
     await mainPage.expectLogMessages('event2', 'event1', 'event3');
 });
+
+test('same message should be shown both sources that happened to fetch it', async ({ mainPage, appState, logs }) => {
+
+    const [s1, s2] = await appState.givenSources({ name: 's1' }, {name: 's2'});
+
+    const sameTimestamp = '2025-02-04T20:00:00.000Z';
+    const sameData = {'event': 'event1'};
+
+    logs.givenSourceRecords(s1, { message: 's1 event1', timestamp: sameTimestamp, data: sameData });
+     // NB: message can be formatted differently different sources
+    logs.givenSourceRecords(s2, { message: 's2 event1', timestamp: sameTimestamp, data: sameData });
+
+    await mainPage.open({startFetch: true});
+
+    await mainPage.expectLogMessages('s1 event1'); //ok, we take the first message
+
+    const firstSourceMaker = mainPage.page.getByTestId('log-table-row')
+        .getByTestId('log-row-source-marker')
+    await expectTexts(firstSourceMaker, 's1', 's2')
+
+    await mainPage.selectSourceTab(s1)
+    await mainPage.expectLogMessages('s1 event1');
+    await mainPage.selectSourceTab(s2)
+    await mainPage.expectLogMessages('s2 event1');
+
+});
+
 
 test('should show error upon failure to fetch', async ({ page, appState, mainPage }) => {
 

@@ -30,7 +30,7 @@ export function LogPanel(props: { log: Log }) {
         <div className="flex w-full">
 
           <AckTillThisButton messageId={props.log.id} />
-          <NewRule log={props.log} />
+          <NewRule logEntry={props.log} />
         </div>
         <div className="space-y-1 px-3 py-2">
           <h3 className="text-sm font-semibold">Fields</h3>
