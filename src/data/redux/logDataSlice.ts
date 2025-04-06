@@ -1,4 +1,4 @@
-import { PayloadAction, createSelector, createSlice, current, isDraft } from '@reduxjs/toolkit';
+import { PayloadAction, createSelector, createSlice } from '@reduxjs/toolkit';
 import { useSelector } from 'react-redux';
 import { Log, LogWithSource } from '@/data/schema';
 import { RootState } from './store';
@@ -26,20 +26,23 @@ export const logDataSlice = createSlice({
     receiveBatch: (state, action: PayloadAction<LogDataReceived>) => {
       const newRecords = [];
       for (const newRecord of action.payload.logs) {
-        const existingRecordsProxy = state.index[newRecord.id];
-        const existingRecords = existingRecordsProxy ? (isDraft(existingRecordsProxy) ? current(existingRecordsProxy) : existingRecordsProxy) : [];
+        const existingRecords = state.index[newRecord.id];
+        if (!existingRecords) {
+          //simplest and the most common case: we just got a new record
+          newRecords.push(newRecord);
+          state.index[newRecord.id] = [newRecord];
+          continue;
+        }
         const sameStreamRecord = existingRecords.find((r) => _.isEqual(r.stream, newRecord.stream));
         if (!sameStreamRecord) {
-          state.index[newRecord.id] = [...existingRecords, newRecord];
           newRecords.push(newRecord);
-          if (existingRecords.length > 0) {
-            console.warn(
-              'Duplicate log id with different stream; existing:  ',
-              existingRecords[0],
-              'new:',
-              newRecord,
-            );
-          }
+          state.index[newRecord.id].push(newRecord);
+          console.warn(
+            'Duplicate log id with different stream; existing:  ',
+            existingRecords[0],
+            'new:',
+            newRecord,
+          );
         }
       }
       state.logs = [...state.logs, ...newRecords].sort((a, b) => (a.id > b.id ? -1 : 1));
