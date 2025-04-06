@@ -22,6 +22,22 @@ test('fetching messages', async ({ page, appState, mainPage, logs }) => {
 
 });
 
+
+test('should sort fetched messages', async ({ page, appState, mainPage, logs }) => {
+
+    await page.clock.install();
+
+    const [s1, s2] = await appState.givenSources({ name: 'existing' });
+
+    logs.givenSourceRecords(s1, { message: 'earlier', timestamp: "1" }, {message: 'later', timestamp: "3"});
+    logs.givenSourceRecords(s2, { message: 'middle', timestamp: "2" }, {message: 'the latest', timestamp: "4"});
+
+    await mainPage.open({startFetch: true});
+
+    await mainPage.expectLogMessages('the latest', 'later', 'middle', 'earlier');
+});
+
+
 test('should fetch updated query on editing', async ({ page, appState, mainPage, logs }) => {
 
     await page.clock.install();
