@@ -31,8 +31,8 @@ export default function Index() {
 
     return (
         <div className="space-y-4">
-            <div className="mt-4 flex items-center justify-between">
-                <h3 className="text-2xl font-bold tracking-tight">List of sources</h3>
+            <div className="flex items-center justify-between">
+                <h3 className="text-2xl font-bold tracking-tight">Sources</h3>
                 <div className="flex items-center gap-x-2">
                     <Button variant="ghost" size="sm" onClick={() => activateAllSources()}>Activate all</Button>
                     <Button variant="ghost" size="sm" onClick={() => deactivateAllSources()}>Deactivate all</Button>

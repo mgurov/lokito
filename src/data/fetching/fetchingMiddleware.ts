@@ -114,11 +114,11 @@ async function processSourceFetching(sourceState: SourceFetchingState, listenerA
         })
 
         //would probably nice somehow move it to the logDataSlice or extract into a separate middleware
-        const linePredicates = Object.values(listenerApi.getState().filters.data).map(filter => RegExp(filter.messageRegex))
+        const linePredicates = Object.values(listenerApi.getState().filters.data).map(filter => ({regex: RegExp(filter.messageRegex), filterId: filter.id}))
         for (const log of logs) {
             for (const linePredicate of linePredicates) {
-                if (linePredicate.test(log.source.message)) {                    
-                    log.acked = true
+                if (linePredicate.regex.test(log.source.message)) {
+                    log.acked = {type: 'filter', filterId: linePredicate.filterId}
                     break
                 }
             }
@@ -151,7 +151,7 @@ function responseEntryToJustReceivedLog(l: LokiResponseEntry, sourceId: string):
         id: ts.toString(),
         timestamp: new Date(parseInt(ts.slice(0, -6))).toISOString(),
         source: {sourceId, message: line},
-        acked: false,
+        acked: null,
     }
 }
 

@@ -1,6 +1,7 @@
 import { test, Page, expect, Locator } from '@playwright/test';
 import SourcePageFixture, { NewSourceRollover } from './SourcesPageFixture';
 import { expectTexts } from '@tests/app/util/visualAssertions';
+import FiltersPageFixture from './FiltersPageFixture';
 
 export const mainPageTest = test.extend<{ mainPage: MainPageFixture }>({
     mainPage: [async ({ page }, use) => {
@@ -52,6 +53,11 @@ export default class MainPageFixture {
     async clickToSources() {
         await this.page.getByTestId('sources-button').click();
         return new SourcePageFixture(this.page);
+    }
+
+    async openFiltersPage() {
+        await this.page.getByTestId('filters-button').click();
+        return new FiltersPageFixture(this.page);
     }
 
     get homeLogo() {
