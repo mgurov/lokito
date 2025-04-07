@@ -5,7 +5,8 @@ import { createRouter } from './routing';
 import { Provider } from 'react-redux';
 import { store } from '@/data/redux/store';
 import { Toaster } from "@/components/ui/sonner";
-import {LokitoLogo} from "./components/ui/lokito-logo";
+import { LokitoLogo } from "./components/ui/lokito-logo";
+import { Button } from "./components/ui/button";
 
 
 function App() {
@@ -25,20 +26,38 @@ function Layout() {
     <>
       <div style={{ fontFamily: 'system-ui, sans-serif', lineHeight: '1.8' }}>
         <div className="flex h-full flex-1 flex-col px-8 py-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold tracking-tight">
-              <Link to="/" data-testid="home-page-logo">
-                <div className="h-auto w-14 p-0">
-                  <LokitoLogo />
-                </div>
-              </Link>
-            </h2>
-          </div>
+          <TopNavigation />
           <Outlet />
         </div>
       </div>
       <Toaster />
     </>
+  )
+}
+
+function TopNavigation() {
+  return (
+    <div className="flex gap-2 items-center mb-2">
+
+      <Link data-testid="home-page-logo" to="/">
+        <div className="h-auto w-14 p-0">
+          <LokitoLogo />
+        </div>
+      </Link>
+
+      <Button data-testid="sources-button" size="sm" variant="secondary" asChild>
+        <Link to="/sources">
+          Sources
+        </Link>
+      </Button>
+
+      <Button data-testid="filters-button" size="sm" variant="secondary" asChild>
+        <Link to="/filters">
+          Filters
+        </Link>
+      </Button>
+
+    </div>
   )
 }
 
