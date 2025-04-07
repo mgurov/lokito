@@ -3,12 +3,14 @@ type SourceAndMessage = {
   message: string,
 }
 
+type Acked = null | {type: 'manual'} | {type: 'filter', filterId: string};
+
 export type JustReceivedLog = {
   stream: { [key: string]: unknown };
   id: string;
   timestamp: string;
   source: SourceAndMessage;
-  acked: boolean;
+  acked: Acked;
 }
 
 export type Log = {
@@ -16,7 +18,7 @@ export type Log = {
   id: string;
   line: string;
   timestamp: string;
-  acked: boolean;
+  acked: Acked;
   sourcesAndMessages: [SourceAndMessage, ...SourceAndMessage[]]
 };
 

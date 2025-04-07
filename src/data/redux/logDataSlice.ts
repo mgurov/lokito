@@ -4,11 +4,12 @@ import { JustReceivedLog, Log, LogWithSource } from '@/data/schema';
 import { RootState } from './store';
 import { createFilter } from '../filters/filtersSlice';
 import _ from 'lodash';
+import { Filter } from '../filters/filter';
 
 type LogIndexNode = {
-    stream: { [key: string]: unknown };
-    id: string;
-    sourceIds: [string, ...string[]];
+  stream: { [key: string]: unknown };
+  id: string;
+  sourceIds: [string, ...string[]];
 }
 
 export interface LogDataState {
@@ -42,7 +43,7 @@ export const logDataSlice = createSlice({
         const sameDataRecord = existingRecords.find((r) => _.isEqual(r.stream, newRecord.stream));
         if (sameDataRecord) {
           // a duplicate. Need to record if came from different source.
-          if (!sameDataRecord.sourceIds.includes(newRecord.source.sourceId)) {            
+          if (!sameDataRecord.sourceIds.includes(newRecord.source.sourceId)) {
             sameDataRecord.sourceIds.push(newRecord.source.sourceId)
             // full scan on id and then narrow down on stream equality
             const logsEntries = state.logs.filter(l => l.id === newRecord.id && _.isEqual(l.stream, newRecord.stream))
@@ -66,13 +67,13 @@ export const logDataSlice = createSlice({
           );
         }
       }
-      const newRecordsAdapted = newRecords.map(({stream, id, source, timestamp, acked}) => (
+      const newRecordsAdapted = newRecords.map(({ stream, id, source, timestamp, acked }) => (
         {
-          stream, 
-          id, 
-          line: source.message, 
-          timestamp, 
-          acked, 
+          stream,
+          id,
+          line: source.message,
+          timestamp,
+          acked,
           sourcesAndMessages: [source]
         } as Log
       ))
@@ -81,13 +82,13 @@ export const logDataSlice = createSlice({
     ack: (state, action: PayloadAction<string>) => {
       const line = state.logs.find((l) => l.id === action.payload);
       if (line) {
-        line.acked = true;
+        line.acked = {type: 'manual'};
       } else {
         console.error("Couldn't find log by id to ack; action: ", action);
       }
-     },
-    ackTillThis: (state, action: PayloadAction<{messageId: string, sourceId?: string}>) => {
-      const {sourceId, messageId} = action.payload;
+    },
+    ackTillThis: (state, action: PayloadAction<{ messageId: string, sourceId?: string }>) => {
+      const { sourceId, messageId } = action.payload;
       const lineIndex = state.logs.findIndex((l) => l.id === messageId);
       if (lineIndex === -1) {
         console.error("Couldn't find log by id to ack; action: ", action);
@@ -95,14 +96,14 @@ export const logDataSlice = createSlice({
       }
       state.logs.forEach((l, index) => {
         if (index >= lineIndex && (sourceId === undefined || l.sourcesAndMessages.find(s => s.sourceId === sourceId))) {
-          l.acked = true;
+          l.acked = {type: 'manual'};
         }
-      })      
-     },
-    ackAll: (state, {payload: sourceId}: PayloadAction<string | undefined>) => {
+      })
+    },
+    ackAll: (state, { payload: sourceId }: PayloadAction<string | undefined>) => {
       state.logs.forEach(l => {
         if (sourceId === undefined || l.sourcesAndMessages.find(s => s.sourceId === sourceId)) {
-          l.acked = true
+          l.acked = {type: 'manual'};
         }
       })
     },
@@ -116,7 +117,9 @@ export const logDataSlice = createSlice({
         if (line.acked) {
           continue;
         }
-        line.acked = undefined !== line.sourcesAndMessages.find(sm => predicate.test(sm.message));
+        if (undefined !== line.sourcesAndMessages.find(sm => predicate.test(sm.message))) {
+          line.acked = filter.transient ? {type: 'manual'} : { type: 'filter', filterId: filter.id };
+        }
       }
     });
   },
@@ -132,17 +135,19 @@ export const useData = (acked: boolean): LogWithSource[] =>
   useSelector(
     createSelector(
       [(state: RootState) => state.logData.logs, (state: RootState) => state.sources.data],
-      (logs, sources) =>
-        logs
-          .filter((log) => log.acked === acked)
+      (logs, sources) => {
+        const ackFilter = acked ? (log: Log) => log.acked != null : (log: Log) => log.acked == null
+        return logs
+          .filter(ackFilter)
           .map((log) => ({
             ...log,
-            sources: log.sourcesAndMessages.map(({sourceId}) => ({
+            sources: log.sourcesAndMessages.map(({ sourceId }) => ({
               id: sources[sourceId].id,
               color: sources[sourceId].color,
               name: sources[sourceId].name,
             }))
-          } as LogWithSource)),
+          } as LogWithSource))
+      },
     ),
   );
 
@@ -150,7 +155,7 @@ export const useAckedDataLength = () =>
   useSelector(
     createSelector(
       [(state: RootState) => state.logData.logs],
-      (logs) => logs.filter((log) => log.acked).length,
+      (logs) => logs.filter((log) => log.acked !== null).length,
     ),
   );
 
@@ -158,7 +163,15 @@ export const useNotAckedDataLength = () =>
   useSelector(
     createSelector(
       [(state: RootState) => state.logData.logs],
-      (logs) => logs.filter((log) => !log.acked).length,
+      (logs) => logs.filter((log) => log.acked === null).length,
     ),
   );
-  
+
+export const useFilterHitCount = (filter: Filter) => 
+  useSelector(
+    createSelector(
+      [(state: RootState) => state.logData.logs],
+      (logs) => logs.filter((log) => log.acked && log.acked.type === 'filter' && log.acked.filterId === filter.id).length,
+    ),
+  );
+
