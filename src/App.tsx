@@ -7,6 +7,7 @@ import { store } from '@/data/redux/store';
 import { Toaster } from "@/components/ui/sonner";
 import { LokitoLogo } from "./components/ui/lokito-logo";
 import { Button } from "./components/ui/button";
+import { TooltipProvider } from "./components/ui/tooltip";
 
 
 function App() {
@@ -15,7 +16,9 @@ function App() {
   return (
     <>
       <Provider store={store}>
-        <RouterProvider router={router} />
+        <TooltipProvider delayDuration={100}>
+          <RouterProvider router={router} />
+        </TooltipProvider>
       </Provider>
     </>
   )

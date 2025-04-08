@@ -1,5 +1,5 @@
 import { PayloadAction, createSelector, createSlice } from "@reduxjs/toolkit";
-import { Filter, loadSourcesFromStorage, saveSourcesToStorage } from "./filter";
+import { Filter, loadFiltersFromStorage, saveFiltersToStorage } from "./filter";
 import _ from 'lodash';
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
@@ -10,7 +10,7 @@ export interface FiltersState {
 }
 
 const initialFiltersState: FiltersState = {
-    data: _.keyBy(loadSourcesFromStorage(), 'id')
+    data: _.keyBy(loadFiltersFromStorage(), 'id')
 }
 
 export const filtersSlice = createSlice({
@@ -22,11 +22,11 @@ export const filtersSlice = createSlice({
                 return;
             }
             state.data[action.payload.id] = action.payload
-            saveSourcesToStorage(Object.values(state.data))
+            saveFiltersToStorage(Object.values(state.data))
         },
         deleteFilter: (state, action: PayloadAction<string>) => {
             delete state.data[action.payload]
-            saveSourcesToStorage(Object.values(state.data))
+            saveFiltersToStorage(Object.values(state.data))
         },
     },
 })

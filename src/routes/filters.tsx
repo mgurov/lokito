@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Filter } from "@/data/filters/filter"
 import { useFilters } from "@/data/filters/filtersSlice"
-import { useFilterHitCount } from "@/data/redux/logDataSlice"
+import { useFilterHitCount, useFilterTotalCount } from "@/data/logData/logDataHooks"
 
 export default function FiltersPage() {
 
@@ -23,31 +23,37 @@ export default function FiltersPage() {
 }
 
 function FilterCard({ filter }: { filter: Filter }) {
-    const currentHitCount = useFilterHitCount(filter)
     return (
         <Card data-testid="filter-card">
             <CardHeader >
                 <div className="space-x-4">
                     <span className="text-sm text-muted-foreground">#{filter.id}</span>
-                    <TooltipProvider delayDuration={100}>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <span data-testid="current-hit-count" 
-                                    className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground"
-                                >
-                                    {currentHitCount}
-                                </span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Hits current session</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
+                    <FilterStats filterId={filter.id} />
                 </div>
             </CardHeader>
             <CardContent>
                 <p data-testid="filter-message-regex">{filter.messageRegex}</p>
             </CardContent>
         </Card>
+    )
+}
+
+function FilterStats({ filterId }: { filterId: string }) {
+    const currentHitCount = useFilterHitCount(filterId)
+    const totalHitCount = useFilterTotalCount(filterId)
+
+    return (
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <span
+                    className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground"
+                >
+                    <span data-testid="current-hit-count" className="mr-1">{currentHitCount}</span> / <span data-testid="total-hit-count" className="ml-1">{totalHitCount}</span>
+                </span>
+            </TooltipTrigger>
+            <TooltipContent>
+                <p>Hits current session / overall</p>
+            </TooltipContent>
+        </Tooltip>
     )
 }

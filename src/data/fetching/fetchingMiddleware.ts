@@ -3,8 +3,8 @@ import { SourceFetchingState, fetchingActions } from "./fetchingSlice";
 import { AppDispatch, RootState } from "../redux/store";
 import { buildLokiUrl } from "@/lib/utils";
 import axios from "axios";
-import { receiveBatch } from "../redux/logDataSlice";
-import { JustReceivedLog } from "../schema";
+import { receiveBatch } from "../logData/logDataSlice";
+import { JustReceivedLog } from "../logData/logSchema";
 import { createNewSource, deleteSource } from "../redux/sourcesSlice";
 
 const REFETCH_DELAY = 60000;

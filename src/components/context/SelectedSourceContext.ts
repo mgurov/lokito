@@ -1,4 +1,4 @@
-import { Log } from '@/data/schema'
+import { Log } from '@/data/logData/logSchema'
 import { createContext, useContext } from 'react'
 
 export const SelectedSourceContext = createContext<{sourceId: string} | undefined>(undefined)
