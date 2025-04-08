@@ -20,7 +20,7 @@ export function saveFiltersToStorage(filters: Filter[]) {
 
 export type FilterStats = Record<string, number>
 
-const FILTERS_STATS_STORAGE_KEY = 'filters_stats';
+export const FILTERS_STATS_STORAGE_KEY = 'filters_stats';
 
 export function loadFilterStatsFromStorage(): FilterStats {
     const storedJson = IS_SERVER ? undefined : localStorage.getItem(FILTERS_STATS_STORAGE_KEY);

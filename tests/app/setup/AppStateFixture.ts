@@ -3,8 +3,7 @@ import { nextId } from "../util/nextId";
 import { StorageFixture, storageTest } from "./StorageFixture";
 
 export class AppStateFixture {
-    constructor(private storage: StorageFixture) {
-        this.storage = storage;
+    constructor(public storage: StorageFixture) {
     }
 
     async sourceNames() {
