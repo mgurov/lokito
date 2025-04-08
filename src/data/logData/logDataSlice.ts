@@ -1,6 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { Acked, JustReceivedLog, Log } from '@/data/logData/logSchema';
-import { createFilter } from '../filters/filtersSlice';
+import { createFilter, deleteFilter } from '../filters/filtersSlice';
 import _ from 'lodash';
 import { FilterStats, loadFilterStatsFromStorage, saveFilterStatsToStorage } from '../filters/filter';
 import { handleNewLogsBatch } from './logDataEventHandlers';
@@ -60,7 +60,6 @@ export const logDataSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // TODO: handle deletion of a filter
     builder.addCase(createFilter, (state, action) => {
       const filter = action.payload;
       const predicate = RegExp(filter.messageRegex);
@@ -80,6 +79,25 @@ export const logDataSlice = createSlice({
         saveFilterStatsToStorage(state.filterStats)
       }
     });
+
+    builder.addCase(deleteFilter, (state, action) => {
+      const filterId = action.payload
+
+      // 1. unack affected lines
+
+      for (const line of state.logs) {
+        const {acked} = line
+        if (acked?.type === 'filter' && acked.filterId === filterId) {
+          line.acked = null
+        }
+      }
+
+      // 2. clear stats
+      delete state.filterStats[filterId]
+      saveFilterStatsToStorage(state.filterStats)
+
+    })
+
   },
 });
 

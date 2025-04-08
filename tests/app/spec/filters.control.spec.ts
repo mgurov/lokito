@@ -1,3 +1,4 @@
+import { FILTERS_STATS_STORAGE_KEY } from '@/data/filters/filter';
 import { test, expect } from '@tests/app/setup/testExtended';
 
 test('created filter should be visible and show acked elements', async ({ page, appState, mainPage, logs }) => {
@@ -56,7 +57,6 @@ test('existing filter should be visible and show acked elements', async ({ appSt
     await expect(yesFilterCard.currentHitCount).toHaveText('2')
 });
 
-
 test('global stats should remain across the refreshes', async ({ appState, mainPage, logs }) => {
 
     await appState.givenSources({});
@@ -105,5 +105,36 @@ test('stats updated on fetches when filters page is open', async ({ appState, ma
     await expect(yesFilterCard.totalHitCount).toHaveText('4')
 });
 
-//TODO: stats cleaned from local storage on filter deletion.
-//TODO: actually, the filter deletion.
+test('should allow filter deletion', async ({ appState, mainPage, logs }) => {
+
+    await mainPage.clock.install()
+
+    await appState.givenSource();
+    logs.givenRecords('yes1', 'yes2', 'xxx');
+    await appState.givenFilter('yes')
+
+    await mainPage.open({startFetch: true});
+
+    await mainPage.expectLogMessages('xxx');
+
+    const filtersPage = await mainPage.openFiltersPage()
+    const yesFilterCard = filtersPage.getFilterCard({regex: 'yes'})
+    await yesFilterCard.deleteButton.click()
+
+    await expect(yesFilterCard.deleteButton).not.toBeAttached()
+
+    await expect.poll(
+        () => appState.storage.getLocalItem<Array<unknown>>(FILTERS_STATS_STORAGE_KEY)
+        ).toStrictEqual({})
+
+
+    await mainPage.homeLogo.click()
+    await mainPage.expectLogMessages('xxx', 'yes2', 'yes1');
+
+    await test.step('more logs fetched', async() => {
+        logs.givenRecords('yes3')
+        await mainPage.clock.runFor('01:01')
+    })
+
+    await mainPage.expectLogMessages('yes3', 'xxx', 'yes2', 'yes1');    
+});

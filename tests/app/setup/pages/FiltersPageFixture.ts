@@ -26,4 +26,8 @@ export class FilterCard {
         return this.locator.getByTestId('total-hit-count')
     }
 
+    get deleteButton() {
+        return this.locator.getByTestId('delete-filter-button')
+    }
+
 }

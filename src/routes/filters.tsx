@@ -1,8 +1,11 @@
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Filter } from "@/data/filters/filter"
-import { useFilters } from "@/data/filters/filtersSlice"
+import { deleteFilter, useFilters } from "@/data/filters/filtersSlice"
 import { useFilterHitCount, useFilterTotalCount } from "@/data/logData/logDataHooks"
+import { TrashIcon } from "@radix-ui/react-icons"
+import { useDispatch } from "react-redux"
 
 export default function FiltersPage() {
 
@@ -23,12 +26,23 @@ export default function FiltersPage() {
 }
 
 function FilterCard({ filter }: { filter: Filter }) {
+    const dispatch = useDispatch();
     return (
         <Card data-testid="filter-card">
             <CardHeader >
                 <div className="space-x-4">
                     <span className="text-sm text-muted-foreground">#{filter.id}</span>
                     <FilterStats filterId={filter.id} />
+                    <Button
+                        data-testid="delete-filter-button"
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => dispatch(deleteFilter(filter.id))}
+                        title="Delete filter"
+                    >
+                        <TrashIcon />
+                    </Button>
+
                 </div>
             </CardHeader>
             <CardContent>

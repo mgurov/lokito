@@ -31,7 +31,7 @@ export const filtersSlice = createSlice({
     },
 })
 
-export const {createFilter} = filtersSlice.actions
+export const {createFilter, deleteFilter} = filtersSlice.actions
 
 export default filtersSlice.reducer
 
