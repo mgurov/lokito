@@ -11,7 +11,8 @@ export default class FiltersPageFixture {
                 )
         )
     }
-    
+
+    open = () => this.page.goto('/filters')
 }
 
 export class FilterCard {
@@ -20,4 +21,9 @@ export class FilterCard {
     get currentHitCount() {
         return this.locator.getByTestId('current-hit-count')
     }
+
+    get totalHitCount() {
+        return this.locator.getByTestId('total-hit-count')
+    }
+
 }

@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-import { Log } from '@/data/schema';
+import { Log } from '@/data/logData/logSchema';
 import { Button } from './ui/button';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { useState } from 'react';

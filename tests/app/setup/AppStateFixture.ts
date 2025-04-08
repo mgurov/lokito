@@ -42,6 +42,18 @@ export class AppStateFixture {
         await this.storage.setLocalItem('filters', [filter]);
         return filter;
     }
+
+    //NB: discards other sources
+    async givenFilters(...messageRegex: string[]) {
+        const filters = messageRegex.map(messageRegex => ({
+            id: nextId(),
+            messageRegex,
+            transient: false
+        }))
+
+        await this.storage.setLocalItem('filters', filters);
+        return filters;
+    }
 }
 
 

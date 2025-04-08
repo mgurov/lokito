@@ -1,9 +1,9 @@
 import { ColumnDef } from '@tanstack/react-table';
 
-import { LogWithSource, LogSource } from '../data/schema';
+import { LogWithSource, LogSource } from '../data/logData/logSchema';
 import { useDispatch } from 'react-redux';
 import { Button } from './ui/button';
-import { ack } from '@/data/redux/logDataSlice';
+import { ack } from '@/data/logData/logDataSlice';
 import { simpleDateTimeFormat } from '@/lib/utils';
 import { CheckIcon } from '@radix-ui/react-icons';
 import { useSelectTab } from './context/SelectedDataTabContext';

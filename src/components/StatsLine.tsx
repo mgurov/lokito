@@ -1,5 +1,6 @@
 import { Alert } from '@/components/ui/alert';
-import { logDataSliceActions, useAckedDataLength, useNotAckedDataLength } from '@/data/redux/logDataSlice';
+import { logDataSliceActions } from '@/data/logData/logDataSlice';
+import { useAckedDataLength, useNotAckedDataLength } from '@/data/logData/logDataHooks';
 import { Button } from './ui/button';
 import { useDispatch } from 'react-redux';
 import SimpleTooltip from './SimpleTooltip';
@@ -34,9 +35,7 @@ export function AckAllButton({notAckedCount}: {notAckedCount: number}) {
     <span className="pl-2">
       <SimpleTooltip content={<><p>ACK all pending messages.</p></>}>
         <Button data-testid="ack-all-button" disabled={ackNack == 'ack'} onClick={() => { dispatch(ackAll(selectedSource?.sourceId)) }} variant="secondary" size="sm">ACK {notAckedCount}</Button>
-
       </SimpleTooltip>
-
 
     </span>
   )

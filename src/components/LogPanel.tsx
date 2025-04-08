@@ -3,9 +3,9 @@ import { ReactNode, useState, useContext } from 'react';
 import NewRule from '@/components/rule-editor';
 import { Button } from '@/components/ui/button';
 
-import { Log } from '@/data/schema';
+import { Log } from '@/data/logData/logSchema';
 import { useDispatch } from 'react-redux';
-import { logDataSliceActions } from '@/data/redux/logDataSlice';
+import { logDataSliceActions } from '@/data/logData/logDataSlice';
 import SimpleTooltip from './SimpleTooltip';
 import { SelectedSourceContext } from './context/SelectedSourceContext';
 import React from 'react';

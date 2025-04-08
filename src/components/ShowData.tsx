@@ -10,12 +10,11 @@ import {
   useOverallFetchingState,
   useSourcesFetchingState,
 } from '@/data/fetching/fetchingSlice';
-import { useData } from '@/data/redux/logDataSlice';
 import { TabsTrigger } from './ui/tabs';
 import { TabsContent, TabsList } from '@radix-ui/react-tabs';
 import { ExclamationTriangleIcon, UpdateIcon } from '@radix-ui/react-icons';
 import { Alert } from './ui/alert';
-import { LogWithSource } from '@/data/schema';
+import { LogWithSource } from '@/data/logData/logSchema';
 import { Badge } from './ui/badge';
 import { Source } from '@/data/source';
 import { AckAllButton, StatsLine } from '@/components/StatsLine';
@@ -24,6 +23,7 @@ import { SelectedSourceContext } from './context/SelectedSourceContext';
 import { useAckNack } from './context/AckNackContext';
 import { StartFetchingPanel } from './StartFetchingPanel';
 import { TabsWithSelectedContext } from './context/SelectedDataTabContext';
+import { useData } from '@/data/logData/logDataHooks';
 
 export function ShowData() {
   const fetchingSourceState = useSourcesFetchingState();

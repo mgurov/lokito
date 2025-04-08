@@ -3,7 +3,7 @@ type SourceAndMessage = {
   message: string,
 }
 
-type Acked = null | {type: 'manual'} | {type: 'filter', filterId: string};
+export type Acked = null | {type: 'manual'} | {type: 'filter', filterId: string};
 
 export type JustReceivedLog = {
   stream: { [key: string]: unknown };
