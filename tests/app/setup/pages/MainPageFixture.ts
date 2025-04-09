@@ -1,5 +1,5 @@
 import { test, Page, expect, Locator } from '@playwright/test';
-import SourcePageFixture, { NewSourceRollover } from './SourcesPageFixture';
+import SourcePageFixture, { NewSourceRollover, SourceCardFixture } from './SourcesPageFixture';
 import { expectTexts } from '@tests/app/util/visualAssertions';
 import FiltersPageFixture from './FiltersPageFixture';
 
@@ -134,6 +134,15 @@ export default class MainPageFixture {
 
     getByTestId(testId: string) {
         return this.page.getByTestId(testId)
+    }
+
+    get showSourceButton() {
+        return this.page.getByTestId('show-source-button')
+    }
+
+    async showSource() {
+        await this.showSourceButton.click()
+        return new SourceCardFixture(this.page)
     }
 }
 

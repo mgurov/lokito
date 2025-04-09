@@ -1,5 +1,3 @@
-[ ] edit the source from its tab
-
 [ ] create filter from user selection 
 
 [ ] preview filter appliance
