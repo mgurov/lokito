@@ -24,6 +24,8 @@ import { useAckNack } from './context/AckNackContext';
 import { StartFetchingPanel } from './StartFetchingPanel';
 import { TabsWithSelectedContext } from './context/SelectedDataTabContext';
 import { useData } from '@/data/logData/logDataHooks';
+import { useState } from 'react';
+import { SourceCard } from './source/SourceCard';
 
 export function ShowData() {
   const fetchingSourceState = useSourcesFetchingState();
@@ -97,6 +99,8 @@ function SourcesTabs({dataFromSources, data, sources, disabled}:
               </Alert>
             )}
 
+            <ShowSourceButton source={source} />
+
             {thisSourceUnaccounted.length > 0 && (
               <>
                 <AckAllButton notAckedCount={thisSourceUnaccounted.length} />
@@ -110,6 +114,19 @@ function SourcesTabs({dataFromSources, data, sources, disabled}:
     );
   }
   return [tabTriggers, tabs];
+}
+
+function ShowSourceButton({source}: {source: Source}) {
+  const [visible, setVisible] = useState(false)
+  if (!visible) {
+    return <Button data-testid="show-source-button" onClick={() => setVisible(true)}>Show source</Button>;
+  }
+
+  return (<>
+    <Button data-testid="hide-source-button" onClick={() => setVisible(false)}>Hide source</Button>
+    <SourceCard source={source} />
+  </>)
+
 }
 
 function ShowAllSourcesData({ data }: { data: LogWithSource[] }) {
