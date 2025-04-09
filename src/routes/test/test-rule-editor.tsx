@@ -1,9 +1,9 @@
-import { RuleDialog } from "@/components/rule-editor";
+import { RuleDialogButton } from "@/components/rule-editor";
 
 const highMessage =  "abcdefg\n".repeat(100);
 export default function() {
     return  (<>
-        <RuleDialog logLine={highMessage} handleSubmit={() => {}} />
+        <RuleDialogButton logLine={highMessage} handleSubmit={() => {}} />
         </>
     );
 }

@@ -140,3 +140,39 @@ test('same message should show use first line from all and respective from sourc
     await mainPage.selectAllSourcesTab()
     await mainPage.expectAckMessages(1)
 });
+
+test('should be able to create a filter based on the selection', async ({ page, appState, mainPage, logs }) => {
+
+    const [source] = await appState.givenSources({});
+    logs.givenSourceRecords(source, 'yes1', 'yes2', 'no');
+
+    await mainPage.open({startFetch: true});
+
+    await mainPage.selectSourceTab(source) //because otherwise the source button messes up
+
+    const yes1 = page.getByText('yes1')
+
+    await page.evaluate((text) => {
+        const div = document.evaluate(`//span[contains(text(), '${text}')]`, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+        if (div) {
+          const range = document.createRange();
+          const startOffset = 0; // Start selecting from the 5th character
+          const endOffset = 3; // End selecting at the 15th character
+    
+          range.setStart(div.childNodes[0], startOffset);
+          range.setEnd(div.childNodes[0], endOffset);
+
+          const selection = window.getSelection();
+          selection?.removeAllRanges();
+          selection?.addRange(range);
+        }
+      }, 'yes1');
+
+     await yes1.click({button: 'right'})
+     await mainPage.getByTestId('create-rule-from-selection').click()
+     await expect(mainPage.getByTestId('rule_regex')).toHaveValue('yes')
+     await expect(mainPage.getByTestId('original-line')).toHaveText('yes1')
+     await mainPage.getByTestId('apply-rule-button').click()
+
+    await mainPage.expectLogMessages('no');
+});

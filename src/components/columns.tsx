@@ -7,8 +7,10 @@ import { ack } from '@/data/logData/logDataSlice';
 import { simpleDateTimeFormat } from '@/lib/utils';
 import { CheckIcon } from '@radix-ui/react-icons';
 import { useSelectTab } from './context/SelectedDataTabContext';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { SelectedSourceContext, useSelectedSourceMessageLine } from './context/SelectedSourceContext';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from './ui/context-menu';
+import { NewRuleFromSelectionDialog } from '@/components/rule-editor'
 
 
 function RowAck({ logId }: { logId: string }) {
@@ -76,11 +78,30 @@ export function columns(): ColumnDef<LogWithSource>[] {
 
 function RenderLine({row}: {row: LogWithSource}) {
   const stringToShow = useSelectedSourceMessageLine(row)
+  const [newRuleOpen, setNewRuleOpen] = useState(false);
+  const [windowSelection, setWindowSelection] = useState<string | undefined>(undefined)
+
+  function onMakeRule() {
+    setWindowSelection(window.getSelection()?.toString())
+    setNewRuleOpen(true)
+  }
+  
   return (
     <>
+      {newRuleOpen && <NewRuleFromSelectionDialog logLine={stringToShow} preselectedText={windowSelection} open={newRuleOpen} setOpen={setNewRuleOpen} />}
       <div className="h-full cursor-pointer overflow-auto whitespace-nowrap text-xs font-medium">
         <SourceIndicator row={row} />
-        <span data-testid="log-message">{stringToShow}</span>
+        
+        <ContextMenu>
+          <ContextMenuTrigger>
+              <span data-testid="log-message">
+                {stringToShow}
+              </span>
+            </ContextMenuTrigger>
+          <ContextMenuContent>
+            <ContextMenuItem data-testid="create-rule-from-selection" onClick={() => onMakeRule()}>Make Rule from selection</ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
       </div>
     </>
   )
@@ -91,7 +112,7 @@ function SourceIndicator({row}: {row: LogWithSource}) {
   const selectTab = useSelectTab();
   const sourcesToShow = row.sources.filter(s => s.id !== selectedSource?.sourceId)
   return sourcesToShow.map(source => (
-    <Button key={source.id} variant="ghost" size="sm" data-testid="log-row-source-marker" className="border boder-red-50" onClick={_e => {
+    <Button key={source.id} variant="ghost" size="sm" data-testid="log-row-source-marker" className="border border-red-50" onClick={_e => {
       selectTab(source.id);
     }}>{source.name}</Button>
   ));

@@ -11,21 +11,18 @@ import {
 import { Log } from '@/data/logData/logSchema';
 import { Button } from './ui/button';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Input } from './ui/input';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { useAppDispatch } from '@/data/redux/reduxhooks';
 import { Filter } from '@/data/filters/filter';
 import { createFilter } from '@/data/filters/filtersSlice';
 import { randomId } from '@/lib/utils';
 import { ScrollArea, ScrollBar } from './ui/scroll-area';
 import { useSelectedSourceMessageLine } from './context/SelectedSourceContext';
+import { useDispatch } from 'react-redux';
 
-export default function NewRule({ logEntry }: {logEntry: Log}) {
-  const logLine = useSelectedSourceMessageLine(logEntry)
-
-  const dispatch = useAppDispatch();
-
+export function useNewRuleHandleSubmissionDispatched() {
+  const dispatch = useDispatch();
 
   function handleSubmit({ save, messageRegex }: SaveRuleProps) {
     const newFilter: Filter = {
@@ -36,7 +33,25 @@ export default function NewRule({ logEntry }: {logEntry: Log}) {
     dispatch(createFilter(newFilter));
   }
 
-  return <RuleDialog logLine={logLine} handleSubmit={handleSubmit} />;
+  return useCallback(handleSubmit, [dispatch])
+}
+
+export default function NewRule({ logEntry }: {logEntry: Log}) {
+
+  const handleSubmit = useNewRuleHandleSubmissionDispatched()
+
+  const logLine = useSelectedSourceMessageLine(logEntry)  
+
+
+  return <RuleDialogButton logLine={logLine} handleSubmit={handleSubmit} />;
+}
+
+export function NewRuleFromSelectionDialog({ logLine, preselectedText, open, setOpen }: 
+    {logLine: string, preselectedText? : string, open: boolean, setOpen: (b: boolean) => void}) {
+
+  const handleSubmit = useNewRuleHandleSubmissionDispatched()
+
+  return <RuleDialog logLine={logLine} suggestedLine={preselectedText} handleSubmit={handleSubmit} open={open} setOpen={setOpen} />;
 }
 
 type SaveRuleProps = {
@@ -44,20 +59,7 @@ type SaveRuleProps = {
   messageRegex: string;
 }
 
-export function RuleDialog({ logLine, handleSubmit }: { logLine: string, handleSubmit: (p: SaveRuleProps) => void }) {
-
-  const [messageRegex, setMessageRegex] = useState<string>(escapeRegExp(logLine));
-  let logLineMatchesRegex: 'yes' | 'no' | 'err' = 'no';
-  let errorMessage: string | null = null;
-  try {
-    if (RegExp(messageRegex).test(logLine)) {
-      logLineMatchesRegex = 'yes';
-    }
-  } catch (e: unknown) {
-    logLineMatchesRegex = 'err';
-    errorMessage = (e as { message: string }).message;
-  }
-
+export function RuleDialogButton({ logLine, handleSubmit }: { logLine: string, handleSubmit: (p: SaveRuleProps) => void }) {
 
   const [open, setOpen] = useState(false);
   if (!open) {
@@ -76,7 +78,28 @@ export function RuleDialog({ logLine, handleSubmit }: { logLine: string, handleS
   }
 
   return (
-    <Dialog open onOpenChange={setOpen}>
+    <RuleDialog logLine={logLine} suggestedLine={undefined} handleSubmit={handleSubmit} open={open} setOpen={setOpen} />
+  );
+}
+
+export function RuleDialog({ logLine, suggestedLine, handleSubmit, open, setOpen }: 
+  { logLine: string, suggestedLine: string | undefined, handleSubmit: (p: SaveRuleProps) => void, open: boolean, setOpen: (b: boolean) => void }) {
+
+  const [messageRegex, setMessageRegex] = useState<string>(escapeRegExp(suggestedLine ?? logLine));
+
+  let logLineMatchesRegex: 'yes' | 'no' | 'err' = 'no';
+  let errorMessage: string | null = null;
+  try {
+    if (RegExp(messageRegex).test(logLine)) {
+      logLineMatchesRegex = 'yes';
+    }
+  } catch (e: unknown) {
+    logLineMatchesRegex = 'err';
+    errorMessage = (e as { message: string }).message;
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="w-1/2">
         <DialogHeader>
           <DialogTitle>New Rule to rule them all</DialogTitle>
@@ -88,7 +111,7 @@ export function RuleDialog({ logLine, handleSubmit }: { logLine: string, handleS
               id="line"
               className="relative px-[0.3rem] py-[0.2rem] font-mono text-sm max-h-80"
             >
-              <pre>
+              <pre data-testid="original-line">
               {logLine}
               </pre>
             </div>
