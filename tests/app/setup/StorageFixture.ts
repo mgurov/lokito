@@ -26,7 +26,7 @@ export class StorageFixture {
         );
     }
 
-    async getLocalItem(key: string): Promise<unknown> {
+    async getLocalItem<T>(key: string): Promise<T | null> {
         const storedString = await this.page.evaluate(key => {
             return localStorage.getItem(key);
         }, key);
@@ -34,7 +34,7 @@ export class StorageFixture {
         if (storedString === null) {
             return null;
         }
-        return JSON.parse(storedString);
+        return JSON.parse(storedString) as T;
     }
 }
 

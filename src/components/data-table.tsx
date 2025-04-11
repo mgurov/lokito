@@ -13,7 +13,7 @@ import { DataTablePagination } from './data-table-pagination';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { LogPanel } from '@/components/LogPanel';
-import { Log, LogWithSource } from '@/data/schema';
+import { Log, LogWithSource } from '@/data/logData/logSchema';
 import { useOverallFetchingState } from '@/data/fetching/fetchingSlice';
 
 interface DataTableProps {

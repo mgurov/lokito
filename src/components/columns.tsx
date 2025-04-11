@@ -1,12 +1,16 @@
 import { ColumnDef } from '@tanstack/react-table';
 
-import { LogWithSource, LogSource } from '../data/schema';
+import { LogWithSource, LogSource } from '../data/logData/logSchema';
 import { useDispatch } from 'react-redux';
 import { Button } from './ui/button';
-import { ack } from '@/data/redux/logDataSlice';
+import { ack } from '@/data/logData/logDataSlice';
 import { simpleDateTimeFormat } from '@/lib/utils';
 import { CheckIcon } from '@radix-ui/react-icons';
 import { useSelectTab } from './context/SelectedDataTabContext';
+import { useContext, useState } from 'react';
+import { SelectedSourceContext, useSelectedSourceMessageLine } from './context/SelectedSourceContext';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from './ui/context-menu';
+import { NewRuleFromSelectionDialog } from '@/components/rule-editor'
 
 
 function RowAck({ logId }: { logId: string }) {
@@ -27,20 +31,20 @@ function RowAck({ logId }: { logId: string }) {
   );
 }
 
-export function columns(showSource: boolean): ColumnDef<LogWithSource>[] {
+export function columns(): ColumnDef<LogWithSource>[] {
 
   const columnsTemplate: ColumnDef<LogWithSource>[] = [
     {
       id: 'source',
-      accessorKey: 'source',
+      accessorKey: 'sources',
       cell: ({ getValue }) => {
-        const value = getValue<LogSource>();
+        const value = getValue<LogSource[]>();
         return (
           <>
             <div
               className="absolute left-0 top-0 h-full w-[3px]"
               // limitation of tailwind
-              style={{ backgroundColor: value.color }}
+              style={{ backgroundColor: value[0]?.color }}
             />
           </>
         )
@@ -65,25 +69,52 @@ export function columns(showSource: boolean): ColumnDef<LogWithSource>[] {
     {
       accessorKey: 'line',
       header: undefined,
-      cell: ({ getValue, row }) => (
-        <>
-          <div className="h-full cursor-pointer overflow-auto whitespace-nowrap text-xs font-medium">
-            {showSource && <SourceIndicator source={row.original.source} />} 
-            <span data-testid="log-message">{getValue<string>()}</span>
-          </div>
-        </>
-      ),
+      cell: ({ row }) => <RenderLine row={row.original} />,
     },
   ];
 
   return columnsTemplate;
 }
 
-function SourceIndicator({source}: {source: LogSource}) {
-  const selectTab = useSelectTab();
+function RenderLine({row}: {row: LogWithSource}) {
+  const stringToShow = useSelectedSourceMessageLine(row)
+  const [newRuleOpen, setNewRuleOpen] = useState(false);
+  const [windowSelection, setWindowSelection] = useState<string | undefined>(undefined)
+
+  function onMakeRule() {
+    setWindowSelection(window.getSelection()?.toString())
+    setNewRuleOpen(true)
+  }
+  
   return (
-    <Button variant="ghost" size="sm" data-testid="log-row-source-marker" className="border boder-red-50" onClick={_e => {
+    <>
+      {newRuleOpen && <NewRuleFromSelectionDialog logLine={stringToShow} preselectedText={windowSelection} open={newRuleOpen} setOpen={setNewRuleOpen} />}
+      <div className="h-full cursor-pointer overflow-auto whitespace-nowrap text-xs font-medium">
+        <SourceIndicator row={row} />
+        
+        <ContextMenu>
+          <ContextMenuTrigger>
+              <span data-testid="log-message">
+                {stringToShow}
+              </span>
+            </ContextMenuTrigger>
+          <ContextMenuContent>
+            <ContextMenuItem data-testid="create-rule-from-selection" onClick={() => onMakeRule()}>Make Rule from selection</ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
+      </div>
+    </>
+  )
+}
+
+function SourceIndicator({row}: {row: LogWithSource}) {
+  const selectedSource = useContext(SelectedSourceContext)
+  const selectTab = useSelectTab();
+  const sourcesToShow = row.sources.filter(s => s.id !== selectedSource?.sourceId)
+  return sourcesToShow.map(source => (
+    <Button key={source.id} variant="ghost" size="sm" data-testid="log-row-source-marker" className="border border-red-50" onClick={_e => {
       selectTab(source.id);
     }}>{source.name}</Button>
-  );
+  ));
 }
+

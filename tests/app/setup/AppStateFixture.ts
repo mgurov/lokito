@@ -3,8 +3,7 @@ import { nextId } from "../util/nextId";
 import { StorageFixture, storageTest } from "./StorageFixture";
 
 export class AppStateFixture {
-    constructor(private storage: StorageFixture) {
-        this.storage = storage;
+    constructor(public storage: StorageFixture) {
     }
 
     async sourceNames() {
@@ -41,6 +40,18 @@ export class AppStateFixture {
 
         await this.storage.setLocalItem('filters', [filter]);
         return filter;
+    }
+
+    //NB: discards other sources
+    async givenFilters(...messageRegex: string[]) {
+        const filters = messageRegex.map(messageRegex => ({
+            id: nextId(),
+            messageRegex,
+            transient: false
+        }))
+
+        await this.storage.setLocalItem('filters', filters);
+        return filters;
     }
 }
 

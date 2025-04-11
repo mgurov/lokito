@@ -16,24 +16,26 @@ export const consoleLoggingTest = test.extend<{ consoleLogging: ConsoleLoggingFi
 
         consoleLogging.ignoreErrorMessagesContaining('error fetching logs');
         consoleLogging.ignoreErrorMessagesContaining('Failed to load resource:');
+        consoleLogging.ignoreErrorMessagesContaining('React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7.');
+        consoleLogging.ignoreErrorMessagesContaining('React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7.');
 
         let consoleErrorDetected: string | null = null;
 
         page.on('console', msg => {
             consoleLogging.messages.push(msg)
-            if (msg.type() === 'error') {
+            if (msg.type() === 'error' || msg.type() === 'warning') {
               
               if (consoleLogging.ignoreErrorMessagesContainingStrings.some(ignoredText => msg.text().includes(ignoredText))) {
                 return;
               }
 
               if (consoleLogging.failImmediately) {
-                throw new Error(`Console error detected: ${msg.text()}`)
+                throw new Error(`Console ${msg.type()} detected: ${msg.text()}`)
               } else {
                 if (consoleErrorDetected === null) {
                   consoleErrorDetected = msg.text();
                 }  
-                console.error(`Console error detected: ${msg.text()}`);
+                console.error(`Console ${msg.type()} detected: ${msg.text()}`);
               }
             }
           });

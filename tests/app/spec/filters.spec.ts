@@ -101,3 +101,78 @@ test('a non-saved filter should be applied to existing but not following message
 
 });
 
+test('same message should show use first line from all and respective from source tab on filter creation', async ({ page, mainPage, appState, logs }) => {
+
+    const [s1, s2] = await appState.givenSources({ name: 's1' }, {name: 's2'});
+
+    const sameTimestamp = '2025-02-04T20:00:00.000Z';
+    const sameData = {'event': 'event1'};
+
+    logs.givenSourceRecords(s1, { message: 's1 event1', timestamp: sameTimestamp, data: sameData });
+     // NB: message can be formatted differently different sources
+    logs.givenSourceRecords(s2, { message: 's2 event1', timestamp: sameTimestamp, data: sameData });
+
+    await mainPage.open({startFetch: true});
+
+    await test.step('from main page use the first source message', async () => {
+        await mainPage.expandRow('s1 event1')
+        await page.getByTestId('new-rule-button').click();
+        await expect(page.getByTestId('rule_regex')).toHaveValue('s1 event1');
+        await page.getByTestId('close-rule-button').click();
+    })
+
+    await test.step('from s1 page use the first source message', async () => {
+        await mainPage.selectSourceTab(s1)
+        await mainPage.expandRow('s1 event1')
+        await page.getByTestId('new-rule-button').click();
+        await expect(page.getByTestId('rule_regex')).toHaveValue('s1 event1');
+        await page.getByTestId('close-rule-button').click();
+    })
+
+    await test.step('from s2 page use the second source message', async () => {
+        await mainPage.selectSourceTab(s2)
+        await mainPage.expandRow('s2 event1')
+        await page.getByTestId('new-rule-button').click();
+        await expect(page.getByTestId('rule_regex')).toHaveValue('s2 event1');
+        await page.getByTestId('apply-rule-button').click();
+    })
+
+    await mainPage.selectAllSourcesTab()
+    await mainPage.expectAckMessages(1)
+});
+
+test('should be able to create a filter based on the selection', async ({ page, appState, mainPage, logs }) => {
+
+    const [source] = await appState.givenSources({});
+    logs.givenSourceRecords(source, 'yes1', 'yes2', 'no');
+
+    await mainPage.open({startFetch: true});
+
+    await mainPage.selectSourceTab(source) //because otherwise the source button messes up
+
+    const yes1 = page.getByText('yes1')
+
+    await page.evaluate((text) => {
+        const div = document.evaluate(`//span[contains(text(), '${text}')]`, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+        if (div) {
+          const range = document.createRange();
+          const startOffset = 0; // Start selecting from the 5th character
+          const endOffset = 3; // End selecting at the 15th character
+    
+          range.setStart(div.childNodes[0], startOffset);
+          range.setEnd(div.childNodes[0], endOffset);
+
+          const selection = window.getSelection();
+          selection?.removeAllRanges();
+          selection?.addRange(range);
+        }
+      }, 'yes1');
+
+     await yes1.click({button: 'right'})
+     await mainPage.getByTestId('create-rule-from-selection').click()
+     await expect(mainPage.getByTestId('rule_regex')).toHaveValue('yes')
+     await expect(mainPage.getByTestId('original-line')).toHaveText('yes1')
+     await mainPage.getByTestId('apply-rule-button').click()
+
+    await mainPage.expectLogMessages('no');
+});

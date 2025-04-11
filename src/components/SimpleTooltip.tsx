@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 
 export default function SimpleTooltip(props: {
@@ -7,15 +7,13 @@ export default function SimpleTooltip(props: {
     content: ReactNode,
 }) {
     return (
-    <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            {props.children}
-          </TooltipTrigger>
-          <TooltipContent>
-            {props.content}
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          {props.children}
+        </TooltipTrigger>
+        <TooltipContent>
+          {props.content}
+        </TooltipContent>
+      </Tooltip>
     )
 }

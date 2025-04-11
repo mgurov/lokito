@@ -3,9 +3,9 @@ import { ReactNode, useState, useContext } from 'react';
 import NewRule from '@/components/rule-editor';
 import { Button } from '@/components/ui/button';
 
-import { Log } from '@/data/schema';
+import { Log } from '@/data/logData/logSchema';
 import { useDispatch } from 'react-redux';
-import { logDataSliceActions } from '@/data/redux/logDataSlice';
+import { logDataSliceActions } from '@/data/logData/logDataSlice';
 import SimpleTooltip from './SimpleTooltip';
 import { SelectedSourceContext } from './context/SelectedSourceContext';
 import React from 'react';
@@ -30,7 +30,7 @@ export function LogPanel(props: { log: Log }) {
         <div className="flex w-full">
 
           <AckTillThisButton messageId={props.log.id} />
-          <NewRule log={props.log} />
+          <NewRule logEntry={props.log} />
         </div>
         <div className="space-y-1 px-3 py-2">
           <h3 className="text-sm font-semibold">Fields</h3>
