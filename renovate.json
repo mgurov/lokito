@@ -3,5 +3,6 @@
   "extends": [
     "config:recommended"
   ],
-  "branchConcurrentLimit": 10
+  "branchConcurrentLimit": 10,
+  "automerge": true
 }
