@@ -216,3 +216,15 @@ test('should be able to cancel editing a source query', async ({ appState, sourc
     .toStrictEqual([['existing', '{job="initial query"}']])
 
 });
+
+test('should be able to display the source card from the source tab', async({appState, mainPage}) => {
+    const source = await appState.givenSource({query: "source-query"})
+
+    await mainPage.open({startFetch: true})
+    
+    await mainPage.selectSourceTab(source)
+
+    const sourceCard = await mainPage.showSource()
+
+    await expect(sourceCard.filterTextarea).toHaveText('source-query')
+})

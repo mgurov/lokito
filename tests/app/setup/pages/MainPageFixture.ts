@@ -1,6 +1,7 @@
 import { test, Page, expect, Locator } from '@playwright/test';
-import SourcePageFixture, { NewSourceRollover } from './SourcesPageFixture';
+import SourcePageFixture, { NewSourceRollover, SourceCardFixture } from './SourcesPageFixture';
 import { expectTexts } from '@tests/app/util/visualAssertions';
+import FiltersPageFixture from './FiltersPageFixture';
 
 export const mainPageTest = test.extend<{ mainPage: MainPageFixture }>({
     mainPage: [async ({ page }, use) => {
@@ -54,6 +55,11 @@ export default class MainPageFixture {
         return new SourcePageFixture(this.page);
     }
 
+    async openFiltersPage() {
+        await this.page.getByTestId('filters-button').click();
+        return new FiltersPageFixture(this.page);
+    }
+
     get homeLogo() {
         return this.page.getByTestId('home-page-logo');
     }
@@ -77,10 +83,12 @@ export default class MainPageFixture {
     }
 
     async clickAckAll(props: {expectedCount?: number} = {}) {
-        if (props.expectedCount) {
-            await expect(this.ackAllButton).toHaveText(`ACK ${props.expectedCount}`)
-        }
-        await this.ackAllButton.click();
+        await test.step('clickAckAll', async () => {
+            if (props.expectedCount) {
+                await expect(this.ackAllButton).toHaveText(`ACK ${props.expectedCount}`)
+            }
+            await this.ackAllButton.click();
+        }, {box: true})
     }
 
     get logMessage() {
@@ -126,6 +134,15 @@ export default class MainPageFixture {
 
     getByTestId(testId: string) {
         return this.page.getByTestId(testId)
+    }
+
+    get showSourceButton() {
+        return this.page.getByTestId('show-source-button')
+    }
+
+    async showSource() {
+        await this.showSourceButton.click()
+        return new SourceCardFixture(this.page)
     }
 }
 

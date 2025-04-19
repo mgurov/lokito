@@ -3,8 +3,8 @@ import { SourceFetchingState, fetchingActions } from "./fetchingSlice";
 import { AppDispatch, RootState } from "../redux/store";
 import { buildLokiUrl } from "@/lib/utils";
 import axios from "axios";
-import { receiveBatch } from "../redux/logDataSlice";
-import { Log } from "../schema";
+import { receiveBatch } from "../logData/logDataSlice";
+import { JustReceivedLog } from "../logData/logSchema";
 import { createNewSource, deleteSource } from "../redux/sourcesSlice";
 
 const REFETCH_DELAY = 60000;
@@ -114,17 +114,17 @@ async function processSourceFetching(sourceState: SourceFetchingState, listenerA
         })
 
         //would probably nice somehow move it to the logDataSlice or extract into a separate middleware
-        const linePredicates = Object.values(listenerApi.getState().filters.data).map(filter => RegExp(filter.messageRegex))
+        const linePredicates = Object.values(listenerApi.getState().filters.data).map(filter => ({regex: RegExp(filter.messageRegex), filterId: filter.id}))
         for (const log of logs) {
             for (const linePredicate of linePredicates) {
-                if (linePredicate.test(log.line)) {                    
-                    log.acked = true
+                if (linePredicate.regex.test(log.source.message)) {
+                    log.acked = {type: 'filter', filterId: linePredicate.filterId}
                     break
                 }
             }
         }
 
-        listenerApi.dispatch(receiveBatch({ logs }));
+        listenerApi.dispatch(receiveBatch(logs));
         listenerApi.dispatch(fetchingActions.sourceFetchedOk(sourceState.sourceId))
     } catch (e: unknown) {
         console.error('error fetching logs', e)
@@ -140,19 +140,22 @@ async function processSourceFetching(sourceState: SourceFetchingState, listenerA
 async function fetchLokiLogs(params: { query: string, from: string, sourceId: string }) {
     const url = buildLokiUrl(params.query, params.from);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return axios.get<{data: {result: any[]} }>(url, /*{timeout: 1000}*/)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .then(response => response.data.data.result.map((l: any) => ({
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            stream: { ...l.stream },
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-            id: l.values?.[0]?.[0].toString(),
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            line: l.values?.[0]?.[1],
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-            timestamp: new Date(parseInt(l.values?.[0]?.[0].slice(0, -6))).toISOString(),
-            sourceId: params.sourceId,
-            acked: false,
-        } as Log)));
+    return axios.get<{data: {result: LokiResponseEntry[]} }>(url, /*{timeout: 1000}*/)
+        .then(response => response.data.data.result.map(l => responseEntryToJustReceivedLog(l, params.sourceId)));
+}
+
+function responseEntryToJustReceivedLog(l: LokiResponseEntry, sourceId: string): JustReceivedLog {
+    const [[ts, line]] = l.values;
+    return {
+        stream: { ...l.stream },
+        id: ts.toString(),
+        timestamp: new Date(parseInt(ts.slice(0, -6))).toISOString(),
+        source: {sourceId, message: line},
+        acked: null,
+    }
+}
+
+type LokiResponseEntry = {
+    values: [[timestamp: string, messageLine: string]],
+    stream: Record<string, unknown>,
 }

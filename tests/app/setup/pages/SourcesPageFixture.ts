@@ -8,7 +8,7 @@ export default class SourcePageFixture {
     }
 
     sourceCard(_sourceName: string) {
-        return new SourceCard(this.page) // NB: need to isolate from other sources eventually
+        return new SourceCardFixture(this.page) // NB: need to isolate from other sources eventually
     }
 
     async clickNewSourceButton() {
@@ -34,7 +34,7 @@ export const sourcePageTest = test.extend<{ sourcePage: SourcePageFixture }>({
 });
 
 
-class SourceCard {
+export class SourceCardFixture {
     constructor(public page: Page) {}
 
     getByTestId(testId: string|RegExp): Locator {

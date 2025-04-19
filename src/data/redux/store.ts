@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
-import logDataReducer from './logDataSlice'
+import logDataReducer from '../logData/logDataSlice'
 import sourcesReducer from './sourcesSlice'
 import fetchingReducer from '../fetching/fetchingSlice'
 import fetchingMiddleware from '../fetching/fetchingMiddleware'
