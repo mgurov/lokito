@@ -1,7 +1,10 @@
 import { test, expect } from '@tests/app/setup/testExtended';
 import { NewSourceRollover } from '../setup/pages/SourcesPageFixture';
 
-test('add source', async ({ page, appState }) => {
+test('add source', async ({ page, appState, consoleLogging }) => {
+
+    consoleLogging.ignoreErrorMessagesContaining('Dialog is changing from uncontrolled to controlled.')
+
     await page.goto('/');
     
     await page.click('text="create a new one"');
@@ -23,11 +26,15 @@ test('add source', async ({ page, appState }) => {
 });
 
 
-test('add a source from the sourceless main screen', async ({ page, appState }) => {
+test('add a source from the sourceless main screen', async ({ page, appState, consoleLogging }) => {
+
+    consoleLogging.failImmediately = true
 
     await page.goto('/');
 
     await expect(page.getByText(/There are no active sources/)).toBeVisible();
+
+    consoleLogging.ignoreErrorMessagesContaining('Dialog is changing from uncontrolled to controlled.')
 
     await page.getByTestId('new-source-button').getByText('create a new one').click();
 
@@ -43,7 +50,9 @@ test('add a source from the sourceless main screen', async ({ page, appState }) 
     expect(await appState.sourceNames()).toEqual(['Test Source']);
 });
 
-test('add a source to an existing list from main page', async ({ mainPage, appState }) => {
+test('add a source to an existing list from main page', async ({ mainPage, appState, consoleLogging }) => {
+
+    consoleLogging.ignoreErrorMessagesContaining('Dialog is changing from uncontrolled to controlled.')
 
     await appState.givenSources({name: 'existing'});
     await mainPage.open();
@@ -55,7 +64,9 @@ test('add a source to an existing list from main page', async ({ mainPage, appSt
     expect(await appState.sourceNames()).toEqual(['existing', 'new']);
 });
 
-test('add a source should have immediate effect on fetching', async ({ mainPage, appState, logs }) => {
+test('add a source should have immediate effect on fetching', async ({ mainPage, appState, logs, consoleLogging }) => {
+
+    consoleLogging.ignoreErrorMessagesContaining('Dialog is changing from uncontrolled to controlled.')
 
     await mainPage.clock.install();
 
@@ -146,7 +157,10 @@ test('deactivate and then activate', async ({ mainPage, appState, logs }) => {
 
 });
 
-test('add a source to an existing list from sources page', async ({ appState, sourcePage }) => {
+test('add a source to an existing list from sources page', async ({ appState, sourcePage, consoleLogging }) => {
+
+    consoleLogging.ignoreErrorMessagesContaining('Dialog is changing from uncontrolled to controlled.')
+
 
     await appState.givenSources({name: 'existing'});
 

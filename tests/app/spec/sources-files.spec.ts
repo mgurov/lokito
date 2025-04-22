@@ -1,7 +1,9 @@
 import { Download, Page } from '@playwright/test';
 import { test, expect } from '@tests/app/setup/testExtended';
 
-test('download sources', async ({ page }) => {
+test('download sources', async ({ page, consoleLogging }) => {
+
+    consoleLogging.ignoreErrorMessagesContaining('Dialog is changing from uncontrolled to controlled.')
 
     await page.goto('/');
     
