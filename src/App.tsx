@@ -8,6 +8,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { LokitoLogo } from "./components/ui/lokito-logo";
 import { Button } from "./components/ui/button";
 import { TooltipProvider } from "./components/ui/tooltip";
+import { useNotAckedDataLength } from "./data/logData/logDataHooks";
+import { useEffect } from "react";
 
 
 function App() {
@@ -34,8 +36,24 @@ function Layout() {
         </div>
       </div>
       <Toaster />
+      <DocumentTitleUpdater/>
     </>
   )
+}
+
+function DocumentTitleUpdater() {
+  const notAckedCount = useNotAckedDataLength();
+
+  useEffect(() => {
+    if (notAckedCount > 0) {
+      document.title = `Lokito🔥${notAckedCount}`;
+    } else {
+      document.title = "Lokito";
+    }
+    
+  }, [notAckedCount]);
+
+  return null;
 }
 
 function TopNavigation() {

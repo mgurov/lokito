@@ -144,6 +144,11 @@ export default class MainPageFixture {
         await this.showSourceButton.click()
         return new SourceCardFixture(this.page)
     }
+
+    async waitNextSyncCycle() {
+        await this.page.clock.runFor('01:00') //a minute to sync
+    }
+
 }
 
 //NB: full-page ATM

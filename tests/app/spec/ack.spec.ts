@@ -200,9 +200,9 @@ test('acked indicator should indicate the number of acked messages', async ({ ap
 
     await mainPage.open({startFetch: true});
 
-    await mainPage.expectAckMessages(0)
 
     await mainPage.expectLogMessages('event2', 'event1');
+    await mainPage.expectAckMessages(0)
 
     //when
     
@@ -220,3 +220,44 @@ test('acked indicator should indicate the number of acked messages', async ({ ap
     })
 
 });
+
+test('document title should indicate the number of acked messages', async ({ appState, mainPage, logs }) => {
+
+    await mainPage.clock.install();
+
+    await appState.givenSource();
+    
+    await mainPage.open({startFetch: true});
+
+    await expect.poll(async () => mainPage.page.title()).toBe('Lokito');
+
+    logs.givenRecords('event1', 'event2');
+    await mainPage.waitNextSyncCycle()
+
+    await expect.poll(async () => mainPage.page.title()).toBe('Lokito🔥2');
+    await mainPage.expectLogMessages('event2', 'event1');
+    await mainPage.expectAckMessages(0)
+
+    //when
+
+    await test.step('first message acked', async () => {
+        await mainPage.page.getByTestId('ack-message-button').first().click()
+        await expect.poll(async () => mainPage.page.title()).toBe('Lokito🔥1');
+    
+        //then
+        await mainPage.expectAckMessages(1)
+        await mainPage.expectLogMessages('event1');
+    })
+    
+
+    await test.step('and then ack once more', async () => {
+        await mainPage.page.getByTestId('ack-message-button').first().click()
+
+        await mainPage.expectAckMessages(2)
+        await mainPage.expectLogMessages(...[]);
+
+        await expect.poll(async () => mainPage.page.title()).toBe('Lokito');
+    })
+
+});
+
