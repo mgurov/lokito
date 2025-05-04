@@ -3,7 +3,6 @@ import { DataTable } from '@/components/data-table';
 import { useSources } from '@/data/redux/sourcesSlice';
 import { simpleDateTimeFormat } from '@/lib/utils';
 import { NewSource } from './new-source';
-import { Link } from '@remix-run/react';
 import { Button } from './ui/button';
 import {
   SourceFetchingState,
@@ -26,6 +25,7 @@ import { TabsWithSelectedContext } from './context/SelectedDataTabContext';
 import { useData } from '@/data/logData/logDataHooks';
 import { useState } from 'react';
 import { SourceCard } from './source/SourceCard';
+import { Link } from 'react-router-dom';
 
 export function ShowData() {
   const fetchingSourceState = useSourcesFetchingState();
