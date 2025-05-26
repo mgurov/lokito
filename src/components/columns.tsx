@@ -9,6 +9,8 @@ import { CheckIcon } from '@radix-ui/react-icons';
 import { useSelectTab } from './context/SelectedDataTabContext';
 import { useContext } from 'react';
 import { SelectedSourceContext, useSelectedSourceMessageLine } from './context/SelectedSourceContext';
+import React from 'react';
+import { ackMatchedByFilter } from '@/data/filters/filtersSlice';
 
 
 function RowAck({ logId }: { logId: string }) {
@@ -80,6 +82,7 @@ function RenderLine({row}: {row: LogWithSource}) {
     <>
       <div className="h-full cursor-pointer overflow-auto whitespace-nowrap text-xs font-medium">
         <SourceIndicator row={row} />
+        <FilterIndicators row={row} />
         <span data-testid="log-message">{stringToShow}</span>
       </div>
     </>
@@ -91,9 +94,24 @@ function SourceIndicator({row}: {row: LogWithSource}) {
   const selectTab = useSelectTab();
   const sourcesToShow = row.sources.filter(s => s.id !== selectedSource?.sourceId)
   return sourcesToShow.map(source => (
-    <Button key={source.id} variant="ghost" size="sm" data-testid="log-row-source-marker" className="border boder-red-50" onClick={_e => {
+    <React.Fragment key={source.id} ><Button variant="ghost" size="sm" data-testid="log-row-source-marker" className="border boder-red-50" onClick={_e => {
       selectTab(source.id);
-    }}>{source.name}</Button>
+    }}>{source.name}</Button>{' '}</React.Fragment>
   ));
 }
+
+function FilterIndicators({row}: {row: LogWithSource}) {
+  const dispatch = useDispatch();
+  return Object.entries(row.filters).map(([id, name]) => (
+    <React.Fragment key={id} >
+      <Button variant="ghost" size="sm" data-testid="matching-filter" className="border boder-red-50"
+        onClick={_e => {
+          dispatch(ackMatchedByFilter(id));
+        }}
+      >{name}</Button>{' '}
+    </React.Fragment>
+  ));
+}
+
+//TODO: check whether there's a linter for the keys
 

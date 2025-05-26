@@ -1,9 +1,9 @@
 export type Filter = {
     id: string;
     messageRegex: string;
-    transient?: boolean;
+    transient?: boolean; // default false
+    autoAck?: boolean; //default true
 };
-
 
 const IS_SERVER = typeof window === 'undefined';
 const FILTERS_STORAGE_KEY = 'filters';

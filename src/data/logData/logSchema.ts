@@ -19,6 +19,7 @@ export type Log = {
   line: string;
   timestamp: string;
   acked: Acked;
+  filters: Record<string, string>;
   sourcesAndMessages: [SourceAndMessage, ...SourceAndMessage[]]
 };
 

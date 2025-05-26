@@ -20,6 +20,7 @@ export function handleNewLogsBatch(state: LogDataState, batch: JustReceivedLog[]
       line: source.message,
       timestamp,
       acked,
+      filters: acked && acked.type === 'filter' ? {[acked.filterId]: acked.filterId} : {},
       sourcesAndMessages: [source]
     } as Log
   ))

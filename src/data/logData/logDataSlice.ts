@@ -1,6 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { Acked, JustReceivedLog, Log } from '@/data/logData/logSchema';
-import { createFilter, deleteFilter } from '../filters/filtersSlice';
+import { createFilter, deleteFilter, ackMatchedByFilter } from '../filters/filtersSlice';
 import _ from 'lodash';
 import { FilterStats, loadFilterStatsFromStorage, saveFilterStatsToStorage } from '../filters/filter';
 import { handleNewLogsBatch } from './logDataEventHandlers';
@@ -66,12 +66,22 @@ export const logDataSlice = createSlice({
       let matched = 0
       const ackMarker: Acked = filter.transient ? {type: 'manual'} : { type: 'filter', filterId: filter.id };
       for (const line of state.logs) {
-        if (line.acked) {
+
+        const thisLineMatched = undefined !== line.sourcesAndMessages.find(sm => predicate.test(sm.message))
+
+        if (!thisLineMatched) {
           continue;
         }
-        if (undefined !== line.sourcesAndMessages.find(sm => predicate.test(sm.message))) {
+
+        if (line.filters[filter.id] !== undefined) {
+          continue;
+        }
+
+        matched += 1;
+        line.filters[filter.id] = filter.id;
+        
+        if (line.acked === null && filter.autoAck) {
           line.acked = ackMarker;
-          matched += 1;
         }
       }
       if (!filter.transient && matched > 0) {
@@ -96,6 +106,19 @@ export const logDataSlice = createSlice({
       delete state.filterStats[filterId]
       saveFilterStatsToStorage(state.filterStats)
 
+    })
+
+
+    builder.addCase(ackMatchedByFilter, (state, action) => {
+      const filterId = action.payload
+      const ackMarker: Acked = { type: 'filter', filterId: filterId };
+
+      // unack affected lines
+      for (const line of state.logs) {
+        if (line.acked === null && line.filters[filterId] !== undefined) {
+          line.acked = ackMarker;
+        }
+      }
     })
 
   },

@@ -20,6 +20,7 @@ import { createFilter } from '@/data/filters/filtersSlice';
 import { randomId } from '@/lib/utils';
 import { ScrollArea, ScrollBar } from './ui/scroll-area';
 import { useSelectedSourceMessageLine } from './context/SelectedSourceContext';
+import { Checkbox } from './ui/checkbox';
 
 export default function NewRule({ logEntry }: {logEntry: Log}) {
   const logLine = useSelectedSourceMessageLine(logEntry)
@@ -27,11 +28,12 @@ export default function NewRule({ logEntry }: {logEntry: Log}) {
   const dispatch = useAppDispatch();
 
 
-  function handleSubmit({ save, messageRegex }: SaveRuleProps) {
+  function handleSubmit({ save, messageRegex, autoAck }: SaveRuleProps) {
     const newFilter: Filter = {
       id: randomId(),
       transient: !save,
       messageRegex,
+      autoAck,
     };
     dispatch(createFilter(newFilter));
   }
@@ -42,6 +44,7 @@ export default function NewRule({ logEntry }: {logEntry: Log}) {
 type SaveRuleProps = {
   save: boolean;
   messageRegex: string;
+  autoAck?: boolean;
 }
 
 export function RuleDialog({ logLine, handleSubmit }: { logLine: string, handleSubmit: (p: SaveRuleProps) => void }) {
@@ -57,9 +60,15 @@ export function RuleDialog({ logLine, handleSubmit }: { logLine: string, handleS
     logLineMatchesRegex = 'err';
     errorMessage = (e as { message: string }).message;
   }
-
+  const [autoAck, setAutoAck] = useState(true);
 
   const [open, setOpen] = useState(false);
+
+  const handleSubmitWithClose = (props: SaveRuleProps) => {
+    handleSubmit(props);
+    setOpen(false);
+  }
+
   if (!open) {
     return <Button
       size="sm"
@@ -116,6 +125,23 @@ export function RuleDialog({ logLine, handleSubmit }: { logLine: string, handleS
               <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
           )}
+            <div className="flex items-center space-x-2">
+            <Checkbox
+              id="auto-ack"
+              data-testid="auto-ack"
+              checked={autoAck}
+              onCheckedChange={(checked) => setAutoAck(!!checked)}
+            />
+            <label
+              htmlFor="auto-ack"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Autoack
+            </label>
+            <p className="text-sm text-muted-foreground">
+              Uncheck to leave matched messages on the incoming list.
+            </p>
+            </div>
         </div>
         <DialogFooter className="space-x-4">
           <DialogClose asChild>
@@ -123,10 +149,10 @@ export function RuleDialog({ logLine, handleSubmit }: { logLine: string, handleS
               Close
             </Button>
           </DialogClose>
-          <Button data-testid="apply-rule-button" disabled={logLineMatchesRegex != 'yes'} onClick={() => handleSubmit({ save: false, messageRegex })} type="submit">
+          <Button data-testid="apply-rule-button" disabled={logLineMatchesRegex != 'yes'} onClick={() => handleSubmit({ save: false, messageRegex, autoAck })} type="submit">
             Apply on current
           </Button>
-          <Button data-testid="save-rule-button" disabled={logLineMatchesRegex != 'yes'} onClick={() => handleSubmit({ save: true, messageRegex })} type="submit">
+          <Button data-testid="save-rule-button" disabled={logLineMatchesRegex != 'yes'} onClick={() => handleSubmitWithClose({ save: true, messageRegex, autoAck })} type="submit">
             Save for the future
           </Button>
         </DialogFooter>
