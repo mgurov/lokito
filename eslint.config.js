@@ -3,6 +3,9 @@ import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
+import reactPlugin from 'eslint-plugin-react'
+
+const reactFiles = ['**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}']
 
 export default tseslint.config(
   { ignores: ['dist'] },
@@ -48,5 +51,22 @@ export default tseslint.config(
       "react-refresh/only-export-components": "off",
       "no-console": ["error", { allow: ["warn", "error"] }],
     },
+  },
+  {
+    files: reactFiles,
+    ...reactPlugin.configs.flat.recommended,
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    }
+  },
+  {
+    files: reactFiles,
+    rules: {
+      'react/react-in-jsx-scope': 'off',
+      'react/no-unescaped-entities': 'off',
+      'react/jsx-key': 'error',
+    }
   },
 )

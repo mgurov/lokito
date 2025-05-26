@@ -112,6 +112,3 @@ function FilterIndicators({row}: {row: LogWithSource}) {
     </React.Fragment>
   ));
 }
-
-//TODO: check whether there's a linter for the keys
-
