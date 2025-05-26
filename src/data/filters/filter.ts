@@ -1,9 +1,26 @@
+
 export type Filter = {
     id: string;
     messageRegex: string;
     transient?: boolean; // default false
     autoAck?: boolean; //default true
+    autoAckTillDate?: string;
 };
+
+export function ackPredicateByDate({autoAckTillDate, autoAck}: Filter): (timestamp: string) => boolean {
+    if (autoAck === false) {
+        return () => false
+    }
+    if (!autoAckTillDate) {
+        return () => true;
+    }
+    const cutoff = new Date(autoAckTillDate).toISOString()
+    return (timestamp: string) => {
+        // expect to work lexicographically because ISO strings both
+        return (cutoff >= timestamp)
+    }
+
+}
 
 const IS_SERVER = typeof window === 'undefined';
 const FILTERS_STORAGE_KEY = 'filters';

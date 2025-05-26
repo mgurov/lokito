@@ -8,7 +8,7 @@ export type Acked = null | {type: 'manual'} | {type: 'filter', filterId: string}
 export type JustReceivedLog = {
   stream: { [key: string]: unknown };
   id: string;
-  timestamp: string;
+  timestamp: string; //iso string
   source: SourceAndMessage;
   acked: Acked;
 }

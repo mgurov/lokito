@@ -2,7 +2,7 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { Acked, JustReceivedLog, Log } from '@/data/logData/logSchema';
 import { createFilter, deleteFilter, ackMatchedByFilter } from '../filters/filtersSlice';
 import _ from 'lodash';
-import { FilterStats, loadFilterStatsFromStorage, saveFilterStatsToStorage } from '../filters/filter';
+import { ackPredicateByDate, FilterStats, loadFilterStatsFromStorage, saveFilterStatsToStorage } from '../filters/filter';
 import { handleNewLogsBatch } from './logDataEventHandlers';
 
 type LogIndexNode = {
@@ -63,8 +63,12 @@ export const logDataSlice = createSlice({
     builder.addCase(createFilter, (state, action) => {
       const filter = action.payload;
       const predicate = RegExp(filter.messageRegex);
-      let matched = 0
       const ackMarker: Acked = filter.transient ? {type: 'manual'} : { type: 'filter', filterId: filter.id };
+
+      let matched = 0
+
+      const ackPredicate = ackPredicateByDate(filter)
+
       for (const line of state.logs) {
 
         const thisLineMatched = undefined !== line.sourcesAndMessages.find(sm => predicate.test(sm.message))
@@ -80,7 +84,7 @@ export const logDataSlice = createSlice({
         matched += 1;
         line.filters[filter.id] = filter.id;
         
-        if (line.acked === null && filter.autoAck) {
+        if (line.acked === null && ackPredicate(line.timestamp)) {
           line.acked = ackMarker;
         }
       }

@@ -31,3 +31,34 @@ test('non-acking filter on it', async ({ page, appState, mainPage, logs }) => {
     await expect(page.getByText('unrelated')).toBeVisible();
 });
 
+
+test('should be possible to define a date for which a filter would be auto-acked', async ({ page, appState, mainPage, logs }) => {
+    await page.clock.install({time: '2025-05-12T08:27:01Z'})
+    await appState.givenSources({ name: 'existing' });
+    logs.givenRecords({message: "stem 1", timestamp: '2025-05-20T08:27:01Z'},
+        {message: "stem 2", timestamp: '2025-05-21T08:27:01Z'},
+        {message: "stem 3", timestamp: '2025-05-22T08:27:01Z'});
+
+    await mainPage.open({
+        startFetch: true
+    });
+
+    await page.getByText('stem 1').click();
+    await page.getByTestId('new-rule-button').click();
+    await page.getByTestId('rule_regex').fill('stem');
+    await page.getByTestId('auto-ack-ttl-trigger-button').click();
+    await page.locator('//button[@name="day" and text()="22"]').click()
+    await page.getByTestId('save-rule-button').click();
+
+    await expect(page.getByText('stem 1')).not.toBeVisible();
+    await expect(page.getByText('stem 2')).not.toBeVisible();
+    await expect(page.getByText('stem 3')).toBeVisible();
+    await mainPage.expectAckMessages(2);
+    await expect(page.getByTestId('matching-filter')).toHaveCount(1);
+});
+
+//TODO: applying to the new fetch.
+//TODO: persistence.
+
+//TODO: shouldn't be able to select previous date maybe.
+//TODO: rename filters to rules?

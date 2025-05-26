@@ -67,6 +67,7 @@ export default tseslint.config(
       'react/react-in-jsx-scope': 'off',
       'react/no-unescaped-entities': 'off',
       'react/jsx-key': 'error',
+      "react/prop-types": ['error', { "ignore": ["className"] }],
     }
   },
 )
