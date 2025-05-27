@@ -1,3 +1,4 @@
+import { Acked } from "../logData/logSchema";
 
 export type Filter = {
     id: string;
@@ -6,6 +7,43 @@ export type Filter = {
     autoAck?: boolean; //default true
     autoAckTillDate?: string;
 };
+
+const NO_MATCH = { matched: 'no' };
+
+//TODO: replace no_match with no acked?
+export type FilterMatchResult = {
+    matched: 'yes',
+    acked: Acked,
+} | typeof NO_MATCH;
+
+export type LineForMatching = {
+    messages: string[],
+    timestamp: string,
+}
+
+export type FilterMatcher = (line: LineForMatching) => FilterMatchResult;
+
+export function makeFilterMatcher(filter: Filter): FilterMatcher {
+    const messagePredicate = RegExp(filter.messageRegex);
+    const ackMarker: Acked = filter.transient ? {type: 'manual'} : { type: 'filter', filterId: filter.id };
+    const ackPredicate = ackPredicateByDate(filter);
+
+    return (line: LineForMatching): FilterMatchResult => {
+
+
+        const thisLineMatched = undefined !== line.messages.find(sm => messagePredicate.test(sm))
+
+        if (!thisLineMatched) {
+          return NO_MATCH
+        }
+
+        return {
+            matched: 'yes',
+            acked: ackPredicate(line.timestamp) ? ackMarker : null,
+        }      
+    }
+
+}
 
 export function ackPredicateByDate({autoAckTillDate, autoAck}: Filter): (timestamp: string) => boolean {
     if (autoAck === false) {

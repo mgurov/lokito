@@ -9,15 +9,15 @@ export type JustReceivedLog = {
   stream: { [key: string]: unknown };
   id: string;
   timestamp: string; //iso string
-  source: SourceAndMessage;
-  acked: Acked;
+  source: SourceAndMessage; //TODO: back to message
+  acked: Acked; //TODO: move it out
 }
 
 export type Log = {
   stream: { [key: string]: unknown };
   id: string;
   line: string;
-  timestamp: string;
+  timestamp: string; //iso string
   acked: Acked;
   filters: Record<string, string>;
   sourcesAndMessages: [SourceAndMessage, ...SourceAndMessage[]]

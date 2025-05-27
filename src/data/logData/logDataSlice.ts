@@ -1,9 +1,9 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
-import { Acked, JustReceivedLog, Log } from '@/data/logData/logSchema';
+import { Acked, Log } from '@/data/logData/logSchema';
 import { createFilter, deleteFilter, ackMatchedByFilter } from '../filters/filtersSlice';
 import _ from 'lodash';
-import { ackPredicateByDate, FilterStats, loadFilterStatsFromStorage, saveFilterStatsToStorage } from '../filters/filter';
-import { handleNewLogsBatch } from './logDataEventHandlers';
+import { FilterStats, loadFilterStatsFromStorage, makeFilterMatcher, saveFilterStatsToStorage } from '../filters/filter';
+import { BatchToProcess, handleNewLogsBatch } from './logDataEventHandlers';
 
 type LogIndexNode = {
   stream: { [key: string]: unknown };
@@ -27,7 +27,7 @@ export const logDataSlice = createSlice({
   name: 'logData',
   initialState,
   reducers: {
-    receiveBatch: (state, action: PayloadAction<JustReceivedLog[]>) => {
+    receiveBatch: (state, action: PayloadAction<BatchToProcess>) => {
       handleNewLogsBatch(state, action.payload)
     },
     ack: (state, action: PayloadAction<string>) => {
@@ -62,18 +62,19 @@ export const logDataSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(createFilter, (state, action) => {
       const filter = action.payload;
-      const predicate = RegExp(filter.messageRegex);
-      const ackMarker: Acked = filter.transient ? {type: 'manual'} : { type: 'filter', filterId: filter.id };
+      const matcher = makeFilterMatcher(filter)
 
       let matched = 0
 
-      const ackPredicate = ackPredicateByDate(filter)
-
       for (const line of state.logs) {
+        const {sourcesAndMessages, timestamp} = line
 
-        const thisLineMatched = undefined !== line.sourcesAndMessages.find(sm => predicate.test(sm.message))
+        const matchResult = matcher({
+          messages: sourcesAndMessages.map(m => m.message),
+          timestamp,
+        })        
 
-        if (!thisLineMatched) {
+        if (matchResult.matched === 'no') {
           continue;
         }
 
@@ -84,8 +85,8 @@ export const logDataSlice = createSlice({
         matched += 1;
         line.filters[filter.id] = filter.id;
         
-        if (line.acked === null && ackPredicate(line.timestamp)) {
-          line.acked = ackMarker;
+        if (line.acked === null && 'acked' in matchResult) {
+          line.acked = matchResult.acked;
         }
       }
       if (!filter.transient && matched > 0) {

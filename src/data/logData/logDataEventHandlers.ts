@@ -1,35 +1,84 @@
 import { current } from '@reduxjs/toolkit';
-import { JustReceivedLog, Log } from '@/data/logData/logSchema';
+import { Acked, JustReceivedLog, Log } from '@/data/logData/logSchema';
 import _ from 'lodash';
-import { FilterStats, saveFilterStatsToStorage } from '../filters/filter';
+import { Filter, FilterMatcher, FilterMatchResult, FilterStats, makeFilterMatcher, saveFilterStatsToStorage } from '../filters/filter';
 import { LogDataState } from './logDataSlice';
 
-export function handleNewLogsBatch(state: LogDataState, batch: JustReceivedLog[]): void {
+
+export type BatchToProcess = {
+  logs: JustReceivedLog[],
+  filters: Filter[],
+}
+
+export function handleNewLogsBatch(state: LogDataState, batch: BatchToProcess): void {
 
   const newRecords: JustReceivedLog[] = [];
-  for (const newRecord of batch) {
+  for (const newRecord of batch.logs) {
     const isDuplicate = recordWhetherDuplicate(state, newRecord)
     if (!isDuplicate) {
       newRecords.push(newRecord);
     }
   }
-  const newRecordsAdapted = newRecords.map(({ stream, id, source, timestamp, acked }) => (
-    {
+
+  const matchers: Array<{matcher: FilterMatcher, filterId: string}> = batch.filters.map(filter => ({matcher: makeFilterMatcher(filter), filterId: filter.id}))
+
+
+  const linePredicates = batch.filters.map(filter => ({regex: RegExp(filter.messageRegex), filterId: filter.id}))
+  for (const log of newRecords) {
+      for (const linePredicate of linePredicates) {
+          if (linePredicate.regex.test(log.source.message)) {
+              log.acked = {type: 'filter', filterId: linePredicate.filterId}
+              break
+          }
+      }
+  }
+
+  const newRecordsAdapted = newRecords.map(({ stream, id, source, timestamp}) => {
+
+    const matchedFilters: Array<{filterId: string, acked: Acked}> = [];
+    for (const m of matchers) {
+      const {matcher} = m
+      const match: FilterMatchResult = matcher({
+        timestamp,
+        messages: [source.message],
+      })
+      //TODO: bark on triple assignment missing
+      if (match.matched === 'yes' && 'acked' in match) {
+        matchedFilters.push({
+          filterId: m.filterId,
+          acked: match.acked
+        })
+      }
+    }
+
+    const filters = matchedFilters.reduce<Record<string, string>>((acc, { filterId }) => {
+      acc[filterId] = filterId;
+      return acc;
+    }, {});
+
+    let acked = matchedFilters.find(mf => mf.acked !== null && mf.acked.type === 'filter')?.acked
+    if (!acked) {
+      acked = matchedFilters.find(mf => mf.acked !== null)?.acked
+    }
+
+    return {
       stream,
       id,
       line: source.message,
       timestamp,
-      acked,
-      filters: acked && acked.type === 'filter' ? {[acked.filterId]: acked.filterId} : {},
+      acked: acked === undefined ? null : acked,
+      filters,
       sourcesAndMessages: [source]
     } as Log
-  ))
+  })
+
+
   state.logs = [...state.logs, ...newRecordsAdapted].sort((a, b) => (a.id > b.id ? -1 : 1));
 
-  updateFilterStats(state.filterStats, newRecords)
+  updateFilterStats(state.filterStats, newRecordsAdapted)
 }
 
-export function updateFilterStats(filterStats: FilterStats, newRecords: JustReceivedLog[]) {
+export function updateFilterStats(filterStats: FilterStats, newRecords: Log[]) {
   //the first step might be overcaution about the piling up updates in immer for many hits.
   const filterCounts: Record<string, number> = {}
   for (const record of newRecords) {
