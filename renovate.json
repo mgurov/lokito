@@ -4,5 +4,12 @@
     "config:recommended"
   ],
   "branchConcurrentLimit": 10,
-  "automerge": true
+  "automerge": true,
+  "packageRules": [
+    {
+      "matchPackageNames": ["tailwindcss"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    }
+  ]
 }
