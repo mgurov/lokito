@@ -1,4 +1,10 @@
-import { Locator, Page } from "@playwright/test";
+import { Locator, Page, test } from "@playwright/test";
+
+export const filtersPageTest = test.extend<{ filtersPage: FiltersPageFixture }>({
+    filtersPage: [async ({ page }, use) => {
+        await use(new FiltersPageFixture(page));
+    }, {}],
+});
 
 export default class FiltersPageFixture {
     constructor(readonly page: Page) { }
@@ -29,5 +35,14 @@ export class FilterCard {
     get deleteButton() {
         return this.locator.getByTestId('delete-filter-button')
     }
+
+    get ttl() {
+        return this.locator.getByTestId('autoack-till')
+    }
+
+    get autoack() {
+        return this.locator.getByTestId('autoack')
+    }
+
 
 }

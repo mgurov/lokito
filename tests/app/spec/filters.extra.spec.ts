@@ -111,11 +111,18 @@ test('a filter with a date should be autoapplied to the new messages', async ({ 
     await expect(page.getByTestId('matching-filter')).toHaveCount(1);
 });
 
+test('only future dates should be available for selection', async ({ page, appState, mainPage, logs }) => {
+    await page.clock.install({time: '2025-05-12T08:27:01Z'})
+    await appState.givenSources({ name: 'existing' });
+    logs.givenRecords({message: "stem 1", timestamp: '2025-05-20T08:27:01Z'});
 
-//TODO: applying to the new fetch.
-//TODO: persistence.
+    await mainPage.open({
+        startFetch: true
+    });
 
-//TODO: shouldn't be able to select previous date maybe.
-//TODO: rename filters to rules?
-//TODO: show TTL'ness on the rule.
-//TODO: filter stats should be updated on new receilals.
+    await page.getByText('stem 1').click();
+    await page.getByTestId('new-rule-button').click();
+    await page.getByTestId('rule_regex').fill('stem');
+    await page.getByTestId('auto-ack-ttl-trigger-button').click();
+    await expect(page.locator('//button[@name="day" and text()="11"]')).toBeDisabled()
+});

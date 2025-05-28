@@ -203,6 +203,7 @@ function TTLDatePicker({date, setDate}: { date: Date | undefined, setDate: (date
           selected={date}
           onSelect={setDate}
           initialFocus
+          disabled={{ before: new Date()}}
           className="rounded-md border bg-white"
         />
       </PopoverContent>

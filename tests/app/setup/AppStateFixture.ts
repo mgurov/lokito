@@ -1,6 +1,7 @@
 import { Source } from "@/data/source";
 import { nextId } from "../util/nextId";
 import { StorageFixture, storageTest } from "./StorageFixture";
+import { Filter } from "@/data/filters/filter";
 
 export class AppStateFixture {
     constructor(public storage: StorageFixture) {
@@ -29,30 +30,36 @@ export class AppStateFixture {
         return sources;
     }
     
-    //NB: discards other sources
-    async givenFilter(messageRegex: string) {
-        const seed = nextId();
-        const filter = {
-            id: seed,
-            messageRegex,
-            transient: false,
-        }
-
-        await this.storage.setLocalItem('filters', [filter]);
-        return filter;
+    //NB: discards other filters
+    async givenFilter(spec: FilterSpec) {
+        return this.givenFilters(spec)
     }
 
-    //NB: discards other sources
-    async givenFilters(...messageRegex: string[]) {
-        const filters = messageRegex.map(messageRegex => ({
-            id: nextId(),
-            messageRegex,
-            transient: false
-        }))
-
+    //NB: discards other filters
+    async givenFilters(...specs: FilterSpec[]) {
+        const filters = specs.map(filterFromSpec)
         await this.storage.setLocalItem('filters', filters);
         return filters;
     }
+}
+
+type FilterSpec = string | Partial<Filter>;
+
+function filterFromSpec(spec: FilterSpec): Filter {
+
+    const template: Filter = {
+        id: nextId(),
+        messageRegex: 'dont much nobody',
+        transient: false,
+        autoAckTillDate: undefined,
+    }
+
+    if (typeof(spec) === 'string') {
+        template.messageRegex = spec
+        return template
+    }
+    
+    return {...template, ...spec}
 }
 
 

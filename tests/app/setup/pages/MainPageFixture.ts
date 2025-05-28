@@ -11,8 +11,6 @@ export const mainPageTest = test.extend<{ mainPage: MainPageFixture }>({
     }, {}],
 });
 
-
-//TODO: decorate the fixture?
 export default class MainPageFixture {
     constructor(readonly page: Page) { }
 
