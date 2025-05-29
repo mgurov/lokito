@@ -25,7 +25,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@radix-ui/react-popover
 import { Calendar } from './ui/calendar';
 import { format } from "date-fns"
 
-export default function NewRule({ logEntry }: {logEntry: Log}) {
+export default function NewRule({ logEntry }: { logEntry: Log }) {
   const logLine = useSelectedSourceMessageLine(logEntry)
 
   const dispatch = useAppDispatch();
@@ -73,7 +73,7 @@ export function RuleDialog({ logLine, onSubmit }: { logLine: string, onSubmit: (
 
   const handleSubmitWithBells = (props: SaveRuleProps) => {
     if (date !== undefined) {
-      onSubmit({...props, autoAckTillDate: format(date, 'yyyy-MM-dd')});
+      onSubmit({ ...props, autoAckTillDate: format(date, 'yyyy-MM-dd') });
     } else {
       onSubmit(props);
     }
@@ -96,8 +96,8 @@ export function RuleDialog({ logLine, onSubmit }: { logLine: string, onSubmit: (
   }
 
   return (
-    <Dialog open onOpenChange={setOpen} data-testid="rule-dialog">
-      <DialogContent className="w-1/2">
+    <Dialog open onOpenChange={setOpen}>
+      <DialogContent className="w-1/2" data-testid="rule-dialog">
         <DialogHeader>
           <DialogTitle>New Rule to rule them all</DialogTitle>
           <DialogDescription></DialogDescription>
@@ -109,7 +109,7 @@ export function RuleDialog({ logLine, onSubmit }: { logLine: string, onSubmit: (
               className="relative px-[0.3rem] py-[0.2rem] font-mono text-sm max-h-80"
             >
               <pre>
-              {logLine}
+                {logLine}
               </pre>
             </div>
             <ScrollBar orientation="horizontal" />
@@ -136,30 +136,30 @@ export function RuleDialog({ logLine, onSubmit }: { logLine: string, onSubmit: (
               <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
           )}
-            <div className="flex items-center space-x-2">
-              <label
-                htmlFor="auto-ack"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                Autoack
-              </label>
-              <Checkbox
-                id="auto-ack"
-                data-testid="auto-ack"
-                checked={autoAck}
-                onCheckedChange={(checked) => setAutoAck(!!checked)}
-              />
-              <p className="text-sm text-muted-foreground">
-                Uncheck to leave matched messages on the incoming list.
-              </p>
-            </div>
+          <div className="flex items-center space-x-2">
+            <label
+              htmlFor="auto-ack"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Autoack
+            </label>
+            <Checkbox
+              id="auto-ack"
+              data-testid="auto-ack"
+              checked={autoAck}
+              onCheckedChange={(checked) => setAutoAck(!!checked)}
+            />
+            <p className="text-sm text-muted-foreground">
+              Uncheck to leave matched messages on the incoming list.
+            </p>
+          </div>
 
-            <div className="flex items-center space-x-2">
-              <TTLDatePicker date={date} setDate={setDate} />
-              <p className="text-sm text-muted-foreground">
-                stop auto-ack'ing after this date (inclusive, UTC)
-              </p>
-            </div>
+          <div className="flex items-center space-x-2">
+            <TTLDatePicker date={date} setDate={setDate} />
+            <p className="text-sm text-muted-foreground">
+              stop auto-ack'ing after this date (inclusive, UTC)
+            </p>
+          </div>
 
         </div>
         <DialogFooter className="space-x-4">
@@ -180,10 +180,10 @@ export function RuleDialog({ logLine, onSubmit }: { logLine: string, onSubmit: (
   );
 }
 
-function TTLDatePicker({date, setDate}: { date: Date | undefined, setDate: (date: Date | undefined) => void }) {
+function TTLDatePicker({ date, setDate }: { date: Date | undefined, setDate: (date: Date | undefined) => void }) {
 
   const [open, setOpen] = useState(false);
- 
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -208,7 +208,7 @@ function TTLDatePicker({date, setDate}: { date: Date | undefined, setDate: (date
             setOpen(false);
           }}
           autoFocus
-          disabled={{ before: new Date()}}
+          disabled={{ before: new Date() }}
           className="rounded-md border bg-white"
         />
       </PopoverContent>

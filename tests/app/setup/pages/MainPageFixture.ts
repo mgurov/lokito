@@ -162,6 +162,7 @@ export default class MainPageFixture {
             await this.page.getByTestId('new-rule-button').click();
 
             const filterEditor = new FilterEditorPageFixture(this.page.getByTestId('rule-dialog'));
+            await expect(filterEditor.locator).toBeAttached();
             
             if (props.filterRegex) {
                 await filterEditor.filterRegex.fill(props.filterRegex);
