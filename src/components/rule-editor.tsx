@@ -96,7 +96,7 @@ export function RuleDialog({ logLine, onSubmit }: { logLine: string, onSubmit: (
   }
 
   return (
-    <Dialog open onOpenChange={setOpen}>
+    <Dialog open onOpenChange={setOpen} data-testid="rule-dialog">
       <DialogContent className="w-1/2">
         <DialogHeader>
           <DialogTitle>New Rule to rule them all</DialogTitle>

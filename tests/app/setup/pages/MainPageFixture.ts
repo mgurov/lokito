@@ -2,6 +2,7 @@ import { test, Page, expect, Locator } from '@playwright/test';
 import SourcePageFixture, { NewSourceRollover, SourceCardFixture } from './SourcesPageFixture';
 import { expectTexts } from '@tests/app/util/visualAssertions';
 import FiltersPageFixture from './FiltersPageFixture';
+import { filter } from 'lodash';
 
 export const mainPageTest = test.extend<{ mainPage: MainPageFixture }>({
     mainPage: [async ({ page }, use) => {
@@ -154,25 +155,51 @@ export default class MainPageFixture {
         filterRegex?: string,
         stepName?: string,
         saveAction?: 'apply' | 'save', //defaults to 'save'
-        customActions?: () => Promise<void>
+        customActions?: (filterEditor: FilterEditorPageFixture) => Promise<void>
     }) {
         await test.step(props.stepName ?? 'createFilter', async () => {
             await this.page.getByText(props.logLineText).click();
             await this.page.getByTestId('new-rule-button').click();
+
+            const filterEditor = new FilterEditorPageFixture(this.page.getByTestId('rule-dialog'));
+            
             if (props.filterRegex) {
-                await this.page.getByTestId('rule_regex').fill(props.filterRegex);
+                await filterEditor.filterRegex.fill(props.filterRegex);
+                //await this.page.getByTestId('rule_regex').fill(props.filterRegex);
             }
             if (props.customActions) {
-                await props.customActions();
+                await props.customActions(filterEditor);
             }
             if (props.saveAction === 'apply') {
-                await this.page.getByTestId('apply-rule-button').click();
+                await filterEditor.applyButton.click();
+                //await this.page.getByTestId('apply-rule-button').click();
             } else {
-                await this.page.getByTestId('save-rule-button').click();
+                await filterEditor.saveButton.click();
+                //await this.page.getByTestId('save-rule-button').click();
             }
         }, {box: false})
     }
 
+}
+
+export class FilterEditorPageFixture {
+    constructor(public locator: Locator) {}
+
+    get filterRegex() {
+        return this.locator.getByTestId('rule_regex')
+    }
+
+    get saveButton() {
+        return this.locator.getByTestId('save-rule-button')
+    }
+
+    get applyButton() {
+        return this.locator.getByTestId('apply-rule-button')
+    }
+
+    get autoAckCheckbox() {
+        return this.locator.getByTestId('auto-ack-checkbox')
+    }
 }
 
 //NB: full-page ATM
