@@ -6,7 +6,6 @@ export const filtersPageTest = test.extend<{ filtersPage: FiltersPageFixture }>(
     }, {}],
 });
 
-
 export default class FiltersPageFixture {
     constructor(readonly page: Page) { }
 
@@ -41,4 +40,7 @@ export class FilterCard {
         return this.locator.getByTestId('auto-ack-sign')
     }
 
+    get ttl() {
+        return this.locator.getByTestId('autoack-till')
+    }
 }

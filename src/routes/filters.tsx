@@ -33,6 +33,7 @@ function FilterCard({ filter }: { filter: Filter }) {
                 <div className="space-x-4">
                     <span className="text-sm text-muted-foreground">#{filter.id}</span>
                     {filter.autoAck !== false && <span data-testid="auto-ack-sign" className="text-green-500">Auto Ack</span>}
+                    {filter.autoAckTillDate && <span className="text-sm text-muted-foreground" data-testid="autoack-till">till {filter.autoAckTillDate}</span>}
                     <FilterStats filterId={filter.id} />
                     <Button
                         data-testid="delete-filter-button"

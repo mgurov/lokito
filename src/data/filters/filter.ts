@@ -5,6 +5,7 @@ export type Filter = {
     messageRegex: string;
     transient?: boolean; // default false
     autoAck?: boolean; //default true
+    autoAckTillDate?: string;
 };
 
 export type FilterMatched = {
@@ -46,7 +47,7 @@ export function createFilterMatcher(filter: Filter): FilterMatcher {
             return undefined;
         }
     };
-}
+};
 
 const IS_SERVER = typeof window === 'undefined';
 const FILTERS_STORAGE_KEY = 'filters';
