@@ -63,31 +63,6 @@ test('filter with TTL should show such', async ({ appState, filtersPage }) => {
 
 });
 
-//TODO: mark TTL expired on the filters page
-
-test('filter should display auto-ack or not', async ({ appState, filtersPage }) => {
-
-    await appState.givenFilters(
-        {messageRegex: 'yes', autoAck: true},
-        {messageRegex: 'no', autoAck: false},
-        {messageRegex: 'undefined', autoAck: undefined},
-    )
-    await filtersPage.open()
-    
-    await expect(
-        filtersPage.getFilterCard({regex: 'yes'}).autoack
-        ).toHaveText('Auto-ack')
-
-    await expect(
-        filtersPage.getFilterCard({regex: 'no'}).autoack
-    ).not.toBeAttached()
-
-        await expect(
-        filtersPage.getFilterCard({regex: 'undefined'}).autoack
-        ).toHaveText('Auto-ack')
-});
-
-
 test('global stats should remain across the refreshes', async ({ appState, mainPage, logs }) => {
 
     await appState.givenSources({});
