@@ -9,8 +9,7 @@ export type JustReceivedLog = {
   stream: { [key: string]: unknown };
   id: string;
   timestamp: string;
-  source: SourceAndMessage;
-  acked: Acked;
+  message: string;
 }
 
 export type Log = {

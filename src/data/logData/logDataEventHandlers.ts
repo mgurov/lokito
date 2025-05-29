@@ -1,35 +1,54 @@
 import { current } from '@reduxjs/toolkit';
-import { JustReceivedLog, Log } from '@/data/logData/logSchema';
+import { Acked, JustReceivedLog, Log } from '@/data/logData/logSchema';
 import _ from 'lodash';
-import { FilterStats, saveFilterStatsToStorage } from '../filters/filter';
+import { Filter, FilterStats, saveFilterStatsToStorage } from '../filters/filter';
 import { LogDataState } from './logDataSlice';
 
-export function handleNewLogsBatch(state: LogDataState, batch: JustReceivedLog[]): void {
+export type JustReceivedBatch = {
+  logs: JustReceivedLog[];
+  filters: Filter[];
+  sourceId: string;
+}
+
+export function handleNewLogsBatch(state: LogDataState, justReceivedBatch: JustReceivedBatch): void {
 
   const newRecords: JustReceivedLog[] = [];
-  for (const newRecord of batch) {
-    const isDuplicate = recordWhetherDuplicate(state, newRecord)
+  for (const newRecord of justReceivedBatch.logs) {
+    const isDuplicate = recordWhetherDuplicate(state, newRecord, justReceivedBatch.sourceId)
     if (!isDuplicate) {
       newRecords.push(newRecord);
     }
   }
-  const newRecordsAdapted = newRecords.map(({ stream, id, source, timestamp, acked }) => (
-    {
+
+  const linePredicates = justReceivedBatch.filters.map(filter => ({regex: RegExp(filter.messageRegex), filterId: filter.id}))
+  
+
+  const newRecordsAdapted = newRecords.map(({ stream, id, message, timestamp }) => {
+
+    let acked: Acked = null;
+    for (const linePredicate of linePredicates) {
+      if (linePredicate.regex.test(message)) {
+        acked = {type: 'filter', filterId: linePredicate.filterId}
+        break
+      }
+    }
+
+    return {
       stream,
       id,
-      line: source.message,
+      line: message,
       timestamp,
       acked,
       filters: acked && acked.type === 'filter' ? {[acked.filterId]: acked.filterId} : {},
-      sourcesAndMessages: [source]
+      sourcesAndMessages: [{sourceId: justReceivedBatch.sourceId, message}],
     } as Log
-  ))
+  })
   state.logs = [...state.logs, ...newRecordsAdapted].sort((a, b) => (a.id > b.id ? -1 : 1));
 
-  updateFilterStats(state.filterStats, newRecords)
+  updateFilterStats(state.filterStats, newRecordsAdapted)
 }
 
-export function updateFilterStats(filterStats: FilterStats, newRecords: JustReceivedLog[]) {
+export function updateFilterStats(filterStats: FilterStats, newRecords: Log[]) {
   //the first step might be overcaution about the piling up updates in immer for many hits.
   const filterCounts: Record<string, number> = {}
   for (const record of newRecords) {
@@ -45,7 +64,7 @@ export function updateFilterStats(filterStats: FilterStats, newRecords: JustRece
   saveFilterStatsToStorage(filterStats)
 }
 
-function recordWhetherDuplicate(state: LogDataState, newRecord: JustReceivedLog): boolean {
+function recordWhetherDuplicate(state: LogDataState, newRecord: JustReceivedLog, sourceId: string): boolean {
 
   const existingRecords = state.index[newRecord.id];
   if (!existingRecords) {
@@ -53,19 +72,19 @@ function recordWhetherDuplicate(state: LogDataState, newRecord: JustReceivedLog)
     state.index[newRecord.id] = [{
       stream: newRecord.stream,
       id: newRecord.id,
-      sourceIds: [newRecord.source.sourceId]
+      sourceIds: [sourceId]
     }];
     return false
   }
   const sameDataRecord = existingRecords.find((r) => _.isEqual(r.stream, newRecord.stream));
   if (sameDataRecord) {
     // a duplicate. Need to record if came from different source.
-    if (!sameDataRecord.sourceIds.includes(newRecord.source.sourceId)) {
-      sameDataRecord.sourceIds.push(newRecord.source.sourceId)
+    if (!sameDataRecord.sourceIds.includes(sourceId)) {
+      sameDataRecord.sourceIds.push(sourceId)
       // full scan on id and then narrow down on stream equality
       const logsEntries = state.logs.filter(l => l.id === newRecord.id && _.isEqual(l.stream, newRecord.stream))
       logsEntries.forEach(l => {
-        l.sourcesAndMessages.push(newRecord.source)
+        l.sourcesAndMessages.push({message: newRecord.message, sourceId});
       });
     }
     return true;
@@ -74,7 +93,7 @@ function recordWhetherDuplicate(state: LogDataState, newRecord: JustReceivedLog)
     state.index[newRecord.id].push({
       stream: newRecord.stream,
       id: newRecord.id,
-      sourceIds: [newRecord.source.sourceId],
+      sourceIds: [sourceId],
     });
     console.warn(
       'Duplicate log id with different stream; existing:  ',

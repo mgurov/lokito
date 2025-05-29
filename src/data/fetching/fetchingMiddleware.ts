@@ -113,18 +113,11 @@ async function processSourceFetching(sourceState: SourceFetchingState, listenerA
             sourceId: source.id,
         })
 
-        //would probably nice somehow move it to the logDataSlice or extract into a separate middleware
-        const linePredicates = Object.values(listenerApi.getState().filters.data).map(filter => ({regex: RegExp(filter.messageRegex), filterId: filter.id}))
-        for (const log of logs) {
-            for (const linePredicate of linePredicates) {
-                if (linePredicate.regex.test(log.source.message)) {
-                    log.acked = {type: 'filter', filterId: linePredicate.filterId}
-                    break
-                }
-            }
-        }
-
-        listenerApi.dispatch(receiveBatch(logs));
+        listenerApi.dispatch(receiveBatch({
+            logs, 
+            filters: Object.values(listenerApi.getState().filters.data),
+            sourceId: source.id,
+        }));
         listenerApi.dispatch(fetchingActions.sourceFetchedOk(sourceState.sourceId))
     } catch (e: unknown) {
         console.error('error fetching logs', e)
@@ -141,17 +134,16 @@ async function fetchLokiLogs(params: { query: string, from: string, sourceId: st
     const url = buildLokiUrl(params.query, params.from);
 
     return axios.get<{data: {result: LokiResponseEntry[]} }>(url, /*{timeout: 1000}*/)
-        .then(response => response.data.data.result.map(l => responseEntryToJustReceivedLog(l, params.sourceId)));
+        .then(response => response.data.data.result.map(l => responseEntryToJustReceivedLog(l)));
 }
 
-function responseEntryToJustReceivedLog(l: LokiResponseEntry, sourceId: string): JustReceivedLog {
+function responseEntryToJustReceivedLog(l: LokiResponseEntry): JustReceivedLog {
     const [[ts, line]] = l.values;
     return {
         stream: { ...l.stream },
         id: ts.toString(),
         timestamp: new Date(parseInt(ts.slice(0, -6))).toISOString(),
-        source: {sourceId, message: line},
-        acked: null,
+        message: line,
     }
 }
 

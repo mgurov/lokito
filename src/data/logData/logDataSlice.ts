@@ -1,9 +1,9 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
-import { Acked, JustReceivedLog, Log } from '@/data/logData/logSchema';
+import { Acked, Log } from '@/data/logData/logSchema';
 import { createFilter, deleteFilter, ackMatchedByFilter } from '../filters/filtersSlice';
 import _ from 'lodash';
 import { FilterStats, loadFilterStatsFromStorage, saveFilterStatsToStorage } from '../filters/filter';
-import { handleNewLogsBatch } from './logDataEventHandlers';
+import { handleNewLogsBatch, JustReceivedBatch } from './logDataEventHandlers';
 
 type LogIndexNode = {
   stream: { [key: string]: unknown };
@@ -27,7 +27,7 @@ export const logDataSlice = createSlice({
   name: 'logData',
   initialState,
   reducers: {
-    receiveBatch: (state, action: PayloadAction<JustReceivedLog[]>) => {
+    receiveBatch: (state, action: PayloadAction<JustReceivedBatch>) => {
       handleNewLogsBatch(state, action.payload)
     },
     ack: (state, action: PayloadAction<string>) => {

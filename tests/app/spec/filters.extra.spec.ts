@@ -28,7 +28,6 @@ test('non-acking filter on it', async ({ page, appState, mainPage, logs }) => {
 
     await page.clock.install();
 
-    //TODO.
     await test.step.skip('new incoming messages should also be retained', async () => {
         logs.givenRecords('stem 3', 'unrelated 2');
         await page.clock.runFor('01:30');
