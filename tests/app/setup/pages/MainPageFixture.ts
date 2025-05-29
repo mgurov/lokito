@@ -170,7 +170,7 @@ export default class MainPageFixture {
             } else {
                 await this.page.getByTestId('save-rule-button').click();
             }
-        }, {box: true})
+        }, {box: false})
     }
 
 }

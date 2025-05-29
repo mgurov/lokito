@@ -68,7 +68,7 @@ test('should be possible to define a date for which a filter would be auto-acked
         filterRegex: 'stem',
         customActions: async() => {
             await page.getByTestId('auto-ack-ttl-trigger-button').click();
-            await page.locator('//button[contains(@class, "rdp-day_button") and text()="22"]').click()
+            await page.locator('td[data-day="2025-05-22"]').click()
         }
     });
 
