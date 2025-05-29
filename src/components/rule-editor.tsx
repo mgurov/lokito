@@ -181,9 +181,11 @@ export function RuleDialog({ logLine, onSubmit }: { logLine: string, onSubmit: (
 }
 
 function TTLDatePicker({date, setDate}: { date: Date | undefined, setDate: (date: Date | undefined) => void }) {
+
+  const [open, setOpen] = useState(false);
  
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           data-testid="auto-ack-ttl-trigger-button"
@@ -201,7 +203,10 @@ function TTLDatePicker({date, setDate}: { date: Date | undefined, setDate: (date
         <Calendar
           mode="single"
           selected={date}
-          onSelect={setDate}
+          onSelect={d => {
+            setDate(d);
+            setOpen(false);
+          }}
           autoFocus
           disabled={{ before: new Date()}}
           className="rounded-md border bg-white"
