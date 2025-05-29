@@ -30,7 +30,7 @@ export function handleNewLogsBatch(state: LogDataState, justReceivedBatch: JustR
       if (acc) {
         return acc;
       }
-      return matcher.match({ messages: [message] });
+      return matcher.match({ messages: [message], timestamp });
     }, undefined as FilterMatchResult);
 
 
