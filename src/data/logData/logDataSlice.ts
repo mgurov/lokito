@@ -2,7 +2,7 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { Acked, Log } from '@/data/logData/logSchema';
 import { createFilter, deleteFilter, ackMatchedByFilter } from '../filters/filtersSlice';
 import _ from 'lodash';
-import { FilterStats, loadFilterStatsFromStorage, saveFilterStatsToStorage } from '../filters/filter';
+import { createFilterMatcher, FilterStats, loadFilterStatsFromStorage, saveFilterStatsToStorage } from '../filters/filter';
 import { handleNewLogsBatch, JustReceivedBatch } from './logDataEventHandlers';
 
 type LogIndexNode = {
@@ -62,28 +62,29 @@ export const logDataSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(createFilter, (state, action) => {
       const filter = action.payload;
-      const predicate = RegExp(filter.messageRegex);
+      const matcher = createFilterMatcher(filter);
       let matched = 0
-      const ackMarker: Acked = filter.transient ? {type: 'manual'} : { type: 'filter', filterId: filter.id };
       for (const line of state.logs) {
 
-        const thisLineMatched = undefined !== line.sourcesAndMessages.find(sm => predicate.test(sm.message))
+        const lineMatched = matcher.match({messages: line.sourcesAndMessages.map(sm => sm.message)});
 
-        if (!thisLineMatched) {
+        if (!lineMatched) {
           continue;
         }
+      
 
-        if (line.filters[filter.id] !== undefined) {
+        if (line.filters[lineMatched.filterId] !== undefined) {
           continue;
         }
 
         matched += 1;
-        line.filters[filter.id] = filter.id;
+        line.filters[lineMatched.filterId] = lineMatched.filterId;
         
-        if (line.acked === null && filter.autoAck) {
-          line.acked = ackMarker;
+        if (line.acked === null) {
+          line.acked = lineMatched.acked;
         }
       }
+
       if (!filter.transient && matched > 0) {
         state.filterStats[filter.id] = matched
         saveFilterStatsToStorage(state.filterStats)

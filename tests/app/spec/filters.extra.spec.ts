@@ -2,6 +2,7 @@
 import { test, expect } from '@tests/app/setup/testExtended';
 
 test('non-acking filter on it', async ({ page, appState, mainPage, logs }) => {
+    await mainPage.clock.install();
     await appState.givenSources({ name: 'existing' });
     logs.givenRecords('stem 1', 'stem 2', 'unrelated');
     
@@ -26,9 +27,8 @@ test('non-acking filter on it', async ({ page, appState, mainPage, logs }) => {
     await mainPage.expectLogMessages('unrelated');
     await mainPage.expectAckMessages(2);
 
-    await page.clock.install();
 
-    await test.step.skip('new incoming messages should also be retained', async () => {
+    await test.step('new incoming messages should also be retained', async () => {
         logs.givenRecords('stem 3', 'unrelated 2');
         await page.clock.runFor('01:30');
 
@@ -38,7 +38,7 @@ test('non-acking filter on it', async ({ page, appState, mainPage, logs }) => {
     })
 });
 
-test.skip('non-acking filter persisted', async ({appState, mainPage, logs }) => {
+test('non-acking filter persisted', async ({appState, mainPage, logs }) => {
 
     await appState.givenSources({ name: 'existing' });
     await appState.givenFilters({messageRegex: 'stem', autoAck: false});

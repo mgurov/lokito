@@ -1,7 +1,7 @@
 import { current } from '@reduxjs/toolkit';
-import { Acked, JustReceivedLog, Log } from '@/data/logData/logSchema';
+import { JustReceivedLog, Log } from '@/data/logData/logSchema';
 import _ from 'lodash';
-import { Filter, FilterStats, saveFilterStatsToStorage } from '../filters/filter';
+import { Filter, FilterStats, saveFilterStatsToStorage, createFilterMatcher, FilterMatchResult } from '../filters/filter';
 import { LogDataState } from './logDataSlice';
 
 export type JustReceivedBatch = {
@@ -20,26 +20,27 @@ export function handleNewLogsBatch(state: LogDataState, justReceivedBatch: JustR
     }
   }
 
-  const linePredicates = justReceivedBatch.filters.map(filter => ({regex: RegExp(filter.messageRegex), filterId: filter.id}))
+  const matchers = justReceivedBatch.filters.map(createFilterMatcher);
   
 
   const newRecordsAdapted = newRecords.map(({ stream, id, message, timestamp }) => {
 
-    let acked: Acked = null;
-    for (const linePredicate of linePredicates) {
-      if (linePredicate.regex.test(message)) {
-        acked = {type: 'filter', filterId: linePredicate.filterId}
-        break
+    const anyMatched = matchers.reduce((acc, matcher) => {
+      //stop reducing if we already found a match
+      if (acc) {
+        return acc;
       }
-    }
+      return matcher.match({ messages: [message] });
+    }, undefined as FilterMatchResult);
+
 
     return {
       stream,
       id,
       line: message,
       timestamp,
-      acked,
-      filters: acked && acked.type === 'filter' ? {[acked.filterId]: acked.filterId} : {},
+      acked: anyMatched? anyMatched.acked : null,
+      filters: anyMatched ? {[anyMatched.filterId]: anyMatched.filterId} : {},
       sourcesAndMessages: [{sourceId: justReceivedBatch.sourceId, message}],
     } as Log
   })
