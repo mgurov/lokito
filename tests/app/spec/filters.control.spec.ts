@@ -127,3 +127,27 @@ test('should allow filter deletion', async ({ appState, mainPage, logs }) => {
 
     await mainPage.expectLogMessages('yes3', 'xxx', 'yes2', 'yes1');    
 });
+
+test('should show whether filter is acking', async ({ appState, filtersPage }) => {
+    await appState.givenFilters(
+        { messageRegex: 'yes', autoAck: true },
+        { messageRegex: 'undefined', autoAck: undefined },
+        { messageRegex: 'no', autoAck: false },
+    )
+    
+    await filtersPage.open();
+
+    await expect(
+        filtersPage.getFilterCard({regex: 'yes'}).autoAckSign
+    ).toContainText("Auto Ack");
+
+    await expect(
+        filtersPage.getFilterCard({regex: 'no'}).autoAckSign
+    ).not.toBeAttached();
+
+    await expect(
+        filtersPage.getFilterCard({regex: 'undefined'}).autoAckSign
+    ).toContainText("Auto Ack");
+
+
+});

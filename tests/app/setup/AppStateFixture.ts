@@ -56,13 +56,13 @@ function specToFilter(spec: FilterSpec): Filter {
         return {
             id: nextId(),
             messageRegex: spec,
-            transient: false,
         };
     }
     return {
         id: spec.id ?? nextId(),
         messageRegex: spec.messageRegex ?? '',
-        transient: spec.transient ?? false,
+        transient: spec.transient,
+        autoAck: spec.autoAck,
     };
 }
 
