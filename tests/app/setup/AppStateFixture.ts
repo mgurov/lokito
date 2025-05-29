@@ -63,6 +63,7 @@ function specToFilter(spec: FilterSpec): Filter {
         messageRegex: spec.messageRegex ?? '',
         transient: spec.transient,
         autoAck: spec.autoAck,
+        autoAckTillDate: spec.autoAckTillDate,
     };
 }
 

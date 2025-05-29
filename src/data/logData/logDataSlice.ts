@@ -66,7 +66,7 @@ export const logDataSlice = createSlice({
       let matched = 0
       for (const line of state.logs) {
 
-        const lineMatched = matcher.match({messages: line.sourcesAndMessages.map(sm => sm.message)});
+        const lineMatched = matcher.match({timestamp: line.timestamp, messages: line.sourcesAndMessages.map(sm => sm.message)});
 
         if (!lineMatched) {
           continue;

@@ -5,6 +5,7 @@ export type Filter = {
     messageRegex: string;
     transient?: boolean; // default false
     autoAck?: boolean; //default true
+    autoAckTillDate?: string;
 };
 
 export type FilterMatched = {
@@ -15,38 +16,41 @@ export type FilterMatched = {
 export type FilterMatchResult = FilterMatched | undefined;
 
 export type FilterMatcher = {
-    match: (line: {messages: string[]}) => FilterMatchResult;
+    match: (line: {messages: string[], timestamp: string}) => FilterMatchResult;
 }
 
 export function createFilterMatcher(filter: Filter): FilterMatcher {
     const regex = new RegExp(filter.messageRegex);
-    let ackMarker: Acked;
 
-    if (filter.transient === true) {
-        ackMarker = { type: 'manual' };
-    } else if (filter.autoAck === false) {
-        ackMarker = null;
-    } else {
-        ackMarker = { type: 'filter', filterId: filter.id };
-    }
-
-    const ifMatched: FilterMatched = {
-        filterId: filter.id,
-        acked: ackMarker,
-    };
-    
+    const acker: (line: {timestamp: string}) => Acked | null = (() => {
+        if (filter.autoAck === false) {
+            return () => null;
+        } else if (filter.autoAckTillDate) {
+            const autoAckTillDate = new Date(filter.autoAckTillDate);
+            return (line) => {
+                const lineDate = new Date(line.timestamp);
+                return lineDate <= autoAckTillDate ? { type: 'filter', filterId: filter.id } : null;
+            };
+        } else {
+            return () => ({ type: 'filter', filterId: filter.id });
+        }
+    })();
+        
     return {
-        match: (line: {messages: string[]}): FilterMatched | undefined => {
+        match: (line: {messages: string[], timestamp: string}): FilterMatched | undefined => {
             for (const msg of line.messages) {
                 const matches = regex.test(msg);
                 if (matches) {
-                    return ifMatched
+                    return {
+                        filterId: filter.id,
+                        acked: acker(line),
+                    }
                 }
             }
             return undefined;
         }
     };
-}
+};
 
 const IS_SERVER = typeof window === 'undefined';
 const FILTERS_STORAGE_KEY = 'filters';

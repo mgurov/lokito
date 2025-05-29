@@ -11,8 +11,6 @@ export const mainPageTest = test.extend<{ mainPage: MainPageFixture }>({
     }, {}],
 });
 
-
-//TODO: decorate the fixture?
 export default class MainPageFixture {
     constructor(readonly page: Page) { }
 
@@ -155,26 +153,73 @@ export default class MainPageFixture {
         logLineText: string,
         filterRegex?: string,
         stepName?: string,
-        saveAction?: 'apply' | 'save', //defaults to 'save'
-        customActions?: () => Promise<void>
+        saveAction?: 'apply' | 'save' | 'none', //defaults to 'save'
+        customActions?: (filterEditor: FilterEditorPageFixture) => Promise<void>
     }) {
+        const filterEditor = new FilterEditorPageFixture(this.page.getByTestId('rule-dialog'));
+
         await test.step(props.stepName ?? 'createFilter', async () => {
             await this.page.getByText(props.logLineText).click();
             await this.page.getByTestId('new-rule-button').click();
+
+            await expect(filterEditor.locator).toBeAttached();
+            
             if (props.filterRegex) {
-                await this.page.getByTestId('rule_regex').fill(props.filterRegex);
+                await filterEditor.filterRegex.fill(props.filterRegex);
             }
             if (props.customActions) {
-                await props.customActions();
+                await props.customActions(filterEditor);
             }
-            if (props.saveAction === 'apply') {
-                await this.page.getByTestId('apply-rule-button').click();
-            } else {
-                await this.page.getByTestId('save-rule-button').click();
+            switch (props.saveAction) {
+                case 'none':
+                    break;
+                case 'apply': 
+                    await filterEditor.applyButton.click();
+                    break;
+                case 'save':
+                case undefined:
+                    await filterEditor.saveButton.click();
+                    break;
             }
-        }, {box: true})
+        }, {box: false})
+
+        return filterEditor
     }
 
+}
+
+export class FilterEditorPageFixture {
+    constructor(public locator: Locator) {}
+
+    get filterRegex() {
+        return this.locator.getByTestId('rule_regex')
+    }
+
+    get saveButton() {
+        return this.locator.getByTestId('save-rule-button')
+    }
+
+    get applyButton() {
+        return this.locator.getByTestId('apply-rule-button')
+    }
+
+    get autoAckCheckbox() {
+        return this.locator.getByTestId('auto-ack-checkbox')
+    }
+
+    get autoAckTtlTriggerButton() {
+        return this.locator.getByTestId('auto-ack-ttl-trigger-button') 
+    }
+
+    calendarDateButton(date: string) {
+        return this.locator.locator(`td[data-day="${date}"] button`)
+    }
+
+
+    async pickTTLDate(date: string) {
+        await this.autoAckTtlTriggerButton.click();
+        await this.calendarDateButton(date).click();
+    }
 }
 
 //NB: full-page ATM

@@ -46,6 +46,23 @@ test('existing filter should be visible and show acked elements', async ({ appSt
     await expect(yesFilterCard.currentHitCount).toHaveText('2')
 });
 
+
+test('filter with TTL should show such', async ({ appState, filtersPage }) => {
+
+    await appState.givenFilters(
+        {messageRegex: 'yes', autoAckTillDate: '2025-05-28'},
+        {messageRegex: 'no', autoAckTillDate: undefined},
+    )
+    await filtersPage.open()
+    
+    const yesFilterCard = filtersPage.getFilterCard({regex: 'yes'})
+    await expect(yesFilterCard.ttl).toHaveText('till 2025-05-28')
+
+    const noFilterCard = filtersPage.getFilterCard({regex: 'no'})
+    await expect(noFilterCard.ttl).not.toBeAttached()
+
+});
+
 test('global stats should remain across the refreshes', async ({ appState, mainPage, logs }) => {
 
     await appState.givenSources({});

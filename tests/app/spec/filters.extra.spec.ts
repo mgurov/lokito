@@ -52,3 +52,60 @@ test('non-acking filter persisted', async ({appState, mainPage, logs }) => {
 });
 
 
+test('should be possible to define a date for which a filter would be auto-acked', async ({ page, appState, mainPage, logs }) => {
+    await page.clock.install({time: '2025-05-12T08:27:01Z'})
+    await appState.givenSources({ name: 'existing' });
+    logs.givenRecords(
+        {message: "stem 1", timestamp: '2025-05-20T08:27:01Z'},
+        {message: "stem 2", timestamp: '2025-05-21T08:27:01Z'},
+        {message: "stem 3", timestamp: '2025-05-22T08:27:01Z'}
+    );
+
+    await mainPage.open();
+
+    await mainPage.createFilter({
+        logLineText: 'stem 1',
+        filterRegex: 'stem',
+        customActions: async(filterEditor) => {
+            await filterEditor.pickTTLDate('2025-05-22');
+        }
+    });
+
+    await mainPage.expectLogMessages('stem 3');
+    await mainPage.expectAckMessages(2);
+    await expect(page.getByTestId('matching-filter')).toHaveCount(1);
+});
+
+
+test('a filter with a date should be autoapplied to the new messages', async ({ page, appState, mainPage, logs }) => {
+    await appState.givenSources({ name: 'existing' });    
+    await appState.givenFilters({messageRegex: 'stem', autoAckTillDate: '2025-05-22'})
+    logs.givenRecords(
+        {message: "stem 1", timestamp: '2025-05-20T08:27:01Z'},
+        {message: "stem 2", timestamp: '2025-05-21T08:27:01Z'},
+        {message: "stem 3", timestamp: '2025-05-22T08:27:01Z'},
+    );
+
+    await mainPage.open();
+
+    await mainPage.expectLogMessages('stem 3')
+
+    await mainPage.expectAckMessages(2);
+    await expect(page.getByTestId('matching-filter')).toHaveCount(1);
+});
+
+test('only future dates should be available for selection', async ({ page, appState, mainPage, logs }) => {
+    await page.clock.install({time: '2025-05-12T08:27:01Z'})
+    await appState.givenSources({ name: 'existing' });
+    logs.givenRecords({message: "stem 1", timestamp: '2025-05-20T08:27:01Z'});
+
+    await mainPage.open();
+
+    const filterEditor = await mainPage.createFilter({
+        logLineText: 'stem 1',
+        saveAction: 'none',
+    })
+
+    await filterEditor.autoAckTtlTriggerButton.click()
+    await expect(filterEditor.calendarDateButton('2025-05-11')).toBeDisabled()
+});
