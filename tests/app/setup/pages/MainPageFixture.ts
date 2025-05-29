@@ -149,6 +149,30 @@ export default class MainPageFixture {
         await this.page.clock.runFor('01:00') //a minute to sync
     }
 
+    async createFilter(props: {
+        logLineText: string,
+        filterRegex?: string,
+        stepName?: string,
+        saveAction?: 'apply' | 'save', //defaults to 'save'
+        customActions?: () => Promise<void>
+    }) {
+        await test.step(props.stepName ?? 'createFilter', async () => {
+            await this.page.getByText(props.logLineText).click();
+            await this.page.getByTestId('new-rule-button').click();
+            if (props.filterRegex) {
+                await this.page.getByTestId('rule_regex').fill(props.filterRegex);
+            }
+            if (props.customActions) {
+                await props.customActions();
+            }
+            if (props.saveAction === 'apply') {
+                await this.page.getByTestId('apply-rule-button').click();
+            } else {
+                await this.page.getByTestId('save-rule-button').click();
+            }
+        }, {box: true})
+    }
+
 }
 
 //NB: full-page ATM

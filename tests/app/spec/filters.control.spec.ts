@@ -1,31 +1,20 @@
 import { FILTERS_STATS_STORAGE_KEY } from '@/data/filters/filter';
 import { test, expect } from '@tests/app/setup/testExtended';
 
-test('created filter should be visible and show acked elements', async ({ page, appState, mainPage, logs }) => {
+test('created filter should be visible and show acked elements', async ({ appState, mainPage, logs }) => {
 
     const [source] = await appState.givenSources({});
     logs.givenSourceRecords(source, 'yes1', 'yes2', 'xxx');
 
     await mainPage.open({startFetch: true});
 
-    await test.step('create a filter', async() => {
-        await page.getByText('yes1').click();
-        await page.getByTestId('new-rule-button').click();
-        await page.getByTestId('rule_regex').fill('yes');
-        await page.getByTestId('save-rule-button').click();
-    })
+    await mainPage.createFilter({logLineText: 'yes1', filterRegex: 'yes'})
 
     await mainPage.expectLogMessages('xxx');
 
-
-    await test.step('create another filter', async() => {
-        await page.getByText('xxx').click();
-        await page.getByTestId('new-rule-button').click();
-        await page.getByTestId('save-rule-button').click();
-    })
+    await mainPage.createFilter({logLineText: 'xxx', stepName: 'create another filter'})
 
     await mainPage.expectLogMessages(...[]);
- 
 
     const filtersPage = await mainPage.openFiltersPage()
     const yesFilterCard = filtersPage.getFilterCard({regex: 'yes'})

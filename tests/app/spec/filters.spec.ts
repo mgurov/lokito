@@ -11,9 +11,9 @@ test('find a line create a filter on it', async ({ page, appState, mainPage, log
         startFetch: true
     });
 
-    await page.getByText('Some<thing> 👻 (H)appened').click();
-    await page.getByTestId('new-rule-button').click();
-    await page.getByTestId('save-rule-button').click();
+    await mainPage.createFilter({
+        logLineText: 'Some<thing> 👻 (H)appened'    
+    });
 
     await expect(page.getByText('Some<thing> 👻 (H)appened')).not.toBeVisible();
     await mainPage.expectAckMessages(1);
@@ -28,17 +28,16 @@ test('a saved filter should be applied to existing and following messages ', asy
     
             await appState.givenSources({ name: 'existing' });
 
-            logs.givenRecords('this_message 1', 'unrelated 1');
+            logs.givenRecords('this_message', 'unrelated 1');
         },
         startFetch: true,
     })
 
-    await mainPage.expectLogMessages('unrelated 1', 'this_message 1');
+    await mainPage.expectLogMessages('unrelated 1', 'this_message');
 
-    await page.getByText('this_message 1').click();
-    await page.getByTestId('new-rule-button').click();
-    await page.getByTestId('rule_regex').fill('this_message');
-    await page.getByTestId('save-rule-button').click();
+    await mainPage.createFilter({
+        logLineText: 'this_message',
+    });
 
     await mainPage.expectLogMessages('unrelated 1');
     await mainPage.expectAckMessages(1);
@@ -77,16 +76,16 @@ test('a non-saved filter should be applied to existing but not following message
 
     await appState.givenSources({ name: 'existing' });
 
-    logs.givenRecords('this_message 1', 'unrelated 1');
+    logs.givenRecords('this_message', 'unrelated 1');
 
     await mainPage.open({startFetch: true});
 
-    await mainPage.expectLogMessages('unrelated 1', 'this_message 1');
+    await mainPage.expectLogMessages('unrelated 1', 'this_message');
 
-    await page.getByText('this_message 1').click();
-    await page.getByTestId('new-rule-button').click();
-    await page.getByTestId('rule_regex').fill('this_message');
-    await page.getByTestId('apply-rule-button').click();
+    await mainPage.createFilter({
+        logLineText: 'this_message',
+        saveAction: 'apply',
+    });
 
     await mainPage.expectLogMessages('unrelated 1');
     await mainPage.expectAckMessages(1);
@@ -98,7 +97,6 @@ test('a non-saved filter should be applied to existing but not following message
 
     await mainPage.expectLogMessages('unrelated 2', 'this_message 2', 'unrelated 1');
     await mainPage.expectAckMessages(1);
-
 });
 
 test('same message should show use first line from all and respective from source tab on filter creation', async ({ page, mainPage, appState, logs }) => {
