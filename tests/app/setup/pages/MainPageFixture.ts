@@ -2,7 +2,6 @@ import { test, Page, expect, Locator } from '@playwright/test';
 import SourcePageFixture, { NewSourceRollover, SourceCardFixture } from './SourcesPageFixture';
 import { expectTexts } from '@tests/app/util/visualAssertions';
 import FiltersPageFixture from './FiltersPageFixture';
-import { filter } from 'lodash';
 
 export const mainPageTest = test.extend<{ mainPage: MainPageFixture }>({
     mainPage: [async ({ page }, use) => {
