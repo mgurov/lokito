@@ -202,7 +202,7 @@ function TTLDatePicker({date, setDate}: { date: Date | undefined, setDate: (date
           mode="single"
           selected={date}
           onSelect={setDate}
-          initialFocus
+          autoFocus
           disabled={{ before: new Date()}}
           className="rounded-md border bg-white"
         />
