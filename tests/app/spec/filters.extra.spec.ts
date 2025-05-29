@@ -66,9 +66,8 @@ test('should be possible to define a date for which a filter would be auto-acked
     await mainPage.createFilter({
         logLineText: 'stem 1',
         filterRegex: 'stem',
-        customActions: async() => {
-            await page.getByTestId('auto-ack-ttl-trigger-button').click();
-            await page.locator('td[data-day="2025-05-22"]').click()
+        customActions: async(filterEditor) => {
+            await filterEditor.pickTTLDate('2025-05-22');
         }
     });
 

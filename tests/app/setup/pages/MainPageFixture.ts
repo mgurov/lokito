@@ -200,6 +200,11 @@ export class FilterEditorPageFixture {
     get autoAckCheckbox() {
         return this.locator.getByTestId('auto-ack-checkbox')
     }
+
+    async pickTTLDate(date: string) {
+        await this.locator.getByTestId('auto-ack-ttl-trigger-button').click();
+        await this.locator.locator(`td[data-day="${date}"]`).click();
+    }
 }
 
 //NB: full-page ATM
