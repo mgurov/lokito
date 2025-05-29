@@ -55,7 +55,7 @@ test('add a source to an existing list from main page', async ({ mainPage, appSt
     consoleLogging.ignoreErrorMessagesContaining('Dialog is changing from uncontrolled to controlled.')
 
     await appState.givenSources({name: 'existing'});
-    await mainPage.open();
+    await mainPage.open({startFetch: false});
 
     const newSourceRollover = await mainPage.clickNewSourceButton()
     await newSourceRollover.fillSourceForm({ name: 'new'});
@@ -71,7 +71,7 @@ test('add a source should have immediate effect on fetching', async ({ mainPage,
     await mainPage.clock.install();
 
     await appState.givenSources({});
-    await mainPage.open({startFetch: true});
+    await mainPage.open();
 
     await expect.poll(() => logs.requests).toHaveLength(1);
 
@@ -89,7 +89,7 @@ test('delete a source should have immediate effect on fetching', async ({ mainPa
     await mainPage.clock.install();
 
     const [toBeRemoved, toBeKept] = await appState.givenSources({name: 'to be removed'}, {});
-    await mainPage.open({startFetch: true});
+    await mainPage.open();
 
     await logs.expectQueries(
         toBeRemoved,
@@ -120,7 +120,7 @@ test('deactivate and then activate', async ({ mainPage, appState, logs }) => {
     await mainPage.clock.install();
 
     const [toBeDeactivated, toBeKept] = await appState.givenSources({name: 'deactivate me'}, {});
-    await mainPage.open({startFetch: true});
+    await mainPage.open();
 
     await logs.expectQueries(toBeDeactivated, toBeKept)
 
@@ -234,7 +234,7 @@ test('should be able to cancel editing a source query', async ({ appState, sourc
 test('should be able to display the source card from the source tab', async({appState, mainPage}) => {
     const source = await appState.givenSource({query: "source-query"})
 
-    await mainPage.open({startFetch: true})
+    await mainPage.open()
     
     await mainPage.selectSourceTab(source)
 

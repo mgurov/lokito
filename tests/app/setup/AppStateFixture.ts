@@ -1,6 +1,7 @@
 import { Source } from "@/data/source";
 import { nextId } from "../util/nextId";
 import { StorageFixture, storageTest } from "./StorageFixture";
+import { Filter } from "@/data/filters/filter";
 
 export class AppStateFixture {
     constructor(public storage: StorageFixture) {
@@ -16,43 +17,53 @@ export class AppStateFixture {
         return ((sourcesStored || []) as [Source]);
     }
 
-
-    //NB: discards other sources
+    
     async givenSource(sourceSpecs: SourceSpec = {}) {
         const [source] = await this.givenSources(...[sourceSpecs]);
         return source
     }
-
+    
+    private sourcesSet: boolean = false;
     async givenSources(...sourceSpecs: SourceSpec[]) {
+        if (this.sourcesSet !== false) {
+            throw Error(`Sources already set, cummulative support is not implemented`);
+        }
+        this.sourcesSet = true
+
         const sources = sourceSpecs.map(toSource);
         await this.storage.setLocalItem('sources', sources);
         return sources;
     }
-    
-    //NB: discards other sources
-    async givenFilter(messageRegex: string) {
-        const seed = nextId();
-        const filter = {
-            id: seed,
-            messageRegex,
-            transient: false,
+
+    private filtersSet: boolean = false;
+    async givenFilters(...messageRegex: FilterSpec[]) {
+
+        if (this.filtersSet !== false) {
+            throw Error(`Filters already set, cummulative filters support is not implemented`);
         }
+        this.filtersSet = true
 
-        await this.storage.setLocalItem('filters', [filter]);
-        return filter;
-    }
-
-    //NB: discards other sources
-    async givenFilters(...messageRegex: string[]) {
-        const filters = messageRegex.map(messageRegex => ({
-            id: nextId(),
-            messageRegex,
-            transient: false
-        }))
-
+        const filters: Filter[] = messageRegex.map(specToFilter)
         await this.storage.setLocalItem('filters', filters);
         return filters;
     }
+}
+
+type FilterSpec = string | Partial<Filter>;
+
+function specToFilter(spec: FilterSpec): Filter {
+    if (typeof spec === 'string') {
+        return {
+            id: nextId(),
+            messageRegex: spec,
+            transient: false,
+        };
+    }
+    return {
+        id: spec.id ?? nextId(),
+        messageRegex: spec.messageRegex ?? '',
+        transient: spec.transient ?? false,
+    };
 }
 
 

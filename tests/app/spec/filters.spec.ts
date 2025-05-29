@@ -2,14 +2,11 @@
 import { test, expect } from '@tests/app/setup/testExtended';
 
 test('find a line create a filter on it', async ({ page, appState, mainPage, logs }) => {
-    
-    await mainPage.open({
-        executeBefore: async () => {
-            await appState.givenSources({ name: 'existing' });
-            logs.givenRecords({ message: 'Some<thing> 👻 (H)appened' });
-        },
-        startFetch: true
-    });
+
+    await appState.givenSources({ name: 'existing' });
+    logs.givenRecords({ message: 'Some<thing> 👻 (H)appened' });
+
+    await mainPage.open();
 
     await mainPage.createFilter({
         logLineText: 'Some<thing> 👻 (H)appened'    
@@ -22,16 +19,11 @@ test('find a line create a filter on it', async ({ page, appState, mainPage, log
 
 test('a saved filter should be applied to existing and following messages ', async ({ page, appState, mainPage, logs }) => {
 
-    await mainPage.open({
-        executeBefore: async () => {
-            await page.clock.install();
-    
-            await appState.givenSources({ name: 'existing' });
+    await page.clock.install();
+    await appState.givenSources({ name: 'existing' });
+    logs.givenRecords('this_message', 'unrelated 1');
 
-            logs.givenRecords('this_message', 'unrelated 1');
-        },
-        startFetch: true,
-    })
+    await mainPage.open()
 
     await mainPage.expectLogMessages('unrelated 1', 'this_message');
 
@@ -56,11 +48,11 @@ test('should be able to see messages acked by a filter', async ({ appState, main
 
     await appState.givenSources({ name: 'existing' });
 
-    await appState.givenFilter('1');
+    await appState.givenFilters('1');
 
     logs.givenRecords('m 1', 'm 2');
 
-    await mainPage.open({startFetch: true})
+    await mainPage.open()
 
     await mainPage.expectLogMessages('m 2');
     await mainPage.expectAckMessages(1)
@@ -78,7 +70,7 @@ test('a non-saved filter should be applied to existing but not following message
 
     logs.givenRecords('this_message', 'unrelated 1');
 
-    await mainPage.open({startFetch: true});
+    await mainPage.open();
 
     await mainPage.expectLogMessages('unrelated 1', 'this_message');
 
@@ -110,7 +102,7 @@ test('same message should show use first line from all and respective from sourc
      // NB: message can be formatted differently different sources
     logs.givenSourceRecords(s2, { message: 's2 event1', timestamp: sameTimestamp, data: sameData });
 
-    await mainPage.open({startFetch: true});
+    await mainPage.open();
 
     await test.step('from main page use the first source message', async () => {
         await mainPage.expandRow('s1 event1')

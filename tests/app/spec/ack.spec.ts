@@ -7,7 +7,7 @@ test.describe('ack all', () => {
     
         logs.givenRecords('event1', 'event2', 'event3');
     
-        await mainPage.open({startFetch: true});
+        await mainPage.open();
         
         await mainPage.expectLogMessages('event3', 'event2', 'event1');
     
@@ -23,7 +23,7 @@ test.describe('ack all', () => {
 
         await appState.givenSource();
     
-        await mainPage.open();
+        await mainPage.open({startFetch: false});
         
         await expect(mainPage.ackAllButton).not.toBeVisible()
         
@@ -38,7 +38,7 @@ test.describe('ack all', () => {
         logs.givenSourceRecords(source1, {message: 'source1.1', timestamp: "1"}, {message: 'source1.2', timestamp: "2"});
         logs.givenSourceRecords(source2, {message: 'source2.1', timestamp: "3"}, {message: 'source2.2', timestamp: "4"});
         
-        await mainPage.open({startFetch: true});
+        await mainPage.open();
         
         await mainPage.expectLogMessages('source2.2', 'source2.1', 'source1.2', 'source1.1');
     
@@ -66,7 +66,7 @@ test.describe('ack all', () => {
         logs.givenSourceRecords(source1, {message: 'source1.1', timestamp: "1"}, {message: 'source1.2', timestamp: "2"});
         logs.givenSourceRecords(source2, {message: 'source2.1', timestamp: "3"}, {message: 'source2.2', timestamp: "4"});
         
-        await mainPage.open({startFetch: true});
+        await mainPage.open();
         
         await mainPage.expectLogMessages('source2.2', 'source2.1', 'source1.2', 'source1.1');
     
@@ -87,7 +87,7 @@ test.describe('ack all', () => {
         logs.givenSourceRecords(source1, {message: 'source1.1', timestamp: "1"}, {message: 'source1.2', timestamp: "2"});
         logs.givenSourceRecords(source2, {message: 'source2.1', timestamp: "3"}, {message: 'source2.2', timestamp: "4"});
         
-        await mainPage.open({startFetch: true});
+        await mainPage.open();
             
         await mainPage.selectSourceTab(source1)
         await mainPage.expectSourceTabCount(source1, 2)
@@ -108,7 +108,7 @@ test.describe('ack till this', () => {
     
         logs.givenRecords('event1', 'event2', 'event3');
     
-        await mainPage.open({startFetch: true});
+        await mainPage.open();
         
         await mainPage.expectLogMessages('event3', 'event2', 'event1');
     
@@ -138,7 +138,7 @@ test.describe('ack till this', () => {
             {message: 's2.2', timestamp: "4"}
         );
     
-        await mainPage.open({startFetch: true});
+        await mainPage.open();
         
         await mainPage.expectLogMessages('s1.3', 's2.2', 's1.2', 's2.1', 's1.1');
     
@@ -175,7 +175,7 @@ test.describe('ack till this', () => {
             {message: 's2.2', timestamp: "4"}
         );
     
-        await mainPage.open({startFetch: true});
+        await mainPage.open();
         
         await mainPage.expectLogMessages('s1.3', 's2.2', 's1.2', 's2.1', 's1.1');
     
@@ -198,7 +198,7 @@ test('acked indicator should indicate the number of acked messages', async ({ ap
 
     logs.givenRecords('event1', 'event2');
 
-    await mainPage.open({startFetch: true});
+    await mainPage.open();
 
 
     await mainPage.expectLogMessages('event2', 'event1');
@@ -227,7 +227,7 @@ test('document title should indicate the number of acked messages', async ({ app
 
     await appState.givenSource();
     
-    await mainPage.open({startFetch: true});
+    await mainPage.open();
 
     await expect.poll(async () => mainPage.page.title()).toBe('Lokito');
 

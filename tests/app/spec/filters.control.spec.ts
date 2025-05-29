@@ -6,7 +6,7 @@ test('created filter should be visible and show acked elements', async ({ appSta
     const [source] = await appState.givenSources({});
     logs.givenSourceRecords(source, 'yes1', 'yes2', 'xxx');
 
-    await mainPage.open({startFetch: true});
+    await mainPage.open();
 
     await mainPage.createFilter({logLineText: 'yes1', filterRegex: 'yes'})
 
@@ -35,9 +35,9 @@ test('existing filter should be visible and show acked elements', async ({ appSt
 
     const [source] = await appState.givenSources({});
     logs.givenSourceRecords(source, 'yes1', 'yes2', 'xxx');
-    await appState.givenFilter('yes')
+    await appState.givenFilters('yes')
 
-    await mainPage.open({startFetch: true});
+    await mainPage.open();
 
     await mainPage.expectLogMessages('xxx');
 
@@ -52,7 +52,7 @@ test('global stats should remain across the refreshes', async ({ appState, mainP
     await appState.givenFilters('yes', 'xxx')
     logs.givenRecords('yes1', 'yes2', 'xxx');
 
-    await mainPage.open({startFetch: true});
+    await mainPage.open();
 
     await mainPage.expectAckMessages(3)
 
@@ -63,7 +63,7 @@ test('global stats should remain across the refreshes', async ({ appState, mainP
 
     //more logs and restart fetching
     logs.givenRecords('yes3');
-    await mainPage.open({startFetch: true});
+    await mainPage.open();
     await mainPage.expectAckMessages(1)
     await mainPage.openFiltersPage()
     await expect(yesFilterCard.currentHitCount).toHaveText('1')
@@ -78,7 +78,7 @@ test('stats updated on fetches when filters page is open', async ({ appState, ma
     await appState.givenFilters('yes')
     logs.givenRecords('yes1', 'yes2');
 
-    await mainPage.open({startFetch: true});
+    await mainPage.open();
 
     const filtersPage = await mainPage.openFiltersPage()
     const yesFilterCard = filtersPage.getFilterCard({regex: 'yes'})
@@ -100,9 +100,9 @@ test('should allow filter deletion', async ({ appState, mainPage, logs }) => {
 
     await appState.givenSource();
     logs.givenRecords('yes1', 'yes2', 'xxx');
-    await appState.givenFilter('yes')
+    await appState.givenFilters('yes')
 
-    await mainPage.open({startFetch: true});
+    await mainPage.open();
 
     await mainPage.expectLogMessages('xxx');
 
