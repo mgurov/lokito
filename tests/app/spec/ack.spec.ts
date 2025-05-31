@@ -1,10 +1,8 @@
 import { expect, test } from '@tests/app/setup/testExtended';
+import { TagSuppressDefaultAppStateTag } from '../setup/AppStateFixture';
 
 test.describe('ack all', () => {
-    test('ack all messages', async ({ appState, mainPage, logs }) => {
-
-        await appState.givenSource();
-    
+    test('ack all messages', async ({ mainPage, logs }) => {    
         logs.givenRecords('event1', 'event2', 'event3');
     
         await mainPage.open();
@@ -19,9 +17,7 @@ test.describe('ack all', () => {
     
     });
 
-    test('hide when nothing to ack', async ({ appState, mainPage }) => {
-
-        await appState.givenSource();
+    test('hide when nothing to ack', async ({ mainPage }) => {
     
         await mainPage.open({startFetch: false});
         
@@ -29,7 +25,7 @@ test.describe('ack all', () => {
         
     });
 
-    test('should only ack a selected source messages', async ({ appState, mainPage, logs }) => {
+    test('should only ack a selected source messages', TagSuppressDefaultAppStateTag, async ({ appState, mainPage, logs }) => {
 
         const [source1, source2] = await appState.givenSources(
             {name: "source1"},
@@ -57,7 +53,7 @@ test.describe('ack all', () => {
     
     });
 
-    test('should ack all messages all sources', async ({ appState, mainPage, logs }) => {
+    test('should ack all messages all sources', TagSuppressDefaultAppStateTag, async ({ appState, mainPage, logs }) => {
 
         const [source1, source2] = await appState.givenSources(
             {name: "source1"},
@@ -78,7 +74,7 @@ test.describe('ack all', () => {
     
     });
 
-    test('should update source count when acking', async ({ appState, mainPage, logs }) => {
+    test('should update source count when acking', TagSuppressDefaultAppStateTag, async ({ appState, mainPage, logs }) => {
 
         const [source1, source2] = await appState.givenSources(
             {name: "source1"},
@@ -102,9 +98,7 @@ test.describe('ack all', () => {
 })
 
 test.describe('ack till this', () => {
-    test('should be able to ack till this message via expanded log line', async ({ appState, mainPage, logs }) => {
-
-        await appState.givenSource();
+    test('should be able to ack till this message via expanded log line', async ({ mainPage, logs }) => {
     
         logs.givenRecords('event1', 'event2', 'event3');
     
@@ -124,7 +118,7 @@ test.describe('ack till this', () => {
         
     });
 
-    test('ack till this should only ack the selected source', async ({ appState, mainPage, logs }) => {
+    test('ack till this should only ack the selected source', TagSuppressDefaultAppStateTag, async ({ appState, mainPage, logs }) => {
 
         const [source1, source2] = await appState.givenSources({name: "source1"}, {name: "source2"});
     
@@ -161,7 +155,7 @@ test.describe('ack till this', () => {
     });
 
 
-    test('ack till this should ack from all source when on all sources page', async ({ appState, mainPage, logs }) => {
+    test('ack till this should ack from all source when on all sources page', TagSuppressDefaultAppStateTag, async ({ appState, mainPage, logs }) => {
 
         const [source1, source2] = await appState.givenSources({name: "source1"}, {name: "source2"});
     
@@ -192,9 +186,7 @@ test.describe('ack till this', () => {
 })
 
 
-test('acked indicator should indicate the number of acked messages', async ({ appState, mainPage, logs }) => {
-
-    await appState.givenSource();
+test('acked indicator should indicate the number of acked messages', async ({ mainPage, logs }) => {
 
     logs.givenRecords('event1', 'event2');
 
@@ -221,11 +213,9 @@ test('acked indicator should indicate the number of acked messages', async ({ ap
 
 });
 
-test('document title should indicate the number of acked messages', async ({ appState, mainPage, logs }) => {
+test('document title should indicate the number of acked messages', async ({ mainPage, logs }) => {
 
     await mainPage.clock.install();
-
-    await appState.givenSource();
     
     await mainPage.open();
 

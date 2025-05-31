@@ -9,7 +9,7 @@ export class AppStateFixture {
 
     async sourceNames() {
         const sourcesStored = await this.storage.getLocalItem('sources')
-        return ((sourcesStored || []) as [{ name: string }]).map(s => s.name);        
+        return ((sourcesStored || []) as [{ name: string }]).map(s => s.name);
     }
 
     async sources() {
@@ -17,16 +17,16 @@ export class AppStateFixture {
         return ((sourcesStored || []) as [Source]);
     }
 
-    
+
     async givenSource(sourceSpecs: SourceSpec = {}) {
         const [source] = await this.givenSources(...[sourceSpecs]);
         return source
     }
-    
+
     private sourcesSet: boolean = false;
     async givenSources(...sourceSpecs: SourceSpec[]) {
         if (this.sourcesSet !== false) {
-            throw Error(`Sources already set, cummulative support is not implemented`);
+            throw Error(`Sources already set, cummulative support is not implemented. Want to override the defaults? Use TagSuppressDefaultSourceTag.`);
         }
         this.sourcesSet = true
 
@@ -81,10 +81,19 @@ function toSource(spec: SourceSpec) {
     };
 }
 
-export const appStateTest = storageTest.extend<{ appState: AppStateFixture }>({
+export const SuppressDefaultAppStateTag = '@suppress-default-app-state'
+export const TagSuppressDefaultAppStateTag = {tag: SuppressDefaultAppStateTag}
+
+export const appStateTest = storageTest.extend<{
+    appState: AppStateFixture,
+}>({
     appState: [
-        async ({ storage }, use) => {
-            await use(new AppStateFixture(storage));
+        async ({ storage}, use, testInfo) => {
+            const appState = new AppStateFixture(storage);
+            if (!testInfo.tags.includes(SuppressDefaultAppStateTag)) {
+                await appState.givenSources({ name: 'default' });
+            }
+            await use(appState);
         },
         { auto: true },
     ],

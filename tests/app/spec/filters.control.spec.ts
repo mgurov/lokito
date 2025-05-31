@@ -1,10 +1,9 @@
 import { FILTERS_STATS_STORAGE_KEY } from '@/data/filters/filter';
 import { test, expect } from '@tests/app/setup/testExtended';
 
-test('created filter should be visible and show acked elements', async ({ appState, mainPage, logs }) => {
+test('created filter should be visible and show acked elements', async ({ mainPage, logs }) => {
 
-    const [source] = await appState.givenSources({});
-    logs.givenSourceRecords(source, 'yes1', 'yes2', 'xxx');
+    logs.givenRecords('yes1', 'yes2', 'xxx');
 
     await mainPage.open();
 
@@ -33,8 +32,7 @@ test('created filter should be visible and show acked elements', async ({ appSta
 
 test('existing filter should be visible and show acked elements', async ({ appState, mainPage, logs }) => {
 
-    const [source] = await appState.givenSources({});
-    logs.givenSourceRecords(source, 'yes1', 'yes2', 'xxx');
+    logs.givenRecords('yes1', 'yes2', 'xxx');
     await appState.givenFilters('yes')
 
     await mainPage.open();
@@ -65,7 +63,6 @@ test('filter with TTL should show such', async ({ appState, filtersPage }) => {
 
 test('global stats should remain across the refreshes', async ({ appState, mainPage, logs }) => {
 
-    await appState.givenSources({});
     await appState.givenFilters('yes', 'xxx')
     logs.givenRecords('yes1', 'yes2', 'xxx');
 
@@ -91,7 +88,6 @@ test('stats updated on fetches when filters page is open', async ({ appState, ma
 
     await mainPage.clock.install()
 
-    await appState.givenSource();
     await appState.givenFilters('yes')
     logs.givenRecords('yes1', 'yes2');
 
@@ -115,7 +111,6 @@ test('should allow filter deletion', async ({ appState, mainPage, logs }) => {
 
     await mainPage.clock.install()
 
-    await appState.givenSource();
     logs.givenRecords('yes1', 'yes2', 'xxx');
     await appState.givenFilters('yes')
 

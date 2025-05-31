@@ -1,7 +1,6 @@
 import { test, expect } from '@tests/app/setup/testExtended';
 
-test('should start with given delay at the moment of click', async ({mainPage, appState, logs}) => {
-    await appState.givenSource();
+test('should start with given delay at the moment of click', async ({mainPage, logs}) => {
     await mainPage.clock.install({time: "2025-02-04T20:30:00.000Z"});
 
     await mainPage.open({startFetch: false});
@@ -40,8 +39,7 @@ test('should start with given delay at the moment of click', async ({mainPage, a
     selected: 'last 24 hours',
     expected: "2025-02-03T20:30:00.000Z"
 }].forEach(({now, selected, expected}) => {
-    test(`should select ${selected}`, async ({mainPage, appState, logs}) => {
-        await appState.givenSource();
+    test(`should select ${selected}`, async ({mainPage, logs}) => {
         await mainPage.clock.setFixedTime(now);
 
         await mainPage.open({startFetch: false});
@@ -58,9 +56,7 @@ test('should start with given delay at the moment of click', async ({mainPage, a
 
 // TODO: imporant: alert of handle exceeding the limit of 1000
 
-test('should show start to begin with', async ({ mainPage, page, appState }) => {
-
-    await appState.givenSource();
+test('should show start to begin with', async ({ mainPage, page }) => {
 
     await page.goto('/');
 

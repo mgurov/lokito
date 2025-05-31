@@ -1,7 +1,8 @@
 import { test, expect } from '@tests/app/setup/testExtended';
 import { NewSourceRollover } from '../setup/pages/SourcesPageFixture';
+import { TagSuppressDefaultAppStateTag } from '../setup/AppStateFixture';
 
-test('add source', async ({ page, appState, consoleLogging }) => {
+test('add source', TagSuppressDefaultAppStateTag, async ({ page, appState, consoleLogging }) => {
 
     consoleLogging.ignoreErrorMessagesContaining('Dialog is changing from uncontrolled to controlled.')
 
@@ -26,7 +27,7 @@ test('add source', async ({ page, appState, consoleLogging }) => {
 });
 
 
-test('add a source from the sourceless main screen', async ({ page, appState, consoleLogging }) => {
+test('add a source from the sourceless main screen', TagSuppressDefaultAppStateTag, async ({ page, appState, consoleLogging }) => {
 
     consoleLogging.failImmediately = true
 
@@ -50,11 +51,12 @@ test('add a source from the sourceless main screen', async ({ page, appState, co
     expect(await appState.sourceNames()).toEqual(['Test Source']);
 });
 
-test('add a source to an existing list from main page', async ({ mainPage, appState, consoleLogging }) => {
+test('add a source to an existing list from main page', TagSuppressDefaultAppStateTag, async ({ mainPage, appState, consoleLogging }) => {
+
+    await appState.givenSources({name: 'existing'});
 
     consoleLogging.ignoreErrorMessagesContaining('Dialog is changing from uncontrolled to controlled.')
 
-    await appState.givenSources({name: 'existing'});
     await mainPage.open({startFetch: false});
 
     const newSourceRollover = await mainPage.clickNewSourceButton()
@@ -64,13 +66,12 @@ test('add a source to an existing list from main page', async ({ mainPage, appSt
     expect(await appState.sourceNames()).toEqual(['existing', 'new']);
 });
 
-test('add a source should have immediate effect on fetching', async ({ mainPage, appState, logs, consoleLogging }) => {
+test('add a source should have immediate effect on fetching', async ({ mainPage, logs, consoleLogging }) => {
 
     consoleLogging.ignoreErrorMessagesContaining('Dialog is changing from uncontrolled to controlled.')
 
     await mainPage.clock.install();
 
-    await appState.givenSources({});
     await mainPage.open();
 
     await expect.poll(() => logs.requests).toHaveLength(1);
@@ -84,7 +85,7 @@ test('add a source should have immediate effect on fetching', async ({ mainPage,
     await expect.poll(() => logs.requests).toHaveLength(3);
 });
 
-test('delete a source should have immediate effect on fetching', async ({ mainPage, appState, logs }) => {
+test('delete a source should have immediate effect on fetching', TagSuppressDefaultAppStateTag, async ({ mainPage, appState, logs }) => {
 
     await mainPage.clock.install();
 
@@ -115,7 +116,7 @@ test('delete a source should have immediate effect on fetching', async ({ mainPa
     )
 });
 
-test('deactivate and then activate', async ({ mainPage, appState, logs }) => {
+test('deactivate and then activate', TagSuppressDefaultAppStateTag, async ({ mainPage, appState, logs }) => {
 
     await mainPage.clock.install();
 
@@ -157,12 +158,11 @@ test('deactivate and then activate', async ({ mainPage, appState, logs }) => {
 
 });
 
-test('add a source to an existing list from sources page', async ({ appState, sourcePage, consoleLogging }) => {
-
-    consoleLogging.ignoreErrorMessagesContaining('Dialog is changing from uncontrolled to controlled.')
-
+test('add a source to an existing list from sources page', TagSuppressDefaultAppStateTag, async ({ appState, sourcePage, consoleLogging }) => {
 
     await appState.givenSources({name: 'existing'});
+
+    consoleLogging.ignoreErrorMessagesContaining('Dialog is changing from uncontrolled to controlled.')
 
     await sourcePage.open();
 
@@ -174,7 +174,7 @@ test('add a source to an existing list from sources page', async ({ appState, so
     expect(await appState.sourceNames()).toEqual(['existing', 'new']);
 });
 
-test('edit a source query', async ({ appState, sourcePage }) => {
+test('edit a source query', TagSuppressDefaultAppStateTag, async ({ appState, sourcePage }) => {
 
     await appState.givenSources({name: 'existing', query: '{job="initial query"}'});
 
@@ -207,7 +207,7 @@ test('edit a source query', async ({ appState, sourcePage }) => {
     // await expect(page.getByTestId('source-card-filter-textarea')).toHaveText('{job="updated query"}')    
 });
 
-test('should be able to cancel editing a source query', async ({ appState, sourcePage }) => {
+test('should be able to cancel editing a source query', TagSuppressDefaultAppStateTag,  async ({ appState, sourcePage }) => {
 
     await appState.givenSources({name: 'existing', query: '{job="initial query"}'});
 
@@ -231,7 +231,7 @@ test('should be able to cancel editing a source query', async ({ appState, sourc
 
 });
 
-test('should be able to display the source card from the source tab', async({appState, mainPage}) => {
+test('should be able to display the source card from the source tab', TagSuppressDefaultAppStateTag, async({appState, mainPage}) => {
     const source = await appState.givenSource({query: "source-query"})
 
     await mainPage.open()

@@ -1,9 +1,8 @@
 
 import { test, expect } from '@tests/app/setup/testExtended';
 
-test('non-acking filter on it', async ({ page, appState, mainPage, logs }) => {
+test('non-acking filter on it', async ({ page, mainPage, logs }) => {
     await mainPage.clock.install();
-    await appState.givenSources({ name: 'existing' });
     logs.givenRecords('stem 1', 'stem 2', 'unrelated');
     
     await mainPage.open();
@@ -40,7 +39,6 @@ test('non-acking filter on it', async ({ page, appState, mainPage, logs }) => {
 
 test('non-acking filter persisted', async ({appState, mainPage, logs }) => {
 
-    await appState.givenSources({ name: 'existing' });
     await appState.givenFilters({messageRegex: 'stem', autoAck: false});
     logs.givenRecords('stem 1', 'stem 2', 'unrelated');
 
@@ -52,9 +50,8 @@ test('non-acking filter persisted', async ({appState, mainPage, logs }) => {
 });
 
 
-test('should be possible to define a date for which a filter would be auto-acked', async ({ page, appState, mainPage, logs }) => {
+test('should be possible to define a date for which a filter would be auto-acked', async ({ page, mainPage, logs }) => {
     await page.clock.install({time: '2025-05-12T08:27:01Z'})
-    await appState.givenSources({ name: 'existing' });
     logs.givenRecords(
         {message: "stem 1", timestamp: '2025-05-20T08:27:01Z'},
         {message: "stem 2", timestamp: '2025-05-21T08:27:01Z'},
@@ -78,7 +75,6 @@ test('should be possible to define a date for which a filter would be auto-acked
 
 
 test('a filter with a date should be autoapplied to the new messages', async ({ page, appState, mainPage, logs }) => {
-    await appState.givenSources({ name: 'existing' });    
     await appState.givenFilters({messageRegex: 'stem', autoAckTillDate: '2025-05-22'})
     logs.givenRecords(
         {message: "stem 1", timestamp: '2025-05-20T08:27:01Z'},
@@ -94,9 +90,8 @@ test('a filter with a date should be autoapplied to the new messages', async ({ 
     await expect(page.getByTestId('matching-filter')).toHaveCount(1);
 });
 
-test('only future dates should be available for selection', async ({ page, appState, mainPage, logs }) => {
+test('only future dates should be available for selection', async ({ page, mainPage, logs }) => {
     await page.clock.install({time: '2025-05-12T08:27:01Z'})
-    await appState.givenSources({ name: 'existing' });
     logs.givenRecords({message: "stem 1", timestamp: '2025-05-20T08:27:01Z'});
 
     await mainPage.open();

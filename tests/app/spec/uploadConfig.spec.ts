@@ -1,7 +1,8 @@
 import { Page } from '@playwright/test';
 import { test, expect } from '@tests/app/setup/testExtended';
+import { TagSuppressDefaultAppStateTag } from '../setup/AppStateFixture';
 
-test('upload configuration', async ({ page, appState }) => {
+test('upload configuration', TagSuppressDefaultAppStateTag, async ({ page, appState }) => {
     await page.goto('/');
 
     await page.getByTitle('Upload configuration').click();
@@ -15,7 +16,7 @@ test('upload configuration', async ({ page, appState }) => {
     expect(await appState.sourceNames()).toEqual(['Test Source']);
 });
 
-test('upload configuration with no json', async ({ page }) => {
+test('upload configuration with no json', TagSuppressDefaultAppStateTag, async ({ page }) => {
     await page.goto('/');
 
     await page.getByTitle('Upload configuration').click();

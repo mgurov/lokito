@@ -1,9 +1,9 @@
 
 import { test, expect } from '@tests/app/setup/testExtended';
+import { TagSuppressDefaultAppStateTag } from '../setup/AppStateFixture';
 
-test('find a line create a filter on it', async ({ page, appState, mainPage, logs }) => {
+test('find a line create a filter on it', async ({ page, mainPage, logs }) => {
 
-    await appState.givenSources({ name: 'existing' });
     logs.givenRecords({ message: 'Some<thing> 👻 (H)appened' });
 
     await mainPage.open();
@@ -17,10 +17,9 @@ test('find a line create a filter on it', async ({ page, appState, mainPage, log
     await expect(mainPage.cleanBacklogMessage).toBeVisible();
 });
 
-test('a saved filter should be applied to existing and following messages ', async ({ page, appState, mainPage, logs }) => {
+test('a saved filter should be applied to existing and following messages ', async ({ page, mainPage, logs }) => {
 
     await page.clock.install();
-    await appState.givenSources({ name: 'existing' });
     logs.givenRecords('this_message', 'unrelated 1');
 
     await mainPage.open()
@@ -46,8 +45,6 @@ test('a saved filter should be applied to existing and following messages ', asy
 
 test('should be able to see messages acked by a filter', async ({ appState, mainPage, logs }) => {
 
-    await appState.givenSources({ name: 'existing' });
-
     await appState.givenFilters('1');
 
     logs.givenRecords('m 1', 'm 2');
@@ -62,11 +59,9 @@ test('should be able to see messages acked by a filter', async ({ appState, main
 });
 
 
-test('a non-saved filter should be applied to existing but not following messages ', async ({ page, appState, mainPage, logs }) => {
+test('a non-saved filter should be applied to existing but not following messages ', async ({ page, mainPage, logs }) => {
 
     await page.clock.install();
-
-    await appState.givenSources({ name: 'existing' });
 
     logs.givenRecords('this_message', 'unrelated 1');
 
@@ -91,7 +86,9 @@ test('a non-saved filter should be applied to existing but not following message
     await mainPage.expectAckMessages(1);
 });
 
-test('same message should show use first line from all and respective from source tab on filter creation', async ({ page, mainPage, appState, logs }) => {
+test('same message should show use first line from all and respective from source tab on filter creation', 
+    TagSuppressDefaultAppStateTag,
+    async ({ page, mainPage, appState, logs }) => {
 
     const [s1, s2] = await appState.givenSources({ name: 's1' }, {name: 's2'});
 
