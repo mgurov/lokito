@@ -2,6 +2,7 @@ import { Source } from "@/data/source";
 import { nextId } from "../util/nextId";
 import { StorageFixture, storageTest } from "./StorageFixture";
 import { Filter } from "@/data/filters/filter";
+import { TestDetailsAnnotation } from "@playwright/test";
 
 export class AppStateFixture {
     constructor(public storage: StorageFixture) {
@@ -81,8 +82,11 @@ function toSource(spec: SourceSpec) {
     };
 }
 
-export const SuppressDefaultAppStateTag = '@suppress-default-app-state'
-export const TagSuppressDefaultAppStateTag = {tag: SuppressDefaultAppStateTag}
+const suppressDefaultAppStateAnnotation = {
+    type: 'suppress-default-app-state',
+    description: 'Suppresses the default app state setup (i.e. single pre-created source), allowing for custom app state setup in tests.',
+} as TestDetailsAnnotation;
+export const AnnotationSuppressDefaultApp = {annotation: suppressDefaultAppStateAnnotation}
 
 export const appStateTest = storageTest.extend<{
     appState: AppStateFixture,
@@ -90,7 +94,7 @@ export const appStateTest = storageTest.extend<{
     appState: [
         async ({ storage}, use, testInfo) => {
             const appState = new AppStateFixture(storage);
-            if (!testInfo.tags.includes(SuppressDefaultAppStateTag)) {
+            if (!testInfo.annotations.includes(suppressDefaultAppStateAnnotation)) {
                 await appState.givenSources({ name: 'default' });
             }
             await use(appState);

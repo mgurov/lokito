@@ -1,5 +1,5 @@
 import { expect, test } from '@tests/app/setup/testExtended';
-import { TagSuppressDefaultAppStateTag } from '../setup/AppStateFixture';
+import { AnnotationSuppressDefaultApp } from '../setup/AppStateFixture';
 
 test.describe('ack all', () => {
     test('ack all messages', async ({ mainPage, logs }) => {    
@@ -25,7 +25,7 @@ test.describe('ack all', () => {
         
     });
 
-    test('should only ack a selected source messages', TagSuppressDefaultAppStateTag, async ({ appState, mainPage, logs }) => {
+    test('should only ack a selected source messages', AnnotationSuppressDefaultApp, async ({ appState, mainPage, logs }) => {
 
         const [source1, source2] = await appState.givenSources(
             {name: "source1"},
@@ -53,7 +53,7 @@ test.describe('ack all', () => {
     
     });
 
-    test('should ack all messages all sources', TagSuppressDefaultAppStateTag, async ({ appState, mainPage, logs }) => {
+    test('should ack all messages all sources', AnnotationSuppressDefaultApp, async ({ appState, mainPage, logs }) => {
 
         const [source1, source2] = await appState.givenSources(
             {name: "source1"},
@@ -74,7 +74,7 @@ test.describe('ack all', () => {
     
     });
 
-    test('should update source count when acking', TagSuppressDefaultAppStateTag, async ({ appState, mainPage, logs }) => {
+    test('should update source count when acking', AnnotationSuppressDefaultApp, async ({ appState, mainPage, logs }) => {
 
         const [source1, source2] = await appState.givenSources(
             {name: "source1"},
@@ -118,7 +118,7 @@ test.describe('ack till this', () => {
         
     });
 
-    test('ack till this should only ack the selected source', TagSuppressDefaultAppStateTag, async ({ appState, mainPage, logs }) => {
+    test('ack till this should only ack the selected source', AnnotationSuppressDefaultApp, async ({ appState, mainPage, logs }) => {
 
         const [source1, source2] = await appState.givenSources({name: "source1"}, {name: "source2"});
     
@@ -155,7 +155,7 @@ test.describe('ack till this', () => {
     });
 
 
-    test('ack till this should ack from all source when on all sources page', TagSuppressDefaultAppStateTag, async ({ appState, mainPage, logs }) => {
+    test('ack till this should ack from all source when on all sources page', AnnotationSuppressDefaultApp, async ({ appState, mainPage, logs }) => {
 
         const [source1, source2] = await appState.givenSources({name: "source1"}, {name: "source2"});
     

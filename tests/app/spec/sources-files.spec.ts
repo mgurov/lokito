@@ -1,8 +1,8 @@
 import { Download, Page } from '@playwright/test';
 import { test, expect } from '@tests/app/setup/testExtended';
-import { TagSuppressDefaultAppStateTag } from '../setup/AppStateFixture';
+import { AnnotationSuppressDefaultApp } from '../setup/AppStateFixture';
 
-test('download sources', TagSuppressDefaultAppStateTag, async ({ page, consoleLogging }) => {
+test('download sources', AnnotationSuppressDefaultApp, async ({ page, consoleLogging }) => {
 
     consoleLogging.ignoreErrorMessagesContaining('Dialog is changing from uncontrolled to controlled.')
 

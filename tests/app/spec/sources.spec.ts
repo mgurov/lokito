@@ -1,8 +1,8 @@
 import { test, expect } from '@tests/app/setup/testExtended';
 import { NewSourceRollover } from '../setup/pages/SourcesPageFixture';
-import { TagSuppressDefaultAppStateTag } from '../setup/AppStateFixture';
+import { AnnotationSuppressDefaultApp } from '../setup/AppStateFixture';
 
-test('add source', TagSuppressDefaultAppStateTag, async ({ page, appState, consoleLogging }) => {
+test('add source', AnnotationSuppressDefaultApp, async ({ page, appState, consoleLogging }) => {
 
     consoleLogging.ignoreErrorMessagesContaining('Dialog is changing from uncontrolled to controlled.')
 
@@ -27,7 +27,7 @@ test('add source', TagSuppressDefaultAppStateTag, async ({ page, appState, conso
 });
 
 
-test('add a source from the sourceless main screen', TagSuppressDefaultAppStateTag, async ({ page, appState, consoleLogging }) => {
+test('add a source from the sourceless main screen', AnnotationSuppressDefaultApp, async ({ page, appState, consoleLogging }) => {
 
     consoleLogging.failImmediately = true
 
@@ -51,7 +51,7 @@ test('add a source from the sourceless main screen', TagSuppressDefaultAppStateT
     expect(await appState.sourceNames()).toEqual(['Test Source']);
 });
 
-test('add a source to an existing list from main page', TagSuppressDefaultAppStateTag, async ({ mainPage, appState, consoleLogging }) => {
+test('add a source to an existing list from main page', AnnotationSuppressDefaultApp, async ({ mainPage, appState, consoleLogging }) => {
 
     await appState.givenSources({name: 'existing'});
 
@@ -85,7 +85,7 @@ test('add a source should have immediate effect on fetching', async ({ mainPage,
     await expect.poll(() => logs.requests).toHaveLength(3);
 });
 
-test('delete a source should have immediate effect on fetching', TagSuppressDefaultAppStateTag, async ({ mainPage, appState, logs }) => {
+test('delete a source should have immediate effect on fetching', AnnotationSuppressDefaultApp, async ({ mainPage, appState, logs }) => {
 
     await mainPage.clock.install();
 
@@ -116,7 +116,7 @@ test('delete a source should have immediate effect on fetching', TagSuppressDefa
     )
 });
 
-test('deactivate and then activate', TagSuppressDefaultAppStateTag, async ({ mainPage, appState, logs }) => {
+test('deactivate and then activate', AnnotationSuppressDefaultApp, async ({ mainPage, appState, logs }) => {
 
     await mainPage.clock.install();
 
@@ -158,7 +158,7 @@ test('deactivate and then activate', TagSuppressDefaultAppStateTag, async ({ mai
 
 });
 
-test('add a source to an existing list from sources page', TagSuppressDefaultAppStateTag, async ({ appState, sourcePage, consoleLogging }) => {
+test('add a source to an existing list from sources page', AnnotationSuppressDefaultApp, async ({ appState, sourcePage, consoleLogging }) => {
 
     await appState.givenSources({name: 'existing'});
 
@@ -174,7 +174,7 @@ test('add a source to an existing list from sources page', TagSuppressDefaultApp
     expect(await appState.sourceNames()).toEqual(['existing', 'new']);
 });
 
-test('edit a source query', TagSuppressDefaultAppStateTag, async ({ appState, sourcePage }) => {
+test('edit a source query', AnnotationSuppressDefaultApp, async ({ appState, sourcePage }) => {
 
     await appState.givenSources({name: 'existing', query: '{job="initial query"}'});
 
@@ -207,7 +207,7 @@ test('edit a source query', TagSuppressDefaultAppStateTag, async ({ appState, so
     // await expect(page.getByTestId('source-card-filter-textarea')).toHaveText('{job="updated query"}')    
 });
 
-test('should be able to cancel editing a source query', TagSuppressDefaultAppStateTag,  async ({ appState, sourcePage }) => {
+test('should be able to cancel editing a source query', AnnotationSuppressDefaultApp,  async ({ appState, sourcePage }) => {
 
     await appState.givenSources({name: 'existing', query: '{job="initial query"}'});
 
@@ -231,7 +231,7 @@ test('should be able to cancel editing a source query', TagSuppressDefaultAppSta
 
 });
 
-test('should be able to display the source card from the source tab', TagSuppressDefaultAppStateTag, async({appState, mainPage}) => {
+test('should be able to display the source card from the source tab', AnnotationSuppressDefaultApp, async({appState, mainPage}) => {
     const source = await appState.givenSource({query: "source-query"})
 
     await mainPage.open()

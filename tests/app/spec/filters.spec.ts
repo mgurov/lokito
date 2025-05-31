@@ -1,6 +1,6 @@
 
 import { test, expect } from '@tests/app/setup/testExtended';
-import { TagSuppressDefaultAppStateTag } from '../setup/AppStateFixture';
+import { AnnotationSuppressDefaultApp } from '../setup/AppStateFixture';
 
 test('find a line create a filter on it', async ({ page, mainPage, logs }) => {
 
@@ -87,7 +87,7 @@ test('a non-saved filter should be applied to existing but not following message
 });
 
 test('same message should show use first line from all and respective from source tab on filter creation', 
-    TagSuppressDefaultAppStateTag,
+    AnnotationSuppressDefaultApp,
     async ({ page, mainPage, appState, logs }) => {
 
     const [s1, s2] = await appState.givenSources({ name: 's1' }, {name: 's2'});

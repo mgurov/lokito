@@ -2,7 +2,7 @@ import { test, expect } from '@tests/app/setup/testExtended';
 import { routes } from '../setup/ExternalLogsFixture';
 import { Deferred } from '../util/promises';
 import { expectTexts } from '../util/visualAssertions';
-import { TagSuppressDefaultAppStateTag } from '../setup/AppStateFixture';
+import { AnnotationSuppressDefaultApp } from '../setup/AppStateFixture';
 
 test('fetching messages', async ({ page, mainPage, logs }) => {
 
@@ -23,7 +23,7 @@ test('fetching messages', async ({ page, mainPage, logs }) => {
 });
 
 
-test('should sort fetched messages', TagSuppressDefaultAppStateTag, async ({ page, appState, mainPage, logs }) => {
+test('should sort fetched messages', AnnotationSuppressDefaultApp, async ({ page, appState, mainPage, logs }) => {
 
     await page.clock.install();
 
@@ -38,7 +38,7 @@ test('should sort fetched messages', TagSuppressDefaultAppStateTag, async ({ pag
 });
 
 
-test('should fetch updated query on editing', TagSuppressDefaultAppStateTag, async ({ page, appState, mainPage, logs }) => {
+test('should fetch updated query on editing', AnnotationSuppressDefaultApp, async ({ page, appState, mainPage, logs }) => {
 
     await page.clock.install();
 
@@ -96,7 +96,7 @@ test('duplications should be filtered out on fetching', async ({ page, mainPage,
     await mainPage.expectLogMessages('event2', 'event1', 'event3');
 });
 
-test('same message should be shown both sources that happened to fetch it', TagSuppressDefaultAppStateTag, async ({ mainPage, appState, logs }) => {
+test('same message should be shown both sources that happened to fetch it', AnnotationSuppressDefaultApp, async ({ mainPage, appState, logs }) => {
 
     const [s1, s2] = await appState.givenSources({ name: 's1' }, {name: 's2'});
 
@@ -123,7 +123,7 @@ test('same message should be shown both sources that happened to fetch it', TagS
 });
 
 
-test('should show error upon failure to fetch', TagSuppressDefaultAppStateTag, async ({ page, appState, mainPage }) => {
+test('should show error upon failure to fetch', AnnotationSuppressDefaultApp, async ({ page, appState, mainPage }) => {
 
     await page.route(routes.loki, async (request) => {
         await request.abort();
@@ -182,7 +182,7 @@ test('should show error on no responses', async ({ page, mainPage }) => {
     await expect(mainPage.cleanCheck).toBeVisible();
 });
 
-test('should mark fetched messages with their source names in the all tab but not in the source one', TagSuppressDefaultAppStateTag, async ({ appState, mainPage, logs }) => {
+test('should mark fetched messages with their source names in the all tab but not in the source one', AnnotationSuppressDefaultApp, async ({ appState, mainPage, logs }) => {
 
     const [s1, s2] = await appState.givenSources({ name: 's1' }, {name: 's2'});
 
@@ -213,7 +213,7 @@ test('should mark fetched messages with their source names in the all tab but no
 
 });
 
-test('should open source tab when clicking on row source indicator', TagSuppressDefaultAppStateTag, async ({ appState, mainPage, logs }) => {
+test('should open source tab when clicking on row source indicator', AnnotationSuppressDefaultApp, async ({ appState, mainPage, logs }) => {
 
     const [s1, s2] = await appState.givenSources({ name: 's1' }, {name: 's2'});
 
