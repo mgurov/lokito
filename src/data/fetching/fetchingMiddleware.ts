@@ -1,11 +1,12 @@
 import { ListenerEffectAPI, createListenerMiddleware } from "@reduxjs/toolkit";
-import { SourceFetchingState, fetchingActions } from "./fetchingSlice";
+import { START_WHERE_STOPPED, SourceFetchingState, fetchingActions } from "./fetchingSlice";
 import { AppDispatch, RootState } from "../redux/store";
 import { buildLokiUrl } from "@/lib/utils";
 import axios from "axios";
 import { receiveBatch } from "../logData/logDataSlice";
 import { JustReceivedLog } from "../logData/logSchema";
 import { createNewSource, deleteSource } from "../redux/sourcesSlice";
+import { loadSourceLastSuccessFromFromStorage } from "../source";
 
 const REFETCH_DELAY = 60000;
 
@@ -19,9 +20,20 @@ fetchingMiddleware.startListening({
             if (!source.active) {
                 continue
             }
+
+            let from = action.payload.from;
+            if (from === START_WHERE_STOPPED) {
+                const lastUpdate = loadSourceLastSuccessFromFromStorage(source.id)
+                if (null === lastUpdate) {                    
+                    from = (new Date()).toISOString()
+                } else {
+                    from = lastUpdate
+                }
+            }
+
             listenerApi.dispatch(fetchingActions.initSourceFetching({
                 source,
-                from: action.payload.from,
+                from,
             }))
         }
 
@@ -118,7 +130,10 @@ async function processSourceFetching(sourceState: SourceFetchingState, listenerA
             filters: Object.values(listenerApi.getState().filters.data),
             sourceId: source.id,
         }));
-        listenerApi.dispatch(fetchingActions.sourceFetchedOk(sourceState.sourceId))
+        listenerApi.dispatch(fetchingActions.sourceFetchedOk({
+            sourceId: sourceState.sourceId,
+            from: newFetchStart,
+        }))
     } catch (e: unknown) {
         console.error('error fetching logs', e)
         const errMessage = e instanceof Error ? e.message : JSON.stringify(e);

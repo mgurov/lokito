@@ -6,6 +6,7 @@ export class StorageFixture {
     }
 
     // NB: there's no guarantee on the order of the items set in localStorage
+    // TODO: opts at the end..
     async setLocalItem(key: string, value: unknown, rawString: boolean = false) {
         const valueString = rawString ? (value as string) : JSON.stringify(value);
         await this.page.addInitScript(
@@ -26,7 +27,7 @@ export class StorageFixture {
         );
     }
 
-    async getLocalItem<T>(key: string): Promise<T | null> {
+    async getLocalItem<T>(key: string, rawString: boolean = false): Promise<T | null> {
         const storedString = await this.page.evaluate(key => {
             return localStorage.getItem(key);
         }, key);
@@ -34,7 +35,12 @@ export class StorageFixture {
         if (storedString === null) {
             return null;
         }
-        return JSON.parse(storedString) as T;
+        if (rawString) {
+            return storedString as T; //TODO: guess if T is string? 
+        } else {
+            return JSON.parse(storedString) as T;
+        }
+        
     }
 }
 

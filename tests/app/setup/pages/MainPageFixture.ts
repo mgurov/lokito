@@ -19,15 +19,16 @@ export default class MainPageFixture {
         startFetch = true,
     }: {
         executeBefore?: () => Promise<void>,
-        startFetch?: boolean,
+        startFetch?: boolean | string,
     } = {}) {
         await test.step('open main page', async () => {
             if (executeBefore) {
                 await executeBefore();
             }
             await this.page.goto('/');
-            if (startFetch === true) {
-                await this.page.getByTestId('fetch-option').getByText('now').click(); 
+            if (startFetch !== false) {
+                const startFetchButton = typeof(startFetch) === 'string' ? startFetch : 'now'
+                await this.page.getByTestId('fetch-option').getByText(startFetchButton).click(); 
             }
         }, {box: true})
 

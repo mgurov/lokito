@@ -94,6 +94,14 @@ export const useActiveSources = () =>
     ),
   );
 
+export const useActiveSourceIds = () =>
+  useSelector(
+    createSelector([(state: RootState) => state.sources.data], (sources) =>
+      Object.values(sources).filter((source) => source.active).map((source) => source.id),
+    ),
+  );
+
+
 export const useSource = (sourceId: string) =>
   useSelector(
     createSelector([(state: RootState) => state.sources.data], (sources) => sources[sourceId]),

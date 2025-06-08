@@ -1,7 +1,9 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
-import { Source } from '../source';
+import { saveSourceLastSuccessFromToStorage, Source } from '../source';
+
+export const START_WHERE_STOPPED = "START_WHERE_STOPPED";
 
 export interface StartFetching {
   from: string;
@@ -15,6 +17,11 @@ export interface InitSourceFetching {
 export interface StartingSourceFetching {
   sourceId: string;
   range: PendingRange;
+}
+
+export interface SourceFetchOk {
+  sourceId: string,
+  from: string;
 }
 
 export interface SourceFetchErr {
@@ -93,16 +100,19 @@ export const fetchingSlice = createSlice({
       sourceState.state = 'fetching';
       sourceState.pendingRange = action.payload.range;
     },
-    sourceFetchedOk: (state, action: PayloadAction<string>) => {
-      const sourceState = state.sourcesState[action.payload];
+    sourceFetchedOk: (state, action: PayloadAction<SourceFetchOk>) => {
+      const {sourceId, from} = action.payload;
+      const sourceState = state.sourcesState[sourceId];
       if (!sourceState) {
-        console.error('source state not found', action.payload);
+        console.error('source state not found', sourceId);
         return;
       }
       sourceState.state = 'ok';
-      sourceState.lastSuccess = sourceState.pendingRange?.at ?? null;
+      const lastSuccess = sourceState.pendingRange?.at ?? null;
+      sourceState.lastSuccess = lastSuccess;
       sourceState.pendingRange = null;
       sourceState.err = null;
+      saveSourceLastSuccessFromToStorage(sourceId, from)
     },
     sourceFetchErr: (state, action: PayloadAction<SourceFetchErr>) => {
       const sourceState = state.sourcesState[action.payload.sourceId];

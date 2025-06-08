@@ -29,3 +29,16 @@ export function saveSourcesToStorage(sources: Source[]) {
         localStorage.setItem(SOURCES_STORAGE_KEY, JSON.stringify(sources));
     }
 }
+
+//TODO: a bloody class
+export function loadSourceLastSuccessFromFromStorage(sourceId: string): string | null {
+    return localStorage.getItem(sourceLastSuccessFromStorageKey(sourceId));
+}
+
+export function saveSourceLastSuccessFromToStorage(sourceId: string, at: string) {
+    localStorage.setItem(sourceLastSuccessFromStorageKey(sourceId), at);
+}
+
+export function sourceLastSuccessFromStorageKey(sourceId: string): string {
+    return "source-last-success-" + sourceId;
+}
