@@ -1,7 +1,7 @@
 import { current } from '@reduxjs/toolkit';
 import { JustReceivedLog, Log } from '@/data/logData/logSchema';
 import _ from 'lodash';
-import { Filter, FilterStats, saveFilterStatsToStorage, createFilterMatcher, FilterMatchResult } from '../filters/filter';
+import { Filter, FilterStats, createFilterMatcher, FilterMatchResult, FiltersLocalStorage } from '../filters/filter';
 import { LogDataState } from './logDataSlice';
 
 export type JustReceivedBatch = {
@@ -62,7 +62,7 @@ export function updateFilterStats(filterStats: FilterStats, newRecords: Log[]) {
     filterStats[filterId] = (filterStats[filterId] || 0) + count;
   }
 
-  saveFilterStatsToStorage(filterStats)
+  FiltersLocalStorage.filterStats.save(filterStats)
 }
 
 function recordWhetherDuplicate(state: LogDataState, newRecord: JustReceivedLog, sourceId: string): boolean {

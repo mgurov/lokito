@@ -1,5 +1,5 @@
 import { PayloadAction, createSelector, createSlice } from "@reduxjs/toolkit";
-import { Filter, loadFiltersFromStorage, saveFiltersToStorage } from "./filter";
+import { Filter, FiltersLocalStorage } from "./filter";
 import _ from 'lodash';
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
@@ -10,7 +10,7 @@ export interface FiltersState {
 }
 
 const initialFiltersState: FiltersState = {
-    data: _.keyBy(loadFiltersFromStorage(), 'id')
+    data: _.keyBy(FiltersLocalStorage.filters.load(), 'id')
 }
 
 export const filtersSlice = createSlice({
@@ -22,11 +22,11 @@ export const filtersSlice = createSlice({
                 return;
             }
             state.data[action.payload.id] = action.payload
-            saveFiltersToStorage(Object.values(state.data))
+            FiltersLocalStorage.filters.save(Object.values(state.data))
         },
         deleteFilter: (state, action: PayloadAction<string>) => {
             delete state.data[action.payload]
-            saveFiltersToStorage(Object.values(state.data))
+            FiltersLocalStorage.filters.save(Object.values(state.data))
         },
         ackMatchedByFilter(_state, _action: PayloadAction<string>) {
             // a hook for the logData slice 

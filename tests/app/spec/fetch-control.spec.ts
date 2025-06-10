@@ -1,6 +1,6 @@
 import { test, expect } from '@tests/app/setup/testExtended';
 import { AnnotationSuppressDefaultApp } from '../setup/AppStateFixture';
-import { sourceLastSuccessFromStorageKey } from '@/data/source';
+import { SourceLocalStorage } from '@/data/source';
 
 test('should start with given delay at the moment of click', async ({mainPage, logs}) => {
     await mainPage.clock.install({time: "2025-02-04T20:30:00.000Z"});
@@ -71,7 +71,7 @@ test.describe('continue from where stopped', () => {
 
         expect(initialRequestUrl.searchParams.get('start')).toContain('2025-02-04T20:30:') //some millisecs initiating the click and such
 
-        const stored = await appState.storage.getLocalItem(sourceLastSuccessFromStorageKey(source.id), true)
+        const stored = await appState.storage.getLocalItem(SourceLocalStorage.lastSuccessFrom.key(source.id), true)
         expect(stored).toBe(initialRequestUrl.searchParams.get('start'))
     })
 
@@ -79,9 +79,9 @@ test.describe('continue from where stopped', () => {
 
         const [source1, source2, _newSource] = await appState.givenSources({}, {}, {})
         const s1fetch = "2025-02-04T16:30:00.000Z"
-        await appState.storage.setLocalItem(sourceLastSuccessFromStorageKey(source1.id), s1fetch, true)
+        await appState.storage.setLocalItem(SourceLocalStorage.lastSuccessFrom.key(source1.id), s1fetch, true)
         const s2fetch = "2025-02-04T16:35:00.000Z"
-        await appState.storage.setLocalItem(sourceLastSuccessFromStorageKey(source2.id), s2fetch, true)
+        await appState.storage.setLocalItem(SourceLocalStorage.lastSuccessFrom.key(source2.id), s2fetch, true)
 
         await mainPage.clock.install({time: "2025-02-05T08:30:00.000Z"});
 
@@ -129,7 +129,7 @@ test.describe('continue from where stopped', () => {
 
         const [_activeSource, inactiveSource] = await appState.givenSources({active: true}, {active: false})
 
-        await appState.storage.setLocalItem(sourceLastSuccessFromStorageKey(inactiveSource.id), "2025-02-04T16:30:00.000Z", true)
+        await appState.storage.setLocalItem(SourceLocalStorage.lastSuccessFrom.key(inactiveSource.id), "2025-02-04T16:30:00.000Z", true)
 
         await mainPage.open({startFetch: false});
 
@@ -142,8 +142,8 @@ test.describe('continue from where stopped', () => {
 
         const [s1, s2] = await appState.givenSources({}, {})
 
-        await appState.storage.setLocalItem(sourceLastSuccessFromStorageKey(s1.id), "2025-02-04T16:30:00.000Z", true)
-        await appState.storage.setLocalItem(sourceLastSuccessFromStorageKey(s2.id), "2025-02-04T16:35:00.000Z", true)
+        await appState.storage.setLocalItem(SourceLocalStorage.lastSuccessFrom.key(s1.id), "2025-02-04T16:30:00.000Z", true)
+        await appState.storage.setLocalItem(SourceLocalStorage.lastSuccessFrom.key(s2.id), "2025-02-04T16:35:00.000Z", true)
 
         await mainPage.open({startFetch: false});
 

@@ -8,7 +8,7 @@ import { subHours, subMinutes } from 'date-fns';
 import { useDispatch } from 'react-redux';
 import { PlayIcon } from "@radix-ui/react-icons"
 import { useActiveSourceIds } from '@/data/redux/sourcesSlice';
-import { loadSourceLastSuccessFromFromStorage } from '@/data/source';
+import { SourceLocalStorage } from '@/data/source';
 
 const startOptions: Record<string, () => Date> = {
   'now': () => new Date(),
@@ -30,7 +30,7 @@ function useEarliestSourceFrom(): string | null {
 
   let earliestFrom: string | null = null;
   for (const activeSourceId of activeSourceIds) {
-    const thisFrom = loadSourceLastSuccessFromFromStorage(activeSourceId)
+    const thisFrom = SourceLocalStorage.lastSuccessFrom.load(activeSourceId)
     if (thisFrom === null) {
       continue;
     }

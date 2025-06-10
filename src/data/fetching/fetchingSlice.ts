@@ -1,7 +1,7 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
-import { saveSourceLastSuccessFromToStorage, Source } from '../source';
+import { Source, SourceLocalStorage } from '../source';
 
 export const START_WHERE_STOPPED = "START_WHERE_STOPPED";
 
@@ -112,7 +112,7 @@ export const fetchingSlice = createSlice({
       sourceState.lastSuccess = lastSuccess;
       sourceState.pendingRange = null;
       sourceState.err = null;
-      saveSourceLastSuccessFromToStorage(sourceId, from)
+      SourceLocalStorage.lastSuccessFrom.save(sourceId, from);
     },
     sourceFetchErr: (state, action: PayloadAction<SourceFetchErr>) => {
       const sourceState = state.sourcesState[action.payload.sourceId];

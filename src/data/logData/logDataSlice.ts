@@ -2,7 +2,7 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { Acked, Log } from '@/data/logData/logSchema';
 import { createFilter, deleteFilter, ackMatchedByFilter } from '../filters/filtersSlice';
 import _ from 'lodash';
-import { createFilterMatcher, FilterStats, loadFilterStatsFromStorage, saveFilterStatsToStorage } from '../filters/filter';
+import { createFilterMatcher, FiltersLocalStorage, FilterStats } from '../filters/filter';
 import { handleNewLogsBatch, JustReceivedBatch } from './logDataEventHandlers';
 
 type LogIndexNode = {
@@ -20,7 +20,7 @@ export interface LogDataState {
 const initialState: LogDataState = {
   logs: [],
   index: {},
-  filterStats: loadFilterStatsFromStorage(),
+  filterStats: FiltersLocalStorage.filterStats.load(),
 };
 
 export const logDataSlice = createSlice({
@@ -87,7 +87,7 @@ export const logDataSlice = createSlice({
 
       if (!filter.transient && matched > 0) {
         state.filterStats[filter.id] = matched
-        saveFilterStatsToStorage(state.filterStats)
+        FiltersLocalStorage.filterStats.save(state.filterStats)
       }
     });
 
@@ -105,7 +105,7 @@ export const logDataSlice = createSlice({
 
       // 2. clear stats
       delete state.filterStats[filterId]
-      saveFilterStatsToStorage(state.filterStats)
+      FiltersLocalStorage.filterStats.save(state.filterStats)
 
     })
 

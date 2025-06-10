@@ -1,4 +1,4 @@
-import { FILTERS_STATS_STORAGE_KEY } from '@/data/filters/filter';
+import { FiltersLocalStorage } from '@/data/filters/filter';
 import { test, expect } from '@tests/app/setup/testExtended';
 
 test('created filter should be visible and show acked elements', async ({ mainPage, logs }) => {
@@ -125,7 +125,7 @@ test('should allow filter deletion', async ({ appState, mainPage, logs }) => {
     await expect(yesFilterCard.deleteButton).not.toBeAttached()
 
     await expect.poll(
-        () => appState.storage.getLocalItem<Array<unknown>>(FILTERS_STATS_STORAGE_KEY)
+        () => appState.storage.getLocalItem<Array<unknown>>(FiltersLocalStorage.filterStats.STORAGE_KEY)
         ).toStrictEqual({})
 
 

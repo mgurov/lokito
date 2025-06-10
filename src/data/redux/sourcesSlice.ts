@@ -1,5 +1,5 @@
 import { PayloadAction, createSelector, createSlice } from '@reduxjs/toolkit';
-import { Source, SourceMutation, loadSourcesFromStorage, saveSourcesToStorage } from '../source';
+import { Source, SourceLocalStorage, SourceMutation} from '../source';
 import _ from 'lodash';
 import { useSelector } from 'react-redux';
 import { RootState } from './store';
@@ -29,7 +29,7 @@ export interface SourcesState {
 }
 
 const initialState: SourcesState = {
-  data: _.keyBy(loadSourcesFromStorage(), 'id'),
+  data: _.keyBy(SourceLocalStorage.sources.load(), 'id'),
 };
 
 export const sourcesSlice = createSlice({
@@ -52,27 +52,27 @@ export const sourcesSlice = createSlice({
         ...action.payload.source,
       };
       state.data[id] = newSource;
-      saveSourcesToStorage(Object.values(state.data)); //TODO: try to unify e.g. with redux-persist or something
+      SourceLocalStorage.sources.save(Object.values(state.data))
     },
     deleteSource: (state, action: PayloadAction<string>) => {
       delete state.data[action.payload];
-      saveSourcesToStorage(Object.values(state.data));
+      SourceLocalStorage.sources.save(Object.values(state.data))
     },
     changeSourceActive: (state, action: PayloadAction<ChangeSourceActive>) => {
       state.data[action.payload.sourceId].active = action.payload.newValue;
-      saveSourcesToStorage(Object.values(state.data));
+      SourceLocalStorage.sources.save(Object.values(state.data))
     },
     changeSourceColor: (state, action: PayloadAction<ChangeSourceColor>) => {
       state.data[action.payload.sourceId].color = action.payload.newValue;
-      saveSourcesToStorage(Object.values(state.data));
+      SourceLocalStorage.sources.save(Object.values(state.data))
     },
     changeSourceQuery: (state, action: PayloadAction<ChangeSourceQuery>) => {
       state.data[action.payload.sourceId].query = action.payload.newQueryValue;
-      saveSourcesToStorage(Object.values(state.data));
+      SourceLocalStorage.sources.save(Object.values(state.data))
     },
     setAllSources: (state, action: PayloadAction<Source[]>) => {
       state.data = _.keyBy(action.payload, 'id');
-      saveSourcesToStorage(Object.values(state.data));
+      SourceLocalStorage.sources.save(Object.values(state.data))
     },
   },
 });

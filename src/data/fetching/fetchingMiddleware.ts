@@ -6,7 +6,7 @@ import axios from "axios";
 import { receiveBatch } from "../logData/logDataSlice";
 import { JustReceivedLog } from "../logData/logSchema";
 import { createNewSource, deleteSource } from "../redux/sourcesSlice";
-import { loadSourceLastSuccessFromFromStorage } from "../source";
+import { SourceLocalStorage } from "../source";
 
 const REFETCH_DELAY = 60000;
 
@@ -23,7 +23,7 @@ fetchingMiddleware.startListening({
 
             let from = action.payload.from;
             if (from === START_WHERE_STOPPED) {
-                const lastUpdate = loadSourceLastSuccessFromFromStorage(source.id)
+                const lastUpdate = SourceLocalStorage.lastSuccessFrom.load(source.id)
                 if (null === lastUpdate) {                    
                     from = (new Date()).toISOString()
                 } else {
