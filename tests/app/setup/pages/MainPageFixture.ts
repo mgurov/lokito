@@ -79,6 +79,10 @@ export default class MainPageFixture {
         return this.page.getByTestId('ack-all-button')
     }
 
+    traceButton(traceId: string): Locator {
+        return this.page.getByTitle(`trace: ${traceId}`)
+    }
+
     get cleanCheck(): Locator {
         return this.page.getByText('Clean ✅')
     }

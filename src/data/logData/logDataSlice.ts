@@ -5,7 +5,7 @@ import _ from 'lodash';
 import { createFilterMatcher, FiltersLocalStorage, FilterStats } from '../filters/filter';
 import { handleNewLogsBatch, JustReceivedBatch } from './logDataEventHandlers';
 
-type LogIndexNode = {
+export type LogIndexNode = {
   stream: { [key: string]: unknown };
   id: string;
   sourceIds: [string, ...string[]];
@@ -13,13 +13,15 @@ type LogIndexNode = {
 
 export interface LogDataState {
   logs: Log[];
-  index: Record<string, LogIndexNode[]>;
+  deduplicationIndex: Record<string, LogIndexNode[]>;
+  traceIdIndex: Record<string, LogIndexNode[]>; //TODO: rename to sorted when actually do
   filterStats: FilterStats;
 }
 
 const initialState: LogDataState = {
   logs: [],
-  index: {},
+  deduplicationIndex: {},
+  traceIdIndex: {},
   filterStats: FiltersLocalStorage.filterStats.load(),
 };
 
