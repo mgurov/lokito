@@ -1,37 +1,41 @@
 import { ColumnDef } from '@tanstack/react-table';
 
-import { LogWithSource, LogSource } from '../data/logData/logSchema';
+import { LogWithSource, LogSource, Acked } from '../data/logData/logSchema';
 import { useDispatch } from 'react-redux';
 import { Button } from './ui/button';
-import { ack } from '@/data/logData/logDataSlice';
+import { ack, unack } from '@/data/logData/logDataSlice';
 import { simpleDateTimeFormat } from '@/lib/utils';
-import { CheckIcon } from '@radix-ui/react-icons';
+import { CheckIcon, MinusIcon } from '@radix-ui/react-icons';
 import { useSelectTab } from './context/SelectedDataTabContext';
 import { useContext } from 'react';
 import { SelectedSourceContext, useSelectedSourceMessageLine } from './context/SelectedSourceContext';
 import React from 'react';
 import { ackMatchedByFilter } from '@/data/filters/filtersSlice';
+import { useTraceIdsMultipleMatchesCount } from '@/data/logData/logDataHooks';
+import { Link } from 'react-router-dom';
 
 
-function RowAck({ logId }: { logId: string }) {
+function RowAck({ logId, acked }: { logId: string, acked: Acked }) {
   const dispatch = useDispatch();
+  const ActionIcon = acked ? MinusIcon : CheckIcon;
   return (
     <Button
-      data-testid="ack-message-button"
+      data-testid={acked ? "unack-message-button" : "ack-message-button" }
       size="icon"
       variant="ghost"
       className="hover:bg-gray-200"
       onClick={(e) => {
-        dispatch(ack(logId));
+        const action = acked ? unack : ack;
+        dispatch(action(logId));
         e.stopPropagation();
       }}
     >
-      <CheckIcon className="h-4 w-4" />
+      <ActionIcon className="h-4 w-4" />
     </Button>
   );
 }
 
-export function columns(): ColumnDef<LogWithSource>[] {
+export function columns(opts: {showTraces?: boolean} = {}): ColumnDef<LogWithSource>[] {
 
   const columnsTemplate: ColumnDef<LogWithSource>[] = [
     {
@@ -54,7 +58,7 @@ export function columns(): ColumnDef<LogWithSource>[] {
       id: 'ack',
       header: undefined,
       cell: ({ row }) => {
-        return <RowAck logId={row.original.id} />;
+        return <RowAck logId={row.original.id} acked={row.original.acked} />;
       },
     },
     {
@@ -69,20 +73,21 @@ export function columns(): ColumnDef<LogWithSource>[] {
     {
       accessorKey: 'line',
       header: undefined,
-      cell: ({ row }) => <RenderLine row={row.original} />,
+      cell: ({ row }) => <RenderLine row={row.original} showTraces={opts.showTraces ?? true} />,
     },
   ];
 
   return columnsTemplate;
 }
 
-function RenderLine({row}: {row: LogWithSource}) {
+function RenderLine({row, showTraces}: {row: LogWithSource, showTraces: boolean}) {
   const stringToShow = useSelectedSourceMessageLine(row)
   return (
     <>
       <div className="h-full cursor-pointer overflow-auto whitespace-nowrap text-xs font-medium">
         <SourceIndicator row={row} />
         <FilterIndicators row={row} />
+        {showTraces && <TraceIndicators row={row} />}
         <span data-testid="log-message">{stringToShow}</span>
       </div>
     </>
@@ -112,3 +117,17 @@ function FilterIndicators({row}: {row: LogWithSource}) {
     </React.Fragment>
   ));
 }
+
+function TraceIndicators({row}: {row: LogWithSource}) {
+  const traceIdsMultipleMatchesCount = useTraceIdsMultipleMatchesCount(row);
+  return Object.entries(traceIdsMultipleMatchesCount).map(([traceId, count]) => (
+    <React.Fragment key={traceId} >
+      <Button 
+        variant="ghost" size="sm" data-testid="trace-button" className="border boder-yellow-50"
+        title={`trace: ${traceId}`}
+        asChild
+      ><Link to={`/by-trace/${traceId}`}>✜ {count}</Link></Button>{' '}
+    </React.Fragment>
+  ));
+}
+

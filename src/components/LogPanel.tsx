@@ -47,7 +47,7 @@ export function LogPanel(props: { log: Log }) {
                       <Button
                         size="icon"
                         variant="outline"
-                        onClick={() => handleCopyToClipboard(props.log.stream?.[field] as string, field)}
+                        onClick={() => handleCopyToClipboard(props.log.stream?.[field], field)}
                         className="h-4 w-0 border-none bg-transparent text-gray-600 opacity-0 transition-opacity group-hover:opacity-100 group-hover:w-4"
                         title={copiedField === field ? 'Copied!' : 'Copy'}
                       >

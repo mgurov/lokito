@@ -20,8 +20,8 @@ test('non-acking filter on it', async ({ page, mainPage, logs }) => {
     await mainPage.expectAckMessages(0);
 
     //but it is possible to ack all messages matching the filter
-    await expect(page.getByTestId('matching-filter')).toHaveCount(2);
-    await page.getByTestId('matching-filter').first().click();
+    await expect(mainPage.matchingFilterButtons).toHaveCount(2);
+    await mainPage.matchingFilterButtons.first().click();
     //then
     await mainPage.expectLogMessages('unrelated');
     await mainPage.expectAckMessages(2);
@@ -33,7 +33,7 @@ test('non-acking filter on it', async ({ page, mainPage, logs }) => {
 
         await mainPage.expectLogMessages('unrelated 2', 'stem 3', 'unrelated');
         await mainPage.expectAckMessages(2);
-        await expect(page.getByTestId('matching-filter')).toHaveCount(1);
+        await expect(mainPage.matchingFilterButtons).toHaveCount(1);
     })
 });
 
@@ -70,11 +70,11 @@ test('should be possible to define a date for which a filter would be auto-acked
 
     await mainPage.expectLogMessages('stem 3');
     await mainPage.expectAckMessages(2);
-    await expect(page.getByTestId('matching-filter')).toHaveCount(1);
+    await expect(mainPage.matchingFilterButtons).toHaveCount(1);
 });
 
 
-test('a filter with a date should be autoapplied to the new messages', async ({ page, appState, mainPage, logs }) => {
+test('a filter with a date should be autoapplied to the new messages', async ({ appState, mainPage, logs }) => {
     await appState.givenFilters({messageRegex: 'stem', autoAckTillDate: '2025-05-22'})
     logs.givenRecords(
         {message: "stem 1", timestamp: '2025-05-20T08:27:01Z'},
@@ -87,7 +87,7 @@ test('a filter with a date should be autoapplied to the new messages', async ({ 
     await mainPage.expectLogMessages('stem 3')
 
     await mainPage.expectAckMessages(2);
-    await expect(page.getByTestId('matching-filter')).toHaveCount(1);
+    await expect(mainPage.matchingFilterButtons).toHaveCount(1);
 });
 
 test('only future dates should be available for selection', async ({ page, mainPage, logs }) => {

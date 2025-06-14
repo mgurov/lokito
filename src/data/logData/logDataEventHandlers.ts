@@ -3,6 +3,7 @@ import { JustReceivedLog, Log } from '@/data/logData/logSchema';
 import _ from 'lodash';
 import { Filter, FilterStats, createFilterMatcher, FilterMatchResult, FiltersLocalStorage } from '../filters/filter';
 import { LogDataState } from './logDataSlice';
+import { traceIdFields } from '@/lib/traceIds';
 
 export type JustReceivedBatch = {
   logs: JustReceivedLog[];
@@ -22,7 +23,6 @@ export function handleNewLogsBatch(state: LogDataState, justReceivedBatch: JustR
 
   const matchers = justReceivedBatch.filters.map(createFilterMatcher);
   
-
   const newRecordsAdapted = newRecords.map(({ stream, id, message, timestamp }) => {
 
     const anyMatched = matchers.reduce((acc, matcher) => {
@@ -44,9 +44,24 @@ export function handleNewLogsBatch(state: LogDataState, justReceivedBatch: JustR
       sourcesAndMessages: [{sourceId: justReceivedBatch.sourceId, message}],
     } as Log
   })
+
   state.logs = [...state.logs, ...newRecordsAdapted].sort((a, b) => (a.id > b.id ? -1 : 1));
 
+  updateTraceIdIndex(state.traceIdIndex, newRecordsAdapted)
+
   updateFilterStats(state.filterStats, newRecordsAdapted)
+}
+
+function updateTraceIdIndex(traceIdIndex: Record<string, string[]>, newRecords: Log[]) {
+  for (const rec of newRecords) {    
+    for (const {traceIdValue} of traceIdFields(rec)) {
+      if (traceIdIndex[traceIdValue]) {
+        traceIdIndex[traceIdValue].push(rec.id)
+      } else {
+        traceIdIndex[traceIdValue] = [rec.id]
+      }
+    }    
+  }
 }
 
 export function updateFilterStats(filterStats: FilterStats, newRecords: Log[]) {
@@ -67,10 +82,10 @@ export function updateFilterStats(filterStats: FilterStats, newRecords: Log[]) {
 
 function recordWhetherDuplicate(state: LogDataState, newRecord: JustReceivedLog, sourceId: string): boolean {
 
-  const existingRecords = state.index[newRecord.id];
+  const existingRecords = state.deduplicationIndex[newRecord.id];
   if (!existingRecords) {
     //simplest and the most common case: we just got a new record
-    state.index[newRecord.id] = [{
+    state.deduplicationIndex[newRecord.id] = [{
       stream: newRecord.stream,
       id: newRecord.id,
       sourceIds: [sourceId]
@@ -91,7 +106,7 @@ function recordWhetherDuplicate(state: LogDataState, newRecord: JustReceivedLog,
     return true;
   } else {
     // somewhat unexpected the same id (ts in loki) returned records with different streams AFAIU values    
-    state.index[newRecord.id].push({
+    state.deduplicationIndex[newRecord.id].push({
       stream: newRecord.stream,
       id: newRecord.id,
       sourceIds: [sourceId],

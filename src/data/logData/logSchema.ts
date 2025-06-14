@@ -13,7 +13,7 @@ export type JustReceivedLog = {
 }
 
 export type Log = {
-  stream: { [key: string]: unknown };
+  stream: { [key: string]: string };
   id: string;
   line: string;
   timestamp: string; //iso string

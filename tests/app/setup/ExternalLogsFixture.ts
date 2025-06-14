@@ -1,3 +1,4 @@
+import { TRACE_ID_FIELDS } from '@/hardcodes';
 import { Page, test, expect } from '@playwright/test';
 
 export const routes = {
@@ -19,6 +20,7 @@ export const externalLogsTest = test.extend<{ logs: LogSource }>({
 export type LogRecordSpec = string | {
     timestamp?: string;
     message?: string;
+    traceId?: string;
     data?: Record<string, string>;
 }
 
@@ -79,7 +81,10 @@ class LogSource {
     givenSourceRecords(source: { query: string } | null, ...logRecords: LogRecordSpec[]) {
         const newRecords = logRecords.map(logSpec => {
             const logSpecObjectified = typeof logSpec === 'string' ? { message: logSpec } : logSpec;
-            const { timestamp, message = 'a log message', data } = logSpecObjectified;
+            const { timestamp, message = 'a log message', data = {} } = logSpecObjectified;
+            if (logSpecObjectified.traceId) {
+                data[TRACE_ID_FIELDS[0]] = logSpecObjectified.traceId
+            }
             let timestampDate: Date
             if (timestamp) {
                 timestampDate = new Date(timestamp)
