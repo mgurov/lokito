@@ -16,7 +16,7 @@ import { Alert } from './ui/alert';
 import { LogWithSource } from '@/data/logData/logSchema';
 import { Badge } from './ui/badge';
 import { Source } from '@/data/source';
-import { AckAllButton, StatsLine } from '@/components/StatsLine';
+import { AckAllOnSourceButton, StatsLine } from '@/components/StatsLine';
 import { UploadSourcesConfiguration } from '@/components/upload-config';
 import { SelectedSourceContext } from './context/SelectedSourceContext';
 import { useAckNack } from './context/AckNackContext';
@@ -103,7 +103,7 @@ function SourcesTabs({dataFromSources, data, sources, disabled}:
 
             {thisSourceUnaccounted.length > 0 && (
               <>
-                <AckAllButton notAckedCount={thisSourceUnaccounted.length} />
+                <AckAllOnSourceButton notAckedCount={thisSourceUnaccounted.length} />
                 <DataTable data={thisSourceUnaccounted} columns={columns()} />
               </>
 

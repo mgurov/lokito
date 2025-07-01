@@ -13,7 +13,7 @@ export function StatsLine() {
   const notAckedDataLength = useNotAckedDataLength();
   return <Alert className="text-size-min">
     <CountOfAckMessages />
-    <AckAllButton notAckedCount={notAckedDataLength} />
+    <AckAllOnSourceButton notAckedCount={notAckedDataLength} />
   </Alert>;
 }
 
@@ -23,18 +23,23 @@ function CountOfAckMessages() {
   return <Toggle data-testid="acked-messages-count" size="sm" onClick={toggleAckNack}>ACK'ed {ackedMessagesCount}</Toggle>
 }
 
-export function AckAllButton({notAckedCount}: {notAckedCount: number}) {
-  const ackNack = useAckNack();
+export function AckAllOnSourceButton({notAckedCount}: {notAckedCount: number}) {
   const dispatch = useDispatch()
   const selectedSource = useContext(SelectedSourceContext)
   const { ackAll } = logDataSliceActions
+
+  return <AckAllButton notAckedCount={notAckedCount} onClick={() => dispatch(ackAll({type: "sourceId", sourceId: selectedSource?.sourceId}))} />
+}
+
+export function AckAllButton({notAckedCount, onClick}: {notAckedCount: number, onClick: () => void}) {
+  const ackNack = useAckNack();
   if (!notAckedCount) {
     return null;
   }
   return (
     <span className="pl-2">
       <SimpleTooltip content={<><p>ACK all pending messages.</p></>}>
-        <Button data-testid="ack-all-button" disabled={ackNack == 'ack'} onClick={() => { dispatch(ackAll(selectedSource?.sourceId)) }} variant="secondary" size="sm">ACK {notAckedCount}</Button>
+        <Button data-testid="ack-all-button" disabled={ackNack == 'ack'} onClick={() => { onClick() }} variant="secondary" size="sm">ACK {notAckedCount}</Button>
       </SimpleTooltip>
 
     </span>

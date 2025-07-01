@@ -95,6 +95,28 @@ test.describe('ack all', () => {
     
     });
 
+    test('ack all should preserve filters', async({appState, mainPage, logs}) => {
+        await appState.givenFilters({messageRegex: 'match_not_ack', autoAck: false})
+
+        logs.givenRecords('match_not_ack')
+
+        await mainPage.open();
+
+        await mainPage.expectLogMessages('match_not_ack')
+
+        await expect(mainPage.matchingFilterButtons).toHaveCount(1)
+
+        await mainPage.clickAckAll()
+
+        //no messages
+        await expect(mainPage.matchingFilterButtons).toHaveCount(0)
+
+        await mainPage.ackedMessagesCount.click()
+
+        //the filter marker should be preserved also on the acked messages
+        await expect(mainPage.matchingFilterButtons).toHaveCount(1)
+    })
+
 })
 
 test.describe('ack till this', () => {
@@ -250,4 +272,3 @@ test('document title should indicate the number of acked messages', async ({ mai
     })
 
 });
-

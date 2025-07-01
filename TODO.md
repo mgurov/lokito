@@ -1,12 +1,20 @@
-[ ] continue previously left
-[ ] select exact moment when to continue
+[ ] select exact moment when to continue (previously left)
+[ ] continue after first non-acked
+[ ] date-time to fetch from;
+[ ] track acks in browser db w/GC
 
-[ ] MDC view
+[ ] link to Tempo
+
+[ ] force fetch cycle
+
+
 [ ] create filter from user selection 
 
 [ ] preview filter appliance
 [ ] comment on a log line
 [ ] persist in the session storage of the browser
+
+[ ] coding style
 
 
 A talk points
