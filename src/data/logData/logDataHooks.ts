@@ -86,7 +86,7 @@ export const useTraceIdLogs = (traceId: string): LogWithSource[] =>
             ],
             (all, toShow, sources) => {
                 return all.filter((log) => {
-                    return toShow.some((match) => match === log.id)
+                    return (toShow || []).some((match) => match === log.id)
                 }).map(enrichLogWithSourcesFun(sources))
             }
         ),
