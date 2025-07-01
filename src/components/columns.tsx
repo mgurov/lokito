@@ -99,7 +99,7 @@ function SourceIndicator({row}: {row: LogWithSource}) {
   const selectTab = useSelectTab();
   const sourcesToShow = row.sources.filter(s => s.id !== selectedSource?.sourceId)
   return sourcesToShow.map(source => (
-    <React.Fragment key={source.id} ><Button variant="ghost" size="sm" data-testid="log-row-source-marker" className="border boder-red-50" onClick={_e => {
+    <React.Fragment key={source.id} ><Button variant="ghost" size="sm" data-testid="log-row-source-marker" className="border border-red-50" onClick={_e => {
       selectTab(source.id);
     }}>{source.name}</Button>{' '}</React.Fragment>
   ));
