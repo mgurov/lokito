@@ -1,4 +1,5 @@
 [ ] filter by a field
+[ ] notes on a message w/o filter
 
 [ ] select exact moment when to continue (previously left)
 [ ] continue after first non-acked
