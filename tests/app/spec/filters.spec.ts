@@ -1,6 +1,7 @@
 
 import { test, expect } from '@tests/app/setup/testExtended';
 import { AnnotationSuppressDefaultApp } from '../setup/AppStateFixture';
+import { FilterEditorPageFixture } from '../setup/pages/MainPageFixture';
 
 test('find a line create a filter on it', async ({ page, mainPage, logs }) => {
 
@@ -127,3 +128,19 @@ test('same message should show use first line from all and respective from sourc
     await mainPage.selectAllSourcesTab()
     await mainPage.expectAckMessages(1)
 });
+
+test('filter description', async ({page, mainPage, logs}) => {
+    logs.givenRecords({ message: 'message1' });
+
+    await mainPage.open();
+
+    await mainPage.createFilter({
+        logLineText: 'message1',
+        customActions: async (filterEditor: FilterEditorPageFixture) => {
+            await filterEditor.descriptionTextEditor.fill('This is a somewhat explanation')
+            await filterEditor.autoAckCheckbox.click()
+        }, 
+    });
+
+    await expect(page.getByText('This is a somewhat explanation')).toBeVisible()
+})

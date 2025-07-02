@@ -218,12 +218,17 @@ export class FilterEditorPageFixture {
     }
 
     get autoAckCheckbox() {
-        return this.locator.getByTestId('auto-ack-checkbox')
+        return this.locator.getByTestId('auto-ack')
     }
 
     get autoAckTtlTriggerButton() {
         return this.locator.getByTestId('auto-ack-ttl-trigger-button') 
     }
+
+    get descriptionTextEditor() {
+        return this.locator.getByTestId('filter-description-input') 
+    }
+
 
     calendarDateButton(date: string) {
         return this.locator.locator(`td[data-day="${date}"] button`)

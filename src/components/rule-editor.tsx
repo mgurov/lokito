@@ -31,13 +31,14 @@ export default function NewRule({ logEntry }: { logEntry: Log }) {
   const dispatch = useAppDispatch();
 
 
-  function handleSubmit({ save, messageRegex, autoAck, autoAckTillDate }: SaveRuleProps) {
+  function handleSubmit({ save, messageRegex, autoAck, autoAckTillDate, description }: SaveRuleProps) {
     const newFilter: Filter = {
       id: randomId(),
       transient: !save,
       messageRegex,
       autoAck,
       autoAckTillDate,
+      description,
     };
     dispatch(createFilter(newFilter));
   }
@@ -50,6 +51,7 @@ type SaveRuleProps = {
   messageRegex: string;
   autoAck?: boolean;
   autoAckTillDate?: string;
+  description?: string;
 }
 
 export function RuleDialog({ logLine, onSubmit }: { logLine: string, onSubmit: (p: SaveRuleProps) => void }) {
@@ -70,6 +72,8 @@ export function RuleDialog({ logLine, onSubmit }: { logLine: string, onSubmit: (
   const [open, setOpen] = useState(false);
 
   const [date, setDate] = useState<Date | undefined>(undefined);
+
+  const [description, setDescription] = useState<string | undefined>(undefined)
 
   const handleSubmitWithBells = (props: SaveRuleProps) => {
     if (date !== undefined) {
@@ -154,6 +158,16 @@ export function RuleDialog({ logLine, onSubmit }: { logLine: string, onSubmit: (
             </p>
           </div>
 
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Input
+              data-testid="filter-description-input"
+              className="col-span-4"
+              placeholder="details"
+              value={description || ''}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+
           <div className="flex items-center space-x-2">
             <TTLDatePicker date={date} setDate={setDate} />
             <p className="text-sm text-muted-foreground">
@@ -168,10 +182,10 @@ export function RuleDialog({ logLine, onSubmit }: { logLine: string, onSubmit: (
               Close
             </Button>
           </DialogClose>
-          <Button data-testid="apply-rule-button" disabled={logLineMatchesRegex != 'yes'} onClick={() => onSubmit({ save: false, messageRegex, autoAck })} type="submit" variant="secondary">
+          <Button data-testid="apply-rule-button" disabled={logLineMatchesRegex != 'yes'} onClick={() => onSubmit({ save: false, messageRegex, autoAck, description })} type="submit" variant="secondary">
             Apply on current
           </Button>
-          <Button data-testid="save-rule-button" disabled={logLineMatchesRegex != 'yes'} onClick={() => handleSubmitWithBells({ save: true, messageRegex, autoAck })} type="submit">
+          <Button data-testid="save-rule-button" disabled={logLineMatchesRegex != 'yes'} onClick={() => handleSubmitWithBells({ save: true, messageRegex, autoAck, description })} type="submit">
             Save for the future
           </Button>
         </DialogFooter>

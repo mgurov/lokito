@@ -6,6 +6,7 @@ export type Filter = {
     transient?: boolean; // default false
     autoAck?: boolean; //default true
     autoAckTillDate?: string;
+    description?: string;
 };
 
 export type FilterMatched = {

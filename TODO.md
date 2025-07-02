@@ -1,10 +1,12 @@
 [ ] filter by a field
 [ ] notes on a message w/o filter
 
+[ ] rename filter to rule
+
+
 [ ] select exact moment when to continue (previously left)
 [ ] continue after first non-acked
 [ ] date-time to fetch from;
-[ ] track acks in browser db w/GC
 
 [ ] link to Tempo
 
@@ -15,7 +17,7 @@
 
 [ ] preview filter appliance
 [ ] comment on a log line
-[ ] persist in the session storage of the browser
+[ ] persist in the session storage of the browser w. GC
 
 [ ] coding style
 

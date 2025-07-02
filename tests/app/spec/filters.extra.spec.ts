@@ -10,8 +10,8 @@ test('non-acking filter on it', async ({ page, mainPage, logs }) => {
     await mainPage.createFilter({
         logLineText: 'stem 1',
         filterRegex: 'stem',
-        customActions: async() => {
-            await page.getByTestId('auto-ack').click(); // to uncheck
+        customActions: async(d) => {
+            await d.autoAckCheckbox.click(); // to uncheck
         }
     });
 
