@@ -1,3 +1,5 @@
+[ ] filter by a field
+
 [ ] select exact moment when to continue (previously left)
 [ ] continue after first non-acked
 [ ] date-time to fetch from;
