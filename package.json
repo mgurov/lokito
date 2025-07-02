@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "validate:static": "npm run lint && npx tsc -b",
+    "fix": "npx dprint fmt",
+    "validate:static": "npx dprint check && npm run lint && npx tsc -b",
     "validate": "npm run validate:static && npx playwright test",
     "preview": "vite preview",
     "boot": "./boot.sh"
@@ -35,6 +36,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
+    "dprint": "^0.50.1",
     "lodash": "^4.17.21",
     "lucide-react": "^0.525.0",
     "next-themes": "^0.4.4",
