@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from "axios";
+import { useEffect, useState } from "react";
 
 interface UseAxiosParams {
   url: string;
-  method?: 'get' | 'post' | 'put' | 'delete';
+  method?: "get" | "post" | "put" | "delete";
   body?: any;
   headers?: any;
 }
@@ -17,7 +17,7 @@ interface UseAxiosReturn {
 
 function useAxios({
   url,
-  method = 'get',
+  method = "get",
   body = null,
   headers = null,
 }: UseAxiosParams): UseAxiosReturn {

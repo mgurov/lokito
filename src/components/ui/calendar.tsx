@@ -1,9 +1,4 @@
-import {
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronUpIcon,
-} from "lucide-react";
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon } from "lucide-react";
 import * as React from "react";
 import { ChevronProps, DayFlag, DayPicker, SelectionState, UI } from "react-day-picker";
 
@@ -37,8 +32,7 @@ export const Calendar = ({
         ),
         [UI.MonthGrid]: "w-full border-collapse space-y-1",
         [UI.Weekdays]: "flex",
-        [UI.Weekday]:
-          "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
+        [UI.Weekday]: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
         [UI.Week]: "flex w-full mt-2",
         [UI.Day]:
           "h-9 w-9 text-center rounded-md text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
@@ -49,8 +43,7 @@ export const Calendar = ({
         [SelectionState.range_end]: "day-range-end",
         [SelectionState.selected]:
           "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-        [SelectionState.range_middle]:
-          "aria-selected:bg-accent aria-selected:text-accent-foreground",
+        [SelectionState.range_middle]: "aria-selected:bg-accent aria-selected:text-accent-foreground",
         [DayFlag.today]: "bg-accent text-accent-foreground",
         [DayFlag.outside]:
           "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
@@ -66,18 +59,17 @@ export const Calendar = ({
   );
 };
 
-
 const Chevron = ({ orientation }: ChevronProps) => {
-	if (orientation === "up") {
-		return <ChevronUpIcon className="h-4 w-4" />;
-	}
-	if (orientation === "down") {
-		return <ChevronDownIcon className="h-4 w-4" />;
-	}
-	if (orientation === "right") {
-		return <ChevronRightIcon className="h-4 w-4" />;
-	}
-	return <ChevronLeftIcon className="h-4 w-4" />;
+  if (orientation === "up") {
+    return <ChevronUpIcon className="h-4 w-4" />;
+  }
+  if (orientation === "down") {
+    return <ChevronDownIcon className="h-4 w-4" />;
+  }
+  if (orientation === "right") {
+    return <ChevronRightIcon className="h-4 w-4" />;
+  }
+  return <ChevronLeftIcon className="h-4 w-4" />;
 };
 
 // adjusted as per https://github.com/shadcn-ui/ui/issues/5799#issuecomment-2513801325 and https://github.com/shadcn-ui/ui/issues/5799#issuecomment-2549430290

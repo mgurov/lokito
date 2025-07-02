@@ -24,7 +24,7 @@ export function awaitWithTimeout<T>(
   options: {
     timeout: number;
     failureMessage: string;
-  }
+  },
 ): Promise<T> {
   return Promise.race([
     promise,

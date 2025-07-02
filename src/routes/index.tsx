@@ -1,8 +1,5 @@
-import MainBody from '@/components/MainBody';
-
+import MainBody from "@/components/MainBody";
 
 export default function Index() {
-  return (
-      <MainBody/>
-  );
+  return <MainBody />;
 }

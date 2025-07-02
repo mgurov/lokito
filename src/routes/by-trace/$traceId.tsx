@@ -5,34 +5,38 @@ import { useTraceIdLogs } from "@/data/logData/logDataHooks";
 import { logDataSliceActions } from "@/data/logData/logDataSlice";
 import { LogWithSource } from "@/data/logData/logSchema";
 import { useDispatch } from "react-redux";
-import { useParams } from "react-router-dom"
+import { useParams } from "react-router-dom";
 
 export default function LogsByTraceId() {
-    const {traceId = ''} = useParams()
-    const traceIdLogs = useTraceIdLogs(traceId || '')
-    return (<>
-        <h1 className="font-bold">Trace ID: {traceId}</h1>
-        <AckAllOnTraceViewButton data={traceIdLogs} />
-        <SourcesData data={traceIdLogs} />
-        </>
-    )
+  const { traceId = "" } = useParams();
+  const traceIdLogs = useTraceIdLogs(traceId || "");
+  return (
+    <>
+      <h1 className="font-bold">Trace ID: {traceId}</h1>
+      <AckAllOnTraceViewButton data={traceIdLogs} />
+      <SourcesData data={traceIdLogs} />
+    </>
+  );
 }
 
 function SourcesData({ data }: { data: LogWithSource[] }) {
-
   return (
     <div className="mt-2 space-y-4">
-      <DataTable data={data} columns={columns({showTraces: false})} />
+      <DataTable data={data} columns={columns({ showTraces: false })} />
     </div>
   );
 }
 
 function AckAllOnTraceViewButton({ data }: { data: LogWithSource[] }) {
+  const dispatch = useDispatch();
+  const { ackAll } = logDataSliceActions;
 
-  const dispatch = useDispatch()
-  const { ackAll } = logDataSliceActions
+  const notAckedCount = data.filter(p => p.acked === null).length;
 
-  const notAckedCount = data.filter(p => p.acked === null).length
-  
-  return <AckAllButton notAckedCount={notAckedCount} onClick={() => dispatch(ackAll({type: 'ids', ids: data.map(l => l.id)}))}  />
+  return (
+    <AckAllButton
+      notAckedCount={notAckedCount}
+      onClick={() => dispatch(ackAll({ type: "ids", ids: data.map(l => l.id) }))}
+    />
+  );
 }

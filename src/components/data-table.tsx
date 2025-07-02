@@ -1,20 +1,20 @@
-import * as React from 'react';
 import {
   ColumnDef,
   ExpandedState,
   flexRender,
   getCoreRowModel,
+  getExpandedRowModel,
   getPaginationRowModel,
   useReactTable,
-  getExpandedRowModel,
-} from '@tanstack/react-table';
+} from "@tanstack/react-table";
+import * as React from "react";
 
-import { DataTablePagination } from './data-table-pagination';
-import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
-import { cn } from '@/lib/utils';
-import { LogPanel } from '@/components/LogPanel';
-import { Log, LogWithSource } from '@/data/logData/logSchema';
-import { useOverallFetchingState } from '@/data/fetching/fetchingSlice';
+import { LogPanel } from "@/components/LogPanel";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { useOverallFetchingState } from "@/data/fetching/fetchingSlice";
+import { Log, LogWithSource } from "@/data/logData/logSchema";
+import { cn } from "@/lib/utils";
+import { DataTablePagination } from "./data-table-pagination";
 
 interface DataTableProps {
   columns: ColumnDef<LogWithSource>[];
@@ -55,50 +55,50 @@ export function DataTable({ columns, data }: DataTableProps) {
       <div className="rounded-md border">
         <Table>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <React.Fragment key={row.id}>
-                  <TableRow
-                    data-testid="log-table-row"
-                    data-state={row.getIsSelected() && 'selected'}
-                    className={cn(
-                      now - new Date(row.original.timestamp).getTime() < 1000 * REFRESH_RATE &&
-                        'transform-gpu bg-green-50 transition-all duration-700 ease-out',
-                    )}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        className={cn('relative', cell.column.id === 'line' && 'w-full')}
-                        {...(cell.column.id !== 'source' && cell.column.id !== 'ack'
-                          ? {
-                              role: 'button',
+            {table.getRowModel().rows?.length
+              ? (
+                table.getRowModel().rows.map((row) => (
+                  <React.Fragment key={row.id}>
+                    <TableRow
+                      data-testid="log-table-row"
+                      data-state={row.getIsSelected() && "selected"}
+                      className={cn(
+                        now - new Date(row.original.timestamp).getTime() < 1000 * REFRESH_RATE
+                          && "transform-gpu bg-green-50 transition-all duration-700 ease-out",
+                      )}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell
+                          key={cell.id}
+                          className={cn("relative", cell.column.id === "line" && "w-full")}
+                          {...(cell.column.id !== "source" && cell.column.id !== "ack"
+                            ? {
+                              role: "button",
                               tabIndex: 0,
                               onClick: () => row.toggleExpanded(),
                               onKeyDown: (event) => {
-                                if (event.key === 'Enter') {
+                                if (event.key === "Enter") {
                                   row.toggleExpanded();
                                 }
                               },
                             }
-                          : {})}
-                      >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  {row.getIsExpanded() && (
-                    <TableRow className="bg-muted/50">
-                      <TableCell colSpan={columns.length}>
-                        <LogPanel log={row.original} />
-                      </TableCell>
+                            : {})}
+                        >
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
                     </TableRow>
-                  )}
-                </React.Fragment>
-              ))
-            ) : (
-              <NoData />
-            )}
+                    {row.getIsExpanded() && (
+                      <TableRow className="bg-muted/50">
+                        <TableCell colSpan={columns.length}>
+                          <LogPanel log={row.original} />
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
+                ))
+              )
+              : <NoData />}
           </TableBody>
         </Table>
       </div>

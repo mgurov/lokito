@@ -1,8 +1,6 @@
-import { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { Button, buttonVariantSizes, buttonVariantVariants } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button, buttonVariantSizes, buttonVariantVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Sheet,
   SheetContent,
@@ -11,12 +9,21 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '@/components/ui/sheet';
-import { Textarea } from '@/components/ui/textarea';
-import { createNewSource } from '@/data/redux/sourcesSlice';
-import { SourceMutation } from '@/data/source';
+} from "@/components/ui/sheet";
+import { Textarea } from "@/components/ui/textarea";
+import { createNewSource } from "@/data/redux/sourcesSlice";
+import { SourceMutation } from "@/data/source";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
 
-export function NewSource(props: { preOpen?: boolean; buttonText?: string, buttonVariant?: keyof typeof buttonVariantVariants, buttonSize?: keyof typeof buttonVariantSizes }) {
+export function NewSource(
+  props: {
+    preOpen?: boolean;
+    buttonText?: string;
+    buttonVariant?: keyof typeof buttonVariantVariants;
+    buttonSize?: keyof typeof buttonVariantSizes;
+  },
+) {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(props.preOpen);
 
@@ -30,8 +37,12 @@ export function NewSource(props: { preOpen?: boolean; buttonText?: string, butto
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button data-testid="new-source-button" size={props.buttonSize || "sm"} variant={props.buttonVariant ?? "ghost"}>
-          {props.buttonText ?? 'New Source'}
+        <Button
+          data-testid="new-source-button"
+          size={props.buttonSize || "sm"}
+          variant={props.buttonVariant ?? "ghost"}
+        >
+          {props.buttonText ?? "New Source"}
         </Button>
       </SheetTrigger>
       <SheetContent data-testid="new-source-sheet" className="w-1/2">

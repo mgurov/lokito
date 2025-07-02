@@ -1,15 +1,15 @@
-import { PayloadAction, createSlice } from '@reduxjs/toolkit';
-import { Acked, Log } from '@/data/logData/logSchema';
-import { createFilter, deleteFilter, ackMatchedByFilter } from '../filters/filtersSlice';
-import _ from 'lodash';
-import { createFilterMatcher, FiltersLocalStorage, FilterStats } from '../filters/filter';
-import { handleNewLogsBatch, JustReceivedBatch } from './logDataEventHandlers';
+import { Acked, Log } from "@/data/logData/logSchema";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import _ from "lodash";
+import { createFilterMatcher, FiltersLocalStorage, FilterStats } from "../filters/filter";
+import { ackMatchedByFilter, createFilter, deleteFilter } from "../filters/filtersSlice";
+import { handleNewLogsBatch, JustReceivedBatch } from "./logDataEventHandlers";
 
 export type LogIndexNode = {
   stream: { [key: string]: unknown };
   id: string;
   sourceIds: [string, ...string[]];
-}
+};
 
 export interface LogDataState {
   logs: Log[];
@@ -26,16 +26,16 @@ const initialState: LogDataState = {
 };
 
 export const logDataSlice = createSlice({
-  name: 'logData',
+  name: "logData",
   initialState,
   reducers: {
     receiveBatch: (state, action: PayloadAction<JustReceivedBatch>) => {
-      handleNewLogsBatch(state, action.payload)
+      handleNewLogsBatch(state, action.payload);
     },
     ack: (state, action: PayloadAction<string>) => {
       const line = state.logs.find((l) => l.id === action.payload);
       if (line) {
-        line.acked = {type: 'manual'};
+        line.acked = { type: "manual" };
       } else {
         console.error("Couldn't find log by id to ack; action: ", action);
       }
@@ -43,12 +43,12 @@ export const logDataSlice = createSlice({
     unack: (state, action: PayloadAction<string>) => {
       const line = state.logs.find((l) => l.id === action.payload);
       if (line) {
-        line.acked = null; //hard unack even if were matched by a filter we don't care anymore. TODO: check what happens in that case.
+        line.acked = null; // hard unack even if were matched by a filter we don't care anymore. TODO: check what happens in that case.
       } else {
         console.error("Couldn't find log by id to ack; action: ", action);
       }
     },
-    ackTillThis: (state, action: PayloadAction<{ messageId: string, sourceId?: string }>) => {
+    ackTillThis: (state, action: PayloadAction<{ messageId: string; sourceId?: string }>) => {
       const { sourceId, messageId } = action.payload;
       const lineIndex = state.logs.findIndex((l) => l.id === messageId);
       if (lineIndex === -1) {
@@ -57,55 +57,58 @@ export const logDataSlice = createSlice({
       }
       state.logs.forEach((l, index) => {
         if (index >= lineIndex && (sourceId === undefined || l.sourcesAndMessages.find(s => s.sourceId === sourceId))) {
-          l.acked = {type: 'manual'};
+          l.acked = { type: "manual" };
         }
-      })
+      });
     },
-    ackAll: (state, { payload }: PayloadAction<{
-      type: 'sourceId', sourceId: string | undefined,
-    } | {
-      type: 'ids', ids: string[],
-    }
-      >) => {
-
+    ackAll: (state, { payload }: PayloadAction<
+      {
+        type: "sourceId";
+        sourceId: string | undefined;
+      } | {
+        type: "ids";
+        ids: string[];
+      }
+    >) => {
       let ackingPredicate: (l: Log) => boolean;
 
       switch (payload.type) {
-        case 'sourceId':
+        case "sourceId":
           if (payload.sourceId) {
             ackingPredicate = (l: Log) => l.sourcesAndMessages.find(s => s.sourceId === payload.sourceId) != undefined;
           } else {
             ackingPredicate = () => true;
           }
           break;
-        case 'ids':
+        case "ids":
           ackingPredicate = (l: Log) => payload.ids.includes(l.id);
           break;
         default:
-          console.error('Unknown acking payload type', payload);
+          console.error("Unknown acking payload type", payload);
           return;
       }
-      
+
       state.logs.forEach(l => {
         if (ackingPredicate(l)) {
-          l.acked = {type: 'manual'};
+          l.acked = { type: "manual" };
         }
-      })
+      });
     },
   },
   extraReducers: (builder) => {
     builder.addCase(createFilter, (state, action) => {
       const filter = action.payload;
       const matcher = createFilterMatcher(filter);
-      let matched = 0
+      let matched = 0;
       for (const line of state.logs) {
-
-        const lineMatched = matcher.match({timestamp: line.timestamp, messages: line.sourcesAndMessages.map(sm => sm.message)});
+        const lineMatched = matcher.match({
+          timestamp: line.timestamp,
+          messages: line.sourcesAndMessages.map(sm => sm.message),
+        });
 
         if (!lineMatched) {
           continue;
         }
-      
 
         if (line.filters[lineMatched.filterId] !== undefined) {
           continue;
@@ -113,40 +116,38 @@ export const logDataSlice = createSlice({
 
         matched += 1;
         line.filters[lineMatched.filterId] = lineMatched.filterId;
-        
+
         if (line.acked === null) {
           line.acked = lineMatched.acked;
         }
       }
 
       if (!filter.transient && matched > 0) {
-        state.filterStats[filter.id] = matched
-        FiltersLocalStorage.filterStats.save(state.filterStats)
+        state.filterStats[filter.id] = matched;
+        FiltersLocalStorage.filterStats.save(state.filterStats);
       }
     });
 
     builder.addCase(deleteFilter, (state, action) => {
-      const filterId = action.payload
+      const filterId = action.payload;
 
       // 1. unack affected lines
 
       for (const line of state.logs) {
-        const {acked} = line
-        if (acked?.type === 'filter' && acked.filterId === filterId) {
-          line.acked = null
+        const { acked } = line;
+        if (acked?.type === "filter" && acked.filterId === filterId) {
+          line.acked = null;
         }
       }
 
       // 2. clear stats
-      delete state.filterStats[filterId]
-      FiltersLocalStorage.filterStats.save(state.filterStats)
-
-    })
-
+      delete state.filterStats[filterId];
+      FiltersLocalStorage.filterStats.save(state.filterStats);
+    });
 
     builder.addCase(ackMatchedByFilter, (state, action) => {
-      const filterId = action.payload
-      const ackMarker: Acked = { type: 'filter', filterId: filterId };
+      const filterId = action.payload;
+      const ackMarker: Acked = { type: "filter", filterId: filterId };
 
       // unack affected lines
       for (const line of state.logs) {
@@ -154,8 +155,7 @@ export const logDataSlice = createSlice({
           line.acked = ackMarker;
         }
       }
-    })
-
+    });
   },
 });
 

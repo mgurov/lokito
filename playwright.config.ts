@@ -1,4 +1,4 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from "@playwright/test";
 
 /**
  * Read environment variables from file.
@@ -11,7 +11,7 @@ import { defineConfig, devices } from '@playwright/test';
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: './tests/app/spec',
+  testDir: "./tests/app/spec",
   testMatch: /.*\.ts/,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -22,16 +22,15 @@ export default defineConfig({
   use: {
     actionTimeout: 1000,
     navigationTimeout: 1000,
-    baseURL: 'http://localhost:5175',
-    trace: 'on-first-retry',
+    baseURL: "http://localhost:5175",
+    trace: "on-first-retry",
   },
 
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
     },
-
     // {
     //   name: 'firefox',
     //   use: { ...devices['Desktop Firefox'] },
@@ -44,8 +43,8 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:5175',
+    command: "npm run dev",
+    url: "http://localhost:5175",
     reuseExistingServer: !process.env.CI,
   },
 });

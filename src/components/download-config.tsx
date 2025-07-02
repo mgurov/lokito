@@ -1,14 +1,14 @@
-import { DownloadIcon } from '@radix-ui/react-icons';
-import { Button } from '@/components/ui/button';
-import { useSources } from '@/data/redux/sourcesSlice';
-import { useFilters } from '@/data/filters/filtersSlice';
+import { Button } from "@/components/ui/button";
+import { useFilters } from "@/data/filters/filtersSlice";
+import { useSources } from "@/data/redux/sourcesSlice";
+import { DownloadIcon } from "@radix-ui/react-icons";
 
 function downloadConfig(config: unknown, filename: string) {
   const jsonString = JSON.stringify(config, null, 2);
-  const blob = new Blob([jsonString], { type: 'application/json' });
+  const blob = new Blob([jsonString], { type: "application/json" });
   const url = URL.createObjectURL(blob);
 
-  const link = document.createElement('a');
+  const link = document.createElement("a");
   link.href = url;
   link.download = filename;
 
@@ -24,7 +24,7 @@ export function DownloadSourcesConfiguration() {
   const filters = useFilters();
   function handleDownload() {
     const fileName = `lokito-config-${new Date().toISOString()}.json`;
-    downloadConfig({sources, filters}, fileName);
+    downloadConfig({ sources, filters }, fileName);
   }
 
   return (

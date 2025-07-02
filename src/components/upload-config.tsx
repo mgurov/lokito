@@ -1,8 +1,4 @@
-import { UploadIcon } from '@radix-ui/react-icons';
-import { useState, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
-import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,14 +6,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { setAllSources } from '@/data/redux/sourcesSlice';
-import { Source } from '@/data/source';
-import { Alert, AlertTitle } from './ui/alert';
-import { Filter } from '@/data/filters/filter';
-import { createFilter } from '@/data/filters/filtersSlice';
+} from "@/components/ui/dialog";
+import { Filter } from "@/data/filters/filter";
+import { createFilter } from "@/data/filters/filtersSlice";
+import { setAllSources } from "@/data/redux/sourcesSlice";
+import { Source } from "@/data/source";
+import { UploadIcon } from "@radix-ui/react-icons";
+import { useCallback, useState } from "react";
+import { useDispatch } from "react-redux";
+import { toast } from "sonner";
+import { Alert, AlertTitle } from "./ui/alert";
 
-function UploadConfig({ onConfigLoad }: { onConfigLoad: (config: {sources: Source[], filters: Filter[]}) => void }) {
+function UploadConfig({ onConfigLoad }: { onConfigLoad: (config: { sources: Source[]; filters: Filter[] }) => void }) {
   const [isDragActive, setIsDragActive] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
@@ -45,7 +45,7 @@ function UploadConfig({ onConfigLoad }: { onConfigLoad: (config: {sources: Sourc
       setIsDragActive(false);
 
       if (!e.dataTransfer.files || !e.dataTransfer.files[0]) {
-        setUploadError('Not a single file dropped');
+        setUploadError("Not a single file dropped");
         return;
       }
 
@@ -54,32 +54,32 @@ function UploadConfig({ onConfigLoad }: { onConfigLoad: (config: {sources: Sourc
 
       reader.onload = (event) => {
         try {
-          if (!event.target?.result || typeof event.target.result !== 'string') {              
-            setUploadError('Could not read the file dropped');
+          if (!event.target?.result || typeof event.target.result !== "string") {
+            setUploadError("Could not read the file dropped");
             return;
           }
-          let config: {sources: Source[], filters: Filter[]};
+          let config: { sources: Source[]; filters: Filter[] };
           try {
             config = JSON.parse(event.target.result);
           } catch (_error) {
-            setUploadError('The file is not a valid JSON');
+            setUploadError("The file is not a valid JSON");
             return;
           }
 
           if (!config.sources || !config.filters) {
-            setUploadError('Could not find sources or filters in the JSON uploaded');
+            setUploadError("Could not find sources or filters in the JSON uploaded");
             return;
           }
 
           onConfigLoad(config);
-          toast.success('Successful 🎉🎉', {
-            description: `${config.sources.length} sources and ${config.filters.length} filters have been loaded from file`,
+          toast.success("Successful 🎉🎉", {
+            description:
+              `${config.sources.length} sources and ${config.filters.length} filters have been loaded from file`,
           });
         } catch (error) {
           console.error(error);
-          toast.error('Something went wrong', {
-            description:
-              'There was an issue loading the sources from the file. Please try again.',
+          toast.error("Something went wrong", {
+            description: "There was an issue loading the sources from the file. Please try again.",
           });
         }
       };
@@ -98,22 +98,24 @@ function UploadConfig({ onConfigLoad }: { onConfigLoad: (config: {sources: Sourc
         onDragOver={handleDrag}
         onDrop={handleDrop}
         style={{
-          border: '2px dashed #cccccc',
-          borderRadius: '4px',
-          padding: '40px',
-          textAlign: 'center',
-          color: '#333',
-          background: isDragActive ? '#e6f7ff' : '#fafafa',
+          border: "2px dashed #cccccc",
+          borderRadius: "4px",
+          padding: "40px",
+          textAlign: "center",
+          color: "#333",
+          background: isDragActive ? "#e6f7ff" : "#fafafa",
         }}
       >
         {isDragActive
-          ? 'Drop the configuration file here'
-          : 'Drag and drop your configuration file here'}
+          ? "Drop the configuration file here"
+          : "Drag and drop your configuration file here"}
       </div>
-      {uploadError && <Alert variant="destructive">
-        <AlertTitle>Error processing configuration upload</AlertTitle>
-        {uploadError}</Alert>}
-
+      {uploadError && (
+        <Alert variant="destructive">
+          <AlertTitle>Error processing configuration upload</AlertTitle>
+          {uploadError}
+        </Alert>
+      )}
     </>
   );
 }
@@ -121,7 +123,7 @@ function UploadConfig({ onConfigLoad }: { onConfigLoad: (config: {sources: Sourc
 export function UploadSourcesConfiguration() {
   const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch();
-  function loadSources(config: {sources: Source[], filters: Filter[]}) {
+  function loadSources(config: { sources: Source[]; filters: Filter[] }) {
     dispatch(setAllSources(config.sources));
     config.filters.forEach((filter) => {
       dispatch(createFilter(filter));

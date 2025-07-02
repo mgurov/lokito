@@ -1,104 +1,104 @@
+import { Filter } from "@/data/filters/filter";
 import { Source } from "@/data/source";
+import { TestDetailsAnnotation } from "@playwright/test";
 import { nextId } from "../util/nextId";
 import { StorageFixture, storageTest } from "./StorageFixture";
-import { Filter } from "@/data/filters/filter";
-import { TestDetailsAnnotation } from "@playwright/test";
 
 export class AppStateFixture {
-    constructor(public storage: StorageFixture) {
+  constructor(public storage: StorageFixture) {
+  }
+
+  async sourceNames() {
+    const sourcesStored = await this.storage.getLocalItem("sources");
+    return ((sourcesStored || []) as [{ name: string }]).map(s => s.name);
+  }
+
+  async sources() {
+    const sourcesStored = await this.storage.getLocalItem("sources");
+    return ((sourcesStored || []) as [Source]);
+  }
+
+  async givenSource(sourceSpecs: SourceSpec = {}) {
+    const [source] = await this.givenSources(...[sourceSpecs]);
+    return source;
+  }
+
+  private sourcesSet: boolean = false;
+  async givenSources(...sourceSpecs: SourceSpec[]) {
+    if (this.sourcesSet !== false) {
+      throw Error(
+        `Sources already set, cummulative support is not implemented. Want to override the defaults? Use TagSuppressDefaultSourceTag.`,
+      );
     }
+    this.sourcesSet = true;
 
-    async sourceNames() {
-        const sourcesStored = await this.storage.getLocalItem('sources')
-        return ((sourcesStored || []) as [{ name: string }]).map(s => s.name);
+    const sources = sourceSpecs.map(toSource);
+    await this.storage.setLocalItem("sources", sources);
+    return sources;
+  }
+
+  private filtersSet: boolean = false;
+  async givenFilters(...messageRegex: FilterSpec[]) {
+    if (this.filtersSet !== false) {
+      throw Error(`Filters already set, cummulative filters support is not implemented`);
     }
+    this.filtersSet = true;
 
-    async sources() {
-        const sourcesStored = await this.storage.getLocalItem('sources')
-        return ((sourcesStored || []) as [Source]);
-    }
-
-
-    async givenSource(sourceSpecs: SourceSpec = {}) {
-        const [source] = await this.givenSources(...[sourceSpecs]);
-        return source
-    }
-
-    private sourcesSet: boolean = false;
-    async givenSources(...sourceSpecs: SourceSpec[]) {
-        if (this.sourcesSet !== false) {
-            throw Error(`Sources already set, cummulative support is not implemented. Want to override the defaults? Use TagSuppressDefaultSourceTag.`);
-        }
-        this.sourcesSet = true
-
-        const sources = sourceSpecs.map(toSource);
-        await this.storage.setLocalItem('sources', sources);
-        return sources;
-    }
-
-    private filtersSet: boolean = false;
-    async givenFilters(...messageRegex: FilterSpec[]) {
-
-        if (this.filtersSet !== false) {
-            throw Error(`Filters already set, cummulative filters support is not implemented`);
-        }
-        this.filtersSet = true
-
-        const filters: Filter[] = messageRegex.map(specToFilter)
-        await this.storage.setLocalItem('filters', filters);
-        return filters;
-    }
+    const filters: Filter[] = messageRegex.map(specToFilter);
+    await this.storage.setLocalItem("filters", filters);
+    return filters;
+  }
 }
 
 type FilterSpec = string | Partial<Filter>;
 
 function specToFilter(spec: FilterSpec): Filter {
-    if (typeof spec === 'string') {
-        return {
-            id: nextId(),
-            messageRegex: spec,
-        };
-    }
+  if (typeof spec === "string") {
     return {
-        id: spec.id ?? nextId(),
-        messageRegex: spec.messageRegex ?? '',
-        transient: spec.transient,
-        autoAck: spec.autoAck,
-        autoAckTillDate: spec.autoAckTillDate,
+      id: nextId(),
+      messageRegex: spec,
     };
+  }
+  return {
+    id: spec.id ?? nextId(),
+    messageRegex: spec.messageRegex ?? "",
+    transient: spec.transient,
+    autoAck: spec.autoAck,
+    autoAckTillDate: spec.autoAckTillDate,
+  };
 }
-
 
 type SourceSpec = { id?: string; name?: string; query?: string; color?: string; active?: boolean };
 
 function toSource(spec: SourceSpec) {
-    const seed = nextId();
-    return {
-        id: spec.id ?? `source_${seed}`,
-        name: spec.name ?? `Source ${seed}`,
-        query: spec.query ?? `{job="${seed}"}`,
-        color: spec.color ?? '#ff0000',
-        active: spec.active ?? true,
-    };
+  const seed = nextId();
+  return {
+    id: spec.id ?? `source_${seed}`,
+    name: spec.name ?? `Source ${seed}`,
+    query: spec.query ?? `{job="${seed}"}`,
+    color: spec.color ?? "#ff0000",
+    active: spec.active ?? true,
+  };
 }
 
 const suppressDefaultAppStateAnnotation = {
-    type: 'suppress-default-app-state',
-    description: 'Suppresses the default app state setup (i.e. single pre-created source), allowing for custom app state setup in tests.',
+  type: "suppress-default-app-state",
+  description:
+    "Suppresses the default app state setup (i.e. single pre-created source), allowing for custom app state setup in tests.",
 } as TestDetailsAnnotation;
-export const AnnotationSuppressDefaultApp = {annotation: suppressDefaultAppStateAnnotation}
+export const AnnotationSuppressDefaultApp = { annotation: suppressDefaultAppStateAnnotation };
 
 export const appStateTest = storageTest.extend<{
-    appState: AppStateFixture,
+  appState: AppStateFixture;
 }>({
-    appState: [
-        async ({ storage}, use, testInfo) => {
-            const appState = new AppStateFixture(storage);
-            if (!testInfo.annotations.includes(suppressDefaultAppStateAnnotation)) {
-                await appState.givenSources({ name: 'default' });
-            }
-            await use(appState);
-        },
-        { auto: true },
-    ],
+  appState: [
+    async ({ storage }, use, testInfo) => {
+      const appState = new AppStateFixture(storage);
+      if (!testInfo.annotations.includes(suppressDefaultAppStateAnnotation)) {
+        await appState.givenSources({ name: "default" });
+      }
+      await use(appState);
+    },
+    { auto: true },
+  ],
 });

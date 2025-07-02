@@ -6,30 +6,29 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 
-import { Log } from '@/data/logData/logSchema';
-import { Button } from './ui/button';
-import { CalendarIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
-import { useState } from 'react';
-import { Input } from './ui/input';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { useAppDispatch } from '@/data/redux/reduxhooks';
-import { Filter } from '@/data/filters/filter';
-import { createFilter } from '@/data/filters/filtersSlice';
-import { cn, randomId } from '@/lib/utils';
-import { ScrollArea, ScrollBar } from './ui/scroll-area';
-import { useSelectedSourceMessageLine } from './context/SelectedSourceContext';
-import { Checkbox } from './ui/checkbox';
-import { Popover, PopoverContent, PopoverTrigger } from '@radix-ui/react-popover';
-import { Calendar } from './ui/calendar';
-import { format } from "date-fns"
+import { Filter } from "@/data/filters/filter";
+import { createFilter } from "@/data/filters/filtersSlice";
+import { Log } from "@/data/logData/logSchema";
+import { useAppDispatch } from "@/data/redux/reduxhooks";
+import { cn, randomId } from "@/lib/utils";
+import { CalendarIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import { Popover, PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
+import { format } from "date-fns";
+import { useState } from "react";
+import { useSelectedSourceMessageLine } from "./context/SelectedSourceContext";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { Button } from "./ui/button";
+import { Calendar } from "./ui/calendar";
+import { Checkbox } from "./ui/checkbox";
+import { Input } from "./ui/input";
+import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 
 export default function NewRule({ logEntry }: { logEntry: Log }) {
-  const logLine = useSelectedSourceMessageLine(logEntry)
+  const logLine = useSelectedSourceMessageLine(logEntry);
 
   const dispatch = useAppDispatch();
-
 
   function handleSubmit({ save, messageRegex, autoAck, autoAckTillDate, description }: SaveRuleProps) {
     const newFilter: Filter = {
@@ -52,19 +51,18 @@ type SaveRuleProps = {
   autoAck?: boolean;
   autoAckTillDate?: string;
   description?: string;
-}
+};
 
-export function RuleDialog({ logLine, onSubmit }: { logLine: string, onSubmit: (p: SaveRuleProps) => void }) {
-
+export function RuleDialog({ logLine, onSubmit }: { logLine: string; onSubmit: (p: SaveRuleProps) => void }) {
   const [messageRegex, setMessageRegex] = useState<string>(escapeRegExp(logLine));
-  let logLineMatchesRegex: 'yes' | 'no' | 'err' = 'no';
+  let logLineMatchesRegex: "yes" | "no" | "err" = "no";
   let errorMessage: string | null = null;
   try {
     if (RegExp(messageRegex).test(logLine)) {
-      logLineMatchesRegex = 'yes';
+      logLineMatchesRegex = "yes";
     }
   } catch (e: unknown) {
-    logLineMatchesRegex = 'err';
+    logLineMatchesRegex = "err";
     errorMessage = (e as { message: string }).message;
   }
   const [autoAck, setAutoAck] = useState(true);
@@ -73,30 +71,31 @@ export function RuleDialog({ logLine, onSubmit }: { logLine: string, onSubmit: (
 
   const [date, setDate] = useState<Date | undefined>(undefined);
 
-  const [description, setDescription] = useState<string | undefined>(undefined)
+  const [description, setDescription] = useState<string | undefined>(undefined);
 
   const handleSubmitWithBells = (props: SaveRuleProps) => {
     if (date !== undefined) {
-      onSubmit({ ...props, autoAckTillDate: format(date, 'yyyy-MM-dd') });
+      onSubmit({ ...props, autoAckTillDate: format(date, "yyyy-MM-dd") });
     } else {
       onSubmit(props);
     }
     setOpen(false);
-  }
+  };
 
   if (!open) {
-    return <Button
-      size="sm"
-      variant="outline"
-      data-testid="new-rule-button"
-      className="ml-1 mt-1"
-      onClick={() => {
-        setOpen(true);
-      }}
-    >
-      New Rule
-    </Button>
-      ;
+    return (
+      <Button
+        size="sm"
+        variant="outline"
+        data-testid="new-rule-button"
+        className="ml-1 mt-1"
+        onClick={() => {
+          setOpen(true);
+        }}
+      >
+        New Rule
+      </Button>
+    );
   }
 
   return (
@@ -127,13 +126,13 @@ export function RuleDialog({ logLine, onSubmit }: { logLine: string, onSubmit: (
               className="col-span-4"
             />
           </div>
-          {logLineMatchesRegex === 'no' && (
+          {logLineMatchesRegex === "no" && (
             <Alert>
               <ExclamationTriangleIcon className="h-4 w-4" />
               <AlertTitle>The regular expression doesn't match the line</AlertTitle>
             </Alert>
           )}
-          {logLineMatchesRegex === 'err' && (
+          {logLineMatchesRegex === "err" && (
             <Alert variant="destructive">
               <ExclamationTriangleIcon className="h-4 w-4" />
               <AlertTitle>Can't compile the regular expression</AlertTitle>
@@ -163,7 +162,7 @@ export function RuleDialog({ logLine, onSubmit }: { logLine: string, onSubmit: (
               data-testid="filter-description-input"
               className="col-span-4"
               placeholder="details"
-              value={description || ''}
+              value={description || ""}
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
@@ -174,7 +173,6 @@ export function RuleDialog({ logLine, onSubmit }: { logLine: string, onSubmit: (
               stop auto-ack'ing after this date (inclusive, UTC)
             </p>
           </div>
-
         </div>
         <DialogFooter className="space-x-4">
           <DialogClose asChild>
@@ -182,10 +180,21 @@ export function RuleDialog({ logLine, onSubmit }: { logLine: string, onSubmit: (
               Close
             </Button>
           </DialogClose>
-          <Button data-testid="apply-rule-button" disabled={logLineMatchesRegex != 'yes'} onClick={() => onSubmit({ save: false, messageRegex, autoAck, description })} type="submit" variant="secondary">
+          <Button
+            data-testid="apply-rule-button"
+            disabled={logLineMatchesRegex != "yes"}
+            onClick={() => onSubmit({ save: false, messageRegex, autoAck, description })}
+            type="submit"
+            variant="secondary"
+          >
             Apply on current
           </Button>
-          <Button data-testid="save-rule-button" disabled={logLineMatchesRegex != 'yes'} onClick={() => handleSubmitWithBells({ save: true, messageRegex, autoAck, description })} type="submit">
+          <Button
+            data-testid="save-rule-button"
+            disabled={logLineMatchesRegex != "yes"}
+            onClick={() => handleSubmitWithBells({ save: true, messageRegex, autoAck, description })}
+            type="submit"
+          >
             Save for the future
           </Button>
         </DialogFooter>
@@ -194,8 +203,7 @@ export function RuleDialog({ logLine, onSubmit }: { logLine: string, onSubmit: (
   );
 }
 
-function TTLDatePicker({ date, setDate }: { date: Date | undefined, setDate: (date: Date | undefined) => void }) {
-
+function TTLDatePicker({ date, setDate }: { date: Date | undefined; setDate: (date: Date | undefined) => void }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -206,11 +214,11 @@ function TTLDatePicker({ date, setDate }: { date: Date | undefined, setDate: (da
           variant={"outline"}
           className={cn(
             "w-[15ch] justify-start text-left font-normal",
-            !date && "text-muted-foreground"
+            !date && "text-muted-foreground",
           )}
         >
-          <CalendarIcon className='mr-[0.5ch]' />
-          {date ? format(date, 'yyyy-MM-dd') : <span>Pick a date</span>}
+          <CalendarIcon className="mr-[0.5ch]" />
+          {date ? format(date, "yyyy-MM-dd") : <span>Pick a date</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
@@ -227,9 +235,9 @@ function TTLDatePicker({ date, setDate }: { date: Date | undefined, setDate: (da
         />
       </PopoverContent>
     </Popover>
-  )
+  );
 }
 
 function escapeRegExp(text: string): string {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

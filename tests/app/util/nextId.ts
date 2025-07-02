@@ -5,5 +5,5 @@ export function nextNumericId() {
 }
 
 export function nextId({ prefix }: { prefix?: string } = {}) {
-  return `${prefix || ''}${nextIdInternal++}`;
+  return `${prefix || ""}${nextIdInternal++}`;
 }

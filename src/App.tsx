@@ -1,19 +1,18 @@
-import { RouterProvider, Outlet, Link } from "react-router-dom";
+import { Link, Outlet, RouterProvider } from "react-router-dom";
 
-import './App.css'
-import { createRouter } from './routing';
-import { Provider } from 'react-redux';
-import { store } from '@/data/redux/store';
+import "./App.css";
 import { Toaster } from "@/components/ui/sonner";
-import { LokitoLogo } from "./components/ui/lokito-logo";
+import { store } from "@/data/redux/store";
+import { useEffect } from "react";
+import { Provider } from "react-redux";
 import { Button } from "./components/ui/button";
+import { LokitoLogo } from "./components/ui/lokito-logo";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { useNotAckedDataLength } from "./data/logData/logDataHooks";
-import { useEffect } from "react";
-
+import { createRouter } from "./routing";
 
 function App() {
-  const router = createRouter({ layout: <Layout /> })
+  const router = createRouter({ layout: <Layout /> });
 
   return (
     <>
@@ -23,22 +22,22 @@ function App() {
         </TooltipProvider>
       </Provider>
     </>
-  )
+  );
 }
 
 function Layout() {
   return (
     <>
-      <div style={{ fontFamily: 'system-ui, sans-serif', lineHeight: '1.8' }}>
+      <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }}>
         <div className="flex h-full flex-1 flex-col px-8 py-4">
           <TopNavigation />
           <Outlet />
         </div>
       </div>
       <Toaster />
-      <DocumentTitleUpdater/>
+      <DocumentTitleUpdater />
     </>
-  )
+  );
 }
 
 function DocumentTitleUpdater() {
@@ -50,7 +49,6 @@ function DocumentTitleUpdater() {
     } else {
       document.title = "Lokito";
     }
-    
   }, [notAckedCount]);
 
   return null;
@@ -59,7 +57,6 @@ function DocumentTitleUpdater() {
 function TopNavigation() {
   return (
     <div className="flex gap-2 items-center mb-2">
-
       <Link data-testid="home-page-logo" to="/">
         <div className="h-auto w-14 p-0">
           <LokitoLogo />
@@ -77,10 +74,8 @@ function TopNavigation() {
           Filters
         </Link>
       </Button>
-
     </div>
-  )
+  );
 }
 
-
-export default App
+export default App;

@@ -1,168 +1,169 @@
-import { ListenerEffectAPI, createListenerMiddleware } from "@reduxjs/toolkit";
-import { START_WHERE_STOPPED, SourceFetchingState, fetchingActions } from "./fetchingSlice";
-import { AppDispatch, RootState } from "../redux/store";
 import { buildLokiUrl } from "@/lib/utils";
+import { createListenerMiddleware, ListenerEffectAPI } from "@reduxjs/toolkit";
 import axios from "axios";
 import { receiveBatch } from "../logData/logDataSlice";
 import { JustReceivedLog } from "../logData/logSchema";
 import { createNewSource, deleteSource } from "../redux/sourcesSlice";
+import { AppDispatch, RootState } from "../redux/store";
 import { SourceLocalStorage } from "../source";
+import { fetchingActions, SourceFetchingState, START_WHERE_STOPPED } from "./fetchingSlice";
 
 const REFETCH_DELAY = 60000;
 
-const fetchingMiddleware = createListenerMiddleware()
-export default fetchingMiddleware
+const fetchingMiddleware = createListenerMiddleware();
+export default fetchingMiddleware;
 
 fetchingMiddleware.startListening({
-    actionCreator: fetchingActions.startFetching,
-    effect: async (action, listenerApi) => {
-        for (const source of Object.values((listenerApi.getState() as RootState).sources.data)) {
-            if (!source.active) {
-                continue
-            }
+  actionCreator: fetchingActions.startFetching,
+  effect: async (action, listenerApi) => {
+    for (const source of Object.values((listenerApi.getState() as RootState).sources.data)) {
+      if (!source.active) {
+        continue;
+      }
 
-            let from = action.payload.from;
-            if (from === START_WHERE_STOPPED) {
-                const lastUpdate = SourceLocalStorage.lastSuccessFrom.load(source.id)
-                if (null === lastUpdate) {                    
-                    from = (new Date()).toISOString()
-                } else {
-                    from = lastUpdate
-                }
-            }
+      let from = action.payload.from;
+      if (from === START_WHERE_STOPPED) {
+        const lastUpdate = SourceLocalStorage.lastSuccessFrom.load(source.id);
+        if (null === lastUpdate) {
+          from = (new Date()).toISOString();
+        } else {
+          from = lastUpdate;
+        }
+      }
 
-            listenerApi.dispatch(fetchingActions.initSourceFetching({
-                source,
-                from,
-            }))
+      listenerApi.dispatch(fetchingActions.initSourceFetching({
+        source,
+        from,
+      }));
+    }
+
+    const task = listenerApi.fork(async (forkApi) => {
+      while (true) {
+        const fetchingState = (listenerApi.getState() as RootState).fetching;
+        if (fetchingState.overallState.status === "idle") {
+          break;
         }
 
-        const task = listenerApi.fork(async (forkApi) => {
-            while (true) {
-                const fetchingState = (listenerApi.getState() as RootState).fetching
-                if (fetchingState.overallState.status === 'idle') {
-                    break
-                }
-
-                for (const sourceState of Object.values(fetchingState.sourcesState)) {
-                    try {
-                        await processSourceFetching(sourceState, listenerApi as ListenerEffectAPI<RootState, AppDispatch>)
-                    } catch (e: unknown) {
-                        const errMessage = e instanceof Error ? e.message : JSON.stringify(e);
-                        console.error('unexpected middleware error fetching source', e)
-                        listenerApi.dispatch(fetchingActions.sourceFetchErr({
-                            sourceId: sourceState.sourceId,
-                            err: errMessage,
-                        }))
-                    }
-                }
-                await forkApi.delay(REFETCH_DELAY) //polling every minute after the last fetch
-            }
-        })
-        await task.result
-    },
-})
+        for (const sourceState of Object.values(fetchingState.sourcesState)) {
+          try {
+            await processSourceFetching(sourceState, listenerApi as ListenerEffectAPI<RootState, AppDispatch>);
+          } catch (e: unknown) {
+            const errMessage = e instanceof Error ? e.message : JSON.stringify(e);
+            console.error("unexpected middleware error fetching source", e);
+            listenerApi.dispatch(fetchingActions.sourceFetchErr({
+              sourceId: sourceState.sourceId,
+              err: errMessage,
+            }));
+          }
+        }
+        await forkApi.delay(REFETCH_DELAY); // polling every minute after the last fetch
+      }
+    });
+    await task.result;
+  },
+});
 
 fetchingMiddleware.startListening({
-    actionCreator: createNewSource,
-    effect: (_action, listenerApi) => {
-        const beforeSources = (listenerApi.getOriginalState() as RootState).sources.data;
-        const afterSources = (listenerApi.getState() as RootState).sources.data;
-        const newSource = Object.values(afterSources).find(source => !beforeSources[source.id])
-        if (!newSource) {
-            return
-        }
-        if (!newSource.active) {
-            return
-        }
-        listenerApi.dispatch(fetchingActions.initSourceFetching({
-            source: newSource,
-            from: new Date().toISOString(),
-        }))
-    },
-})
+  actionCreator: createNewSource,
+  effect: (_action, listenerApi) => {
+    const beforeSources = (listenerApi.getOriginalState() as RootState).sources.data;
+    const afterSources = (listenerApi.getState() as RootState).sources.data;
+    const newSource = Object.values(afterSources).find(source => !beforeSources[source.id]);
+    if (!newSource) {
+      return;
+    }
+    if (!newSource.active) {
+      return;
+    }
+    listenerApi.dispatch(fetchingActions.initSourceFetching({
+      source: newSource,
+      from: new Date().toISOString(),
+    }));
+  },
+});
 
 fetchingMiddleware.startListening({
-    actionCreator: deleteSource,
-    effect: (_action, listenerApi) => {
-        const beforeSources = (listenerApi.getOriginalState() as RootState).sources.data;
-        const afterSources = (listenerApi.getState() as RootState).sources.data;
-        const deletedSource = Object.values(beforeSources).find(source => !afterSources[source.id])
-        if (deletedSource) {
-            listenerApi.dispatch(fetchingActions.removeSourceFetching(deletedSource.id))
-        }
+  actionCreator: deleteSource,
+  effect: (_action, listenerApi) => {
+    const beforeSources = (listenerApi.getOriginalState() as RootState).sources.data;
+    const afterSources = (listenerApi.getState() as RootState).sources.data;
+    const deletedSource = Object.values(beforeSources).find(source => !afterSources[source.id]);
+    if (deletedSource) {
+      listenerApi.dispatch(fetchingActions.removeSourceFetching(deletedSource.id));
+    }
+  },
+});
+
+async function processSourceFetching(
+  sourceState: SourceFetchingState,
+  listenerApi: ListenerEffectAPI<RootState, AppDispatch>,
+) {
+  if (sourceState.state === "fetching") {
+    console.error("source is already fetching", sourceState);
+  }
+  const source = listenerApi.getState().sources.data[sourceState.sourceId];
+  if (!source?.active) {
+    return;
+  }
+  let newFetchStart = sourceState.from;
+  if (sourceState.lastSuccess) {
+    const lastSuccessMin5mins = new Date(sourceState.lastSuccess);
+    lastSuccessMin5mins.setMinutes(lastSuccessMin5mins.getMinutes() - 5);
+    newFetchStart = lastSuccessMin5mins.toISOString();
+  }
+  const newFetchEnd = new Date();
+  listenerApi.dispatch(fetchingActions.startedSourceFetching({
+    sourceId: sourceState.sourceId,
+    range: {
+      from: newFetchStart,
+      at: newFetchEnd.toISOString(),
     },
-})
+  }));
 
-async function processSourceFetching(sourceState: SourceFetchingState, listenerApi: ListenerEffectAPI<RootState, AppDispatch>) {
+  try {
+    const logs = await fetchLokiLogs({
+      query: source.query,
+      from: newFetchStart,
+      sourceId: source.id,
+    });
 
-    if (sourceState.state === 'fetching') {
-        console.error('source is already fetching', sourceState)
-    }
-    const source = listenerApi.getState().sources.data[sourceState.sourceId]
-    if (!source?.active) {
-        return
-    }
-    let newFetchStart = sourceState.from
-    if (sourceState.lastSuccess) {
-        const lastSuccessMin5mins = new Date(sourceState.lastSuccess)
-        lastSuccessMin5mins.setMinutes(lastSuccessMin5mins.getMinutes() - 5)
-        newFetchStart = lastSuccessMin5mins.toISOString()
-    }
-    const newFetchEnd = new Date()
-    listenerApi.dispatch(fetchingActions.startedSourceFetching({
-        sourceId: sourceState.sourceId,
-        range: {
-            from: newFetchStart,
-            at: newFetchEnd.toISOString(),
-        }
-    }))
-
-    try {
-        const logs = await fetchLokiLogs({
-            query: source.query,
-            from: newFetchStart,
-            sourceId: source.id,
-        })
-
-        listenerApi.dispatch(receiveBatch({
-            logs, 
-            filters: Object.values(listenerApi.getState().filters.data),
-            sourceId: source.id,
-        }));
-        listenerApi.dispatch(fetchingActions.sourceFetchedOk({
-            sourceId: sourceState.sourceId,
-            from: newFetchStart,
-        }))
-    } catch (e: unknown) {
-        console.error('error fetching logs', e)
-        const errMessage = e instanceof Error ? e.message : JSON.stringify(e);
-        listenerApi.dispatch(fetchingActions.sourceFetchErr({
-            sourceId: sourceState.sourceId,
-            err: errMessage,
-        }))
-    }
-
+    listenerApi.dispatch(receiveBatch({
+      logs,
+      filters: Object.values(listenerApi.getState().filters.data),
+      sourceId: source.id,
+    }));
+    listenerApi.dispatch(fetchingActions.sourceFetchedOk({
+      sourceId: sourceState.sourceId,
+      from: newFetchStart,
+    }));
+  } catch (e: unknown) {
+    console.error("error fetching logs", e);
+    const errMessage = e instanceof Error ? e.message : JSON.stringify(e);
+    listenerApi.dispatch(fetchingActions.sourceFetchErr({
+      sourceId: sourceState.sourceId,
+      err: errMessage,
+    }));
+  }
 }
 
-async function fetchLokiLogs(params: { query: string, from: string, sourceId: string }) {
-    const url = buildLokiUrl(params.query, params.from);
+async function fetchLokiLogs(params: { query: string; from: string; sourceId: string }) {
+  const url = buildLokiUrl(params.query, params.from);
 
-    return axios.get<{data: {result: LokiResponseEntry[]} }>(url, /*{timeout: 1000}*/)
-        .then(response => response.data.data.result.map(l => responseEntryToJustReceivedLog(l)));
+  return axios.get<{ data: { result: LokiResponseEntry[] } }>(url /*{timeout: 1000}*/)
+    .then(response => response.data.data.result.map(l => responseEntryToJustReceivedLog(l)));
 }
 
 function responseEntryToJustReceivedLog(l: LokiResponseEntry): JustReceivedLog {
-    const [[ts, line]] = l.values;
-    return {
-        stream: { ...l.stream },
-        id: ts.toString(),
-        timestamp: new Date(parseInt(ts.slice(0, -6))).toISOString(),
-        message: line,
-    }
+  const [[ts, line]] = l.values;
+  return {
+    stream: { ...l.stream },
+    id: ts.toString(),
+    timestamp: new Date(parseInt(ts.slice(0, -6))).toISOString(),
+    message: line,
+  };
 }
 
 type LokiResponseEntry = {
-    values: [[timestamp: string, messageLine: string]],
-    stream: Record<string, unknown>,
-}
+  values: [[timestamp: string, messageLine: string]];
+  stream: Record<string, unknown>;
+};

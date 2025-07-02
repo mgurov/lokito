@@ -1,9 +1,9 @@
-import { PayloadAction, createSelector, createSlice } from '@reduxjs/toolkit';
-import { Source, SourceLocalStorage, SourceMutation} from '../source';
-import _ from 'lodash';
-import { useSelector } from 'react-redux';
-import { RootState } from './store';
-import { randomId } from '@/lib/utils';
+import { randomId } from "@/lib/utils";
+import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import _ from "lodash";
+import { useSelector } from "react-redux";
+import { Source, SourceLocalStorage, SourceMutation } from "../source";
+import { RootState } from "./store";
 
 export interface CreateNewSource {
   source: SourceMutation;
@@ -29,11 +29,11 @@ export interface SourcesState {
 }
 
 const initialState: SourcesState = {
-  data: _.keyBy(SourceLocalStorage.sources.load(), 'id'),
+  data: _.keyBy(SourceLocalStorage.sources.load(), "id"),
 };
 
 export const sourcesSlice = createSlice({
-  name: 'sources',
+  name: "sources",
   initialState,
   reducers: {
     createNewSource: (state, action: PayloadAction<CreateNewSource>) => {
@@ -52,33 +52,39 @@ export const sourcesSlice = createSlice({
         ...action.payload.source,
       };
       state.data[id] = newSource;
-      SourceLocalStorage.sources.save(Object.values(state.data))
+      SourceLocalStorage.sources.save(Object.values(state.data));
     },
     deleteSource: (state, action: PayloadAction<string>) => {
       delete state.data[action.payload];
-      SourceLocalStorage.sources.save(Object.values(state.data))
+      SourceLocalStorage.sources.save(Object.values(state.data));
     },
     changeSourceActive: (state, action: PayloadAction<ChangeSourceActive>) => {
       state.data[action.payload.sourceId].active = action.payload.newValue;
-      SourceLocalStorage.sources.save(Object.values(state.data))
+      SourceLocalStorage.sources.save(Object.values(state.data));
     },
     changeSourceColor: (state, action: PayloadAction<ChangeSourceColor>) => {
       state.data[action.payload.sourceId].color = action.payload.newValue;
-      SourceLocalStorage.sources.save(Object.values(state.data))
+      SourceLocalStorage.sources.save(Object.values(state.data));
     },
     changeSourceQuery: (state, action: PayloadAction<ChangeSourceQuery>) => {
       state.data[action.payload.sourceId].query = action.payload.newQueryValue;
-      SourceLocalStorage.sources.save(Object.values(state.data))
+      SourceLocalStorage.sources.save(Object.values(state.data));
     },
     setAllSources: (state, action: PayloadAction<Source[]>) => {
-      state.data = _.keyBy(action.payload, 'id');
-      SourceLocalStorage.sources.save(Object.values(state.data))
+      state.data = _.keyBy(action.payload, "id");
+      SourceLocalStorage.sources.save(Object.values(state.data));
     },
   },
 });
 
-export const { createNewSource, deleteSource, changeSourceActive, changeSourceColor, setAllSources, changeSourceQuery } =
-  sourcesSlice.actions;
+export const {
+  createNewSource,
+  deleteSource,
+  changeSourceActive,
+  changeSourceColor,
+  setAllSources,
+  changeSourceQuery,
+} = sourcesSlice.actions;
 
 export default sourcesSlice.reducer;
 
@@ -90,17 +96,14 @@ export const useSources = () =>
 export const useActiveSources = () =>
   useSelector(
     createSelector([(state: RootState) => state.sources.data], (sources) =>
-      Object.values(sources).filter((source) => source.active),
-    ),
+      Object.values(sources).filter((source) => source.active)),
   );
 
 export const useActiveSourceIds = () =>
   useSelector(
     createSelector([(state: RootState) => state.sources.data], (sources) =>
-      Object.values(sources).filter((source) => source.active).map((source) => source.id),
-    ),
+      Object.values(sources).filter((source) => source.active).map((source) => source.id)),
   );
-
 
 export const useSource = (sourceId: string) =>
   useSelector(

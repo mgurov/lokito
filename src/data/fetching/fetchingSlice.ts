@@ -1,7 +1,7 @@
-import { PayloadAction, createSlice } from '@reduxjs/toolkit';
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
-import { Source, SourceLocalStorage } from '../source';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/store";
+import { Source, SourceLocalStorage } from "../source";
 
 export const START_WHERE_STOPPED = "START_WHERE_STOPPED";
 
@@ -20,7 +20,7 @@ export interface StartingSourceFetching {
 }
 
 export interface SourceFetchOk {
-  sourceId: string,
+  sourceId: string;
   from: string;
 }
 
@@ -37,7 +37,7 @@ interface PendingRange {
 export interface SourceFetchingState {
   sourceId: string;
   sourceName: string;
-  state: 'idle' | 'fetching' | 'ok' | 'error';
+  state: "idle" | "fetching" | "ok" | "error";
   from: string;
   lastSuccess: string | null;
   err: string | null;
@@ -45,7 +45,7 @@ export interface SourceFetchingState {
 }
 
 interface OverallFetchingState {
-  status: 'idle' | 'active';
+  status: "idle" | "active";
   from: string | null; // where null means no fetch has yet been performed
 }
 
@@ -56,31 +56,31 @@ export interface FetchingState {
 
 const initialState: FetchingState = {
   overallState: {
-    status: 'idle',
+    status: "idle",
     from: null,
   },
   sourcesState: {},
 };
 
 export const fetchingSlice = createSlice({
-  name: 'fetching',
+  name: "fetching",
   initialState,
   reducers: {
     startFetching: (state, action: PayloadAction<StartFetching>) => {
       state.overallState = {
-        status: 'active',
+        status: "active",
         from: action.payload.from,
       };
     },
     stopFetching: (state) => {
-      state.overallState.status = 'idle';
+      state.overallState.status = "idle";
     },
     initSourceFetching: (state, action: PayloadAction<InitSourceFetching>) => {
       const source = action.payload.source;
       const newFetchingState: SourceFetchingState = {
         sourceId: source.id,
         sourceName: source.name,
-        state: 'idle',
+        state: "idle",
         from: action.payload.from,
         lastSuccess: null,
         pendingRange: null,
@@ -89,25 +89,25 @@ export const fetchingSlice = createSlice({
       state.sourcesState[source.id] = newFetchingState;
     },
     removeSourceFetching: (state, action: PayloadAction<string>) => {
-      delete state.sourcesState[action.payload]
+      delete state.sourcesState[action.payload];
     },
     startedSourceFetching: (state, action: PayloadAction<StartingSourceFetching>) => {
       const sourceState = state.sourcesState[action.payload.sourceId];
       if (!sourceState) {
-        console.error('source state not found', action.payload);
+        console.error("source state not found", action.payload);
         return;
       }
-      sourceState.state = 'fetching';
+      sourceState.state = "fetching";
       sourceState.pendingRange = action.payload.range;
     },
     sourceFetchedOk: (state, action: PayloadAction<SourceFetchOk>) => {
-      const {sourceId, from} = action.payload;
+      const { sourceId, from } = action.payload;
       const sourceState = state.sourcesState[sourceId];
       if (!sourceState) {
-        console.error('source state not found', sourceId);
+        console.error("source state not found", sourceId);
         return;
       }
-      sourceState.state = 'ok';
+      sourceState.state = "ok";
       const lastSuccess = sourceState.pendingRange?.at ?? null;
       sourceState.lastSuccess = lastSuccess;
       sourceState.pendingRange = null;
@@ -117,10 +117,10 @@ export const fetchingSlice = createSlice({
     sourceFetchErr: (state, action: PayloadAction<SourceFetchErr>) => {
       const sourceState = state.sourcesState[action.payload.sourceId];
       if (!sourceState) {
-        console.error('source state not found', action.payload);
+        console.error("source state not found", action.payload);
         return;
       }
-      sourceState.state = 'error';
+      sourceState.state = "error";
       sourceState.pendingRange = null;
       sourceState.err = action.payload.err;
     },
@@ -132,8 +132,6 @@ export const fetchingActions = fetchingSlice.actions;
 
 export default fetchingSlice.reducer;
 
-export const useOverallFetchingState = () =>
-  useSelector((state: RootState) => state.fetching.overallState);
+export const useOverallFetchingState = () => useSelector((state: RootState) => state.fetching.overallState);
 
-export const useSourcesFetchingState = () =>
-  useSelector((state: RootState) => state.fetching.sourcesState);
+export const useSourcesFetchingState = () => useSelector((state: RootState) => state.fetching.sourcesState);

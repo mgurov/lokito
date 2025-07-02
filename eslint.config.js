@@ -1,14 +1,14 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import tseslint from 'typescript-eslint'
-import reactPlugin from 'eslint-plugin-react'
+import js from "@eslint/js";
+import reactPlugin from "eslint-plugin-react";
+import reactHooks from "eslint-plugin-react-hooks";
+import reactRefresh from "eslint-plugin-react-refresh";
+import globals from "globals";
+import tseslint from "typescript-eslint";
 
-const reactFiles = ['**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}']
+const reactFiles = ["**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}"];
 
 export default tseslint.config(
-  { ignores: ['dist'] },
+  { ignores: ["dist"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommendedTypeChecked, {
       languageOptions: {
@@ -17,20 +17,20 @@ export default tseslint.config(
           tsconfigRootDir: import.meta.dirname,
         },
       },
-    },],
-    files: ['**/*.{ts,tsx}'],
+    }],
+    files: ["**/*.{ts,tsx}"],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
     },
     plugins: {
-      'react-hooks': reactHooks,
-      'react-refresh': reactRefresh,
+      "react-hooks": reactHooks,
+      "react-refresh": reactRefresh,
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': [
-        'warn',
+      "react-refresh/only-export-components": [
+        "warn",
         { allowConstantExport: true },
       ],
       "@typescript-eslint/no-unused-vars": [
@@ -42,11 +42,11 @@ export default tseslint.config(
           "caughtErrorsIgnorePattern": "^_",
           "destructuredArrayIgnorePattern": "^_",
           "varsIgnorePattern": "^_",
-          "ignoreRestSiblings": true
-        }
+          "ignoreRestSiblings": true,
+        },
       ],
       "@typescript-eslint/no-unsafe-assignment": "off",
-      "@typescript-eslint/no-empty-object-type": ["error", { "allowInterfaces": 'with-single-extends' }],
+      "@typescript-eslint/no-empty-object-type": ["error", { "allowInterfaces": "with-single-extends" }],
       "@typescript-eslint/no-floating-promises": "error",
       "react-refresh/only-export-components": "off",
       "no-console": ["error", { allow: ["warn", "error"] }],
@@ -57,16 +57,16 @@ export default tseslint.config(
     ...reactPlugin.configs.flat.recommended,
     settings: {
       react: {
-        version: 'detect',
+        version: "detect",
       },
-    }
+    },
   },
   {
     files: reactFiles,
     rules: {
-      'react/react-in-jsx-scope': 'off',
-      'react/no-unescaped-entities': 'off',
-      'react/jsx-key': 'error',
-    }
+      "react/react-in-jsx-scope": "off",
+      "react/no-unescaped-entities": "off",
+      "react/jsx-key": "error",
+    },
   },
-)
+);
