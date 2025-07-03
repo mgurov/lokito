@@ -9,7 +9,7 @@ import {
 } from "@tanstack/react-table";
 import * as React from "react";
 
-import { LogPanel } from "@/components/LogPanel";
+import { LogPanel } from "@/components/log/LogPanel";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { useOverallFetchingState } from "@/data/fetching/fetchingSlice";
 import { Log, LogWithSource } from "@/data/logData/logSchema";

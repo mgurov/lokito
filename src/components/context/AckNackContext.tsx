@@ -1,5 +1,6 @@
 import { createContext, Dispatch, useContext, useReducer } from "react";
 
+// TODO: consider dropping
 type AckNack = "ack" | "nack";
 
 const AckNackContext = createContext<AckNack>("nack");

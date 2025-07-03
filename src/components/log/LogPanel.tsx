@@ -9,9 +9,9 @@ import { Log } from "@/data/logData/logSchema";
 import { TRACE_ID_FIELDS } from "@/hardcodes";
 import React from "react";
 import { useDispatch } from "react-redux";
-import { SelectedSourceContext } from "./context/SelectedSourceContext";
-import FilterCard from "./rule/FilterCard";
-import SimpleTooltip from "./SimpleTooltip";
+import { SelectedSourceContext } from "../context/SelectedSourceContext";
+import FilterCard from "../rule/FilterCard";
+import SimpleTooltip from "../SimpleTooltip";
 
 // TODO: basic coverage of the fields and copy-pasta
 

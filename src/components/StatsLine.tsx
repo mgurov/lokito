@@ -3,7 +3,8 @@ import { useAckedDataLength, useNotAckedDataLength } from "@/data/logData/logDat
 import { logDataSliceActions } from "@/data/logData/logDataSlice";
 import { useContext } from "react";
 import { useDispatch } from "react-redux";
-import { useAckNack, useToggleAckNack } from "./context/AckNackContext";
+import { Link } from "react-router-dom";
+import { useAckNack } from "./context/AckNackContext";
 import { SelectedSourceContext } from "./context/SelectedSourceContext";
 import SimpleTooltip from "./SimpleTooltip";
 import { Button } from "./ui/button";
@@ -20,10 +21,14 @@ export function StatsLine() {
 }
 
 function CountOfAckMessages() {
-  const toggleAckNack = useToggleAckNack();
+  const ackNack = useAckNack();
   const ackedMessagesCount: number = useAckedDataLength();
+  const toggleLink = ackNack === "ack" ? "/logs/" : "/logs/acked";
+  // TODO: why don't we see a proper toggle, but a button instead? :thinking_face:
   return (
-    <Toggle data-testid="acked-messages-count" size="sm" onClick={toggleAckNack}>ACK'ed {ackedMessagesCount}</Toggle>
+    <Link to={toggleLink} data-testid="toggle-ack-nack">
+      <Toggle data-testid="acked-messages-count" size="sm">ACK'ed {ackedMessagesCount}</Toggle>
+    </Link>
   );
 }
 

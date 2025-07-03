@@ -10,7 +10,6 @@ import React from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { Acked, LogSource, LogWithSource } from "../data/logData/logSchema";
-import { useSelectTab } from "./context/SelectedDataTabContext";
 import { SelectedSourceContext, useSelectedSourceMessageLine } from "./context/SelectedSourceContext";
 import { Button } from "./ui/button";
 
@@ -94,21 +93,19 @@ function RenderLine({ row, showTraces }: { row: LogWithSource; showTraces: boole
 
 function SourceIndicator({ row }: { row: LogWithSource }) {
   const selectedSource = useContext(SelectedSourceContext);
-  const selectTab = useSelectTab();
   const sourcesToShow = row.sources.filter(s => s.id !== selectedSource?.sourceId);
   return sourcesToShow.map(source => (
     <React.Fragment key={source.id}>
-      <Button
-        variant="ghost"
-        size="sm"
-        data-testid="log-row-source-marker"
-        className="border border-red-50"
-        onClick={_e => {
-          selectTab(source.id);
-        }}
-      >
-        {source.name}
-      </Button>
+      <Link to={`/logs/${source.id}`}>
+        <Button
+          variant="ghost"
+          size="sm"
+          data-testid="log-row-source-marker"
+          className="border border-red-50"
+        >
+          {source.name}
+        </Button>
+      </Link>
       {" "}
     </React.Fragment>
   ));

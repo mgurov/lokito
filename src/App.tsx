@@ -34,7 +34,7 @@ function Layout() {
           <Outlet />
         </div>
       </div>
-      <Toaster />
+      <Toaster /> {/* drop the toaster */}
       <DocumentTitleUpdater />
     </>
   );
@@ -54,6 +54,7 @@ function DocumentTitleUpdater() {
   return null;
 }
 
+// TODO: move out the component
 function TopNavigation() {
   return (
     <div className="flex gap-2 items-center mb-2">

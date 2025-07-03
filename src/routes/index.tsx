@@ -1,5 +1,5 @@
-import MainBody from "@/components/MainBody";
+import LogsPage from "@/components/log/LogsPage";
 
 export default function Index() {
-  return <MainBody />;
+  return <LogsPage sourceId={undefined} ackNack="nack" />;
 }

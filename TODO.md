@@ -3,23 +3,28 @@
 
 [ ] rename filter to rule
 
+[ ] create filter from user selection 
+
+[ ] preview filter appliance
+
 
 [ ] select exact moment when to continue (previously left)
 [ ] continue after first non-acked
 [ ] date-time to fetch from;
 
-[ ] link to Tempo
-
 [ ] force fetch cycle
 
+[ ] link to Tempo
 
-[ ] create filter from user selection 
-
-[ ] preview filter appliance
-[ ] comment on a log line
 [ ] persist in the session storage of the browser w. GC
 
-[ ] coding style
+[ ] move from table to flex
+
+[ ] loki setup
+
+[ ] visual examples
+
+[ ] zod to validate the server schema
 
 
 A talk points

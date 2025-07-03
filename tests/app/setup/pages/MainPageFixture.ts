@@ -72,6 +72,11 @@ export default class MainPageFixture {
     return newSourceRollover;
   }
 
+  async unack(message: string) {
+    const row = this.page.getByTestId("log-table-row").filter({ hasText: message });
+    await row.getByTestId("unack-message-button").click();
+  }
+
   get ackAllButton(): Locator {
     return this.page.getByTestId("ack-all-button");
   }
@@ -100,6 +105,10 @@ export default class MainPageFixture {
       }
       await this.ackAllButton.click();
     }, { box: true });
+  }
+
+  get ackedUnackedMessagesToggle() {
+    return this.getByTestId("toggle-ack-nack");
   }
 
   get logMessage() {

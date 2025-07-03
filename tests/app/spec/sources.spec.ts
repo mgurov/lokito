@@ -135,7 +135,7 @@ test("deactivate and then activate", AnnotationSuppressDefaultApp, async ({ main
   await sourcesPage.toggleActiveSource(toBeDeactivated.id);
 
   await mainPage.homeLogo.click();
-  await expect(mainPage.page.getByText(toBeDeactivated.name)).toHaveClass("text-neutral-500");
+  await expect(mainPage.page.getByText(toBeDeactivated.name)).toHaveClass("opacity-50");
 
   await mainPage.clock.runFor("01:01"); // next cycle
 
@@ -158,7 +158,7 @@ test("deactivate and then activate", AnnotationSuppressDefaultApp, async ({ main
   );
 
   await mainPage.homeLogo.click();
-  await expect(mainPage.page.getByText(toBeDeactivated.name)).not.toHaveClass("text-neutral-500");
+  await expect(mainPage.page.getByText(toBeDeactivated.name)).not.toHaveClass("opacity-50");
 });
 
 test(
@@ -248,5 +248,32 @@ test(
     const sourceCard = await mainPage.showSource();
 
     await expect(sourceCard.filterTextarea).toHaveText("source-query");
+  },
+);
+
+test(
+  "should be able back-navigate from a source view to the full list",
+  AnnotationSuppressDefaultApp,
+  async ({ mainPage, appState, logs }) => {
+    const [source1, source2] = await appState.givenSources({ name: "source1" }, { name: "source2" });
+
+    logs.givenSourceRecords(source1, "s1 m");
+    logs.givenSourceRecords(source2, "s2 m");
+
+    await mainPage.open();
+
+    await mainPage.expectLogMessages("s2 m", "s1 m");
+
+    await mainPage.selectSourceTab(source1);
+
+    await mainPage.expectLogMessages("s1 m");
+
+    await mainPage.page.goBack();
+
+    await mainPage.expectLogMessages("s2 m", "s1 m");
+
+    await mainPage.page.goForward();
+
+    await mainPage.expectLogMessages("s1 m");
   },
 );
