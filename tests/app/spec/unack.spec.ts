@@ -25,6 +25,34 @@ test("should show acked and allow unacking", async ({ mainPage, logs }) => {
   await mainPage.expectLogMessages("event3", "event1");
 });
 
+test("navigate correctly in the acked view", AnnotationSuppressDefaultApp, async ({ mainPage, logs, appState }) => {
+  const [source1] = await appState.givenSources(
+    { name: "source1" },
+  );
+  logs.givenRecords("event1", "event2", "event3");
+
+  await mainPage.open();
+
+  await mainPage.ack("event2");
+
+  await mainPage.expectLogMessages("event3", "event1");
+
+  await mainPage.ackedUnackedMessagesToggle.click();
+
+  await mainPage.expectLogMessages("event2");
+
+  // on the source tab
+  await mainPage.selectSourceTab(source1);
+  await mainPage.expectLogMessages("event2");
+
+  // back to the all sources should still stay in the acked mode
+  await mainPage.selectAllSourcesTab();
+  await mainPage.expectLogMessages("event2");
+
+  await mainPage.ackedUnackedMessagesToggle.click();
+  await mainPage.expectLogMessages("event3", "event1");
+});
+
 test(
   "should show acked per source",
   AnnotationSuppressDefaultApp,
@@ -62,3 +90,5 @@ test(
     await mainPage.expectLogMessages("source1.2", "source1.1");
   },
 );
+
+// TODO: hide or correct the "Ack message" button on the acked view;

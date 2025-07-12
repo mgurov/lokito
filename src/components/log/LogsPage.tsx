@@ -7,7 +7,7 @@ import { simpleDateTimeFormat } from "@/lib/utils";
 import { ExclamationTriangleIcon, UpdateIcon } from "@radix-ui/react-icons";
 import { ReactNode, useState } from "react";
 import { columns } from "../columns";
-import { AckNackProvider } from "../context/AckNackContext";
+import { AckNackProp } from "../context/AckNackContext";
 import { SelectedSourceContext } from "../context/SelectedSourceContext";
 import { DataTable } from "../data-table";
 import { NewSource } from "../new-source";
@@ -29,9 +29,7 @@ export default function LogsPage(props: LogsPageProps) {
   return (
     <>
       <NoActiveSourcesHint /> {/** TODO: only on index */}
-      <AckNackProvider>
-        <ShowData {...props} />
-      </AckNackProvider>
+      <ShowData {...props} />
     </>
   );
 }
@@ -52,11 +50,11 @@ function ShowData({ ackNack, sourceId }: LogsPageProps) {
   return (
     <>
       <div className="inline-flex h-9 items-center justify-left rounded-lg bg-muted p-1 text-muted-foreground   bg-gray-200 rounded-lg border border-gray-300 ">
-        <TabLink to="/" data-testid="all-sources-tab">all</TabLink>
+        <TabLink to={`/logs${ackNack === "ack" ? "/acked" : ""}`} data-testid="all-sources-tab">all</TabLink>
         {sourceButtons}
         <NewSource buttonSize="tab" />
       </div>
-      {sourceId === undefined && <ShowAllSourcesData data={data} />}
+      {sourceId === undefined && <ShowAllSourcesData data={data} ackNack={ackNack} />}
       {selectedSourceContent}
     </>
   );
@@ -125,7 +123,7 @@ function SourceTabButtonsAndContent({ dataFromSources, data, sources, selectedSo
 
               {thisSourceNaced.length > 0 && (
                 <>
-                  <AckAllOnSourceButton notAckedCount={thisSourceNaced.length} />
+                  <AckAllOnSourceButton notAckedCount={thisSourceNaced.length} ackNack={ackNack} />
                   <DataTable data={thisSourceNaced} columns={columns()} />
                 </>
               )}
@@ -153,15 +151,14 @@ function ShowSourceButton({ source }: { source: Source }) {
   );
 }
 
-function ShowAllSourcesData({ data }: { data: LogWithSource[] }) {
+function ShowAllSourcesData({ data, ...rest }: { data: LogWithSource[] } & AckNackProp) {
   const overallFetchingState = useOverallFetchingState();
   if (overallFetchingState.from === null) {
     return <StartFetchingPanel />;
   }
   return (
     <div className="mt-2 space-y-4">
-      <h1>all sources</h1>
-      <StatsLine />
+      <StatsLine {...rest} />
 
       <DataTable data={data} columns={columns()} />
     </div>

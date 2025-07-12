@@ -77,6 +77,11 @@ export default class MainPageFixture {
     await row.getByTestId("unack-message-button").click();
   }
 
+  async ack(message: string) {
+    const row = this.page.getByTestId("log-table-row").filter({ hasText: message });
+    await row.getByTestId("ack-message-button").click();
+  }
+
   get ackAllButton(): Locator {
     return this.page.getByTestId("ack-all-button");
   }

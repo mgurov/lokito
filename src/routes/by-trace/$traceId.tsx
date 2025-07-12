@@ -37,6 +37,7 @@ function AckAllOnTraceViewButton({ data }: { data: LogWithSource[] }) {
     <AckAllButton
       notAckedCount={notAckedCount}
       onClick={() => dispatch(ackAll({ type: "ids", ids: data.map(l => l.id) }))}
+      ackNack="nack"
     />
   );
 }
