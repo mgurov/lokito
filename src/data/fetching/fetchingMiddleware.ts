@@ -150,17 +150,20 @@ async function fetchLokiLogs(params: { query: string; from: string; sourceId: st
   const url = buildLokiUrl(params.query, params.from);
 
   return axios.get<{ data: { result: LokiResponseEntry[] } }>(url /*{timeout: 1000}*/)
-    .then(response => response.data.data.result.map(l => responseEntryToJustReceivedLog(l)));
+    .then(response => {
+      return response.data.data.result.map(l => responseEntryToJustReceivedLog(l));
+    });
 }
 
 function responseEntryToJustReceivedLog(l: LokiResponseEntry): JustReceivedLog {
   const [[ts, line]] = l.values;
-  return {
+  const result = {
     stream: { ...l.stream },
     id: ts.toString(),
     timestamp: new Date(parseInt(ts.slice(0, -6))).toISOString(),
     message: line,
   };
+  return result;
 }
 
 type LokiResponseEntry = {
