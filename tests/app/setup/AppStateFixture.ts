@@ -94,7 +94,7 @@ export const appStateTest = storageTest.extend<{
   appState: [
     async ({ storage }, use, testInfo) => {
       const appState = new AppStateFixture(storage);
-      if (!testInfo.annotations.map(it => it.type).includes(suppressDefaultAppStateAnnotation.type)) {
+      if (!testInfo.annotations.find(it => it.type === suppressDefaultAppStateAnnotation.type)) {
         await appState.givenSources({ name: "default" });
       }
       await use(appState);
