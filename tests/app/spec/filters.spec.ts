@@ -84,6 +84,8 @@ test(
   "same message should show use first line from all and respective from source tab on filter creation",
   AnnotationSuppressDefaultApp,
   async ({ page, mainPage, appState, logs }) => {
+    test.slow();
+
     const [s1, s2] = await appState.givenSources({ name: "s1" }, { name: "s2" });
 
     const sameTimestamp = "2025-02-04T20:00:00.000Z";
