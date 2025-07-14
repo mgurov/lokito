@@ -138,8 +138,12 @@ export default class MainPageFixture {
     await this.sourceTabHeader(source).click();
   }
 
+  get allSourcesTab() {
+    return this.page.getByTestId("all-sources-tab");
+  }
+
   async selectAllSourcesTab() {
-    await this.page.getByTestId("all-sources-tab").click();
+    await this.allSourcesTab.click();
   }
 
   async expectSourceTabCount(source: { id: string }, count: number | undefined) {

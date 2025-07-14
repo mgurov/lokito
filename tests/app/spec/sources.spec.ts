@@ -125,18 +125,40 @@ test(
   "many many sources should all be visible",
   AnnotationSuppressDefaultApp,
   async ({ mainPage, appState }) => {
-    await mainPage.clock.install();
-
     const names = Array.from({ length: 50 }, (_, i) => {
       return { name: `source${i}` };
     });
 
     const sources = await appState.givenSources(...names);
+    // when
     await mainPage.open();
 
+    // then
     for (const s of sources) {
       await expect(mainPage.page.getByText(s.name, { exact: true })).toBeInViewport();
     }
+  },
+);
+
+test(
+  "active source or all should be highlighted",
+  AnnotationSuppressDefaultApp,
+  async ({ mainPage, appState }) => {
+    const [source] = await appState.givenSources({ name: "a_source" });
+    await mainPage.open();
+
+    await expect(mainPage.allSourcesTab).toHaveAttribute("data-state", "active");
+    await expect(mainPage.sourceTabHeader(source)).toHaveAttribute("data-state", "");
+
+    await mainPage.selectSourceTab(source);
+
+    await expect(mainPage.allSourcesTab).toHaveAttribute("data-state", "");
+    await expect(mainPage.sourceTabHeader(source)).toHaveAttribute("data-state", "active");
+
+    await mainPage.selectAllSourcesTab();
+
+    await expect(mainPage.allSourcesTab).toHaveAttribute("data-state", "active");
+    await expect(mainPage.sourceTabHeader(source)).toHaveAttribute("data-state", "");
   },
 );
 
