@@ -8,7 +8,8 @@ export default defineConfig({
     port: 5175,
     proxy: {
       "/lokiprod": {
-        target: "http://localhost:9996/api/datasources/proxy/13/loki",
+        // http://localhost:3100/loki/api/v1/query_range?direction=BACKWARD&end=1752322399018319000&limit=30&query=%7Bservice_name%3D%22dice-server%22%7D&start=1752228000000000000
+        target: "http://localhost:3100/loki/",
         rewrite: (path) => path.replace(/^\/lokiprod/, ""),
       },
     },
