@@ -49,7 +49,7 @@ function ShowData({ ackNack, sourceId }: LogsPageProps) {
 
   return (
     <>
-      <div className="inline-flex h-9 items-center justify-left rounded-lg bg-muted p-1 text-muted-foreground   bg-gray-200 rounded-lg border border-gray-300 ">
+      <div className="inline-flex flex-wrap items-center justify-left rounded-lg bg-muted p-1 text-muted-foreground   bg-gray-200 rounded-lg border border-gray-300 ">
         <TabLink to={`/logs${ackNack === "ack" ? "/acked" : ""}`} data-testid="all-sources-tab">all</TabLink>
         {sourceButtons}
         <NewSource buttonSize="tab" />

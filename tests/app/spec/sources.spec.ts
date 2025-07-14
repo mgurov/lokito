@@ -121,6 +121,25 @@ test(
   },
 );
 
+test(
+  "many many sources should all be visible",
+  AnnotationSuppressDefaultApp,
+  async ({ mainPage, appState }) => {
+    await mainPage.clock.install();
+
+    const names = Array.from({ length: 50 }, (_, i) => {
+      return { name: `source${i}` };
+    });
+
+    const sources = await appState.givenSources(...names);
+    await mainPage.open();
+
+    for (const s of sources) {
+      await expect(mainPage.page.getByText(s.name, { exact: true })).toBeInViewport();
+    }
+  },
+);
+
 test("deactivate and then activate", AnnotationSuppressDefaultApp, async ({ mainPage, appState, logs }) => {
   await mainPage.clock.install();
 
