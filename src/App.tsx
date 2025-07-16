@@ -1,4 +1,4 @@
-import { Link, Outlet, RouterProvider } from "react-router-dom";
+import { Link, Outlet, RouterProvider, useLocation } from "react-router-dom";
 
 import "./App.css";
 import { Toaster } from "@/components/ui/sonner";
@@ -26,13 +26,19 @@ function App() {
 }
 
 function Layout() {
+  const l = useLocation();
+  const acked = l.pathname.includes("/acked");
+  const extraClasses = acked ? "bg-stone-100" : "";
   return (
     <>
-      <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }}>
-        <div className="flex h-full flex-1 flex-col px-8 py-4">
-          <TopNavigation />
-          <Outlet />
-        </div>
+      <div
+        style={{
+          lineHeight: "1.8",
+        }}
+        className={`font-sans flex h-full flex-1 flex-col px-8 py-4 min-h-full ${extraClasses}`}
+      >
+        <TopNavigation />
+        <Outlet />
       </div>
       <Toaster /> {/* drop the toaster */}
       <DocumentTitleUpdater />
