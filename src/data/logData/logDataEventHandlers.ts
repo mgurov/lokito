@@ -1,6 +1,5 @@
 import { JustReceivedLog, Log } from "@/data/logData/logSchema";
 import { traceIdFields } from "@/lib/traceIds";
-import { current } from "@reduxjs/toolkit";
 import _ from "lodash";
 import { createFilterMatcher, Filter, FilterMatchResult, FiltersLocalStorage, FilterStats } from "../filters/filter";
 import { LogDataState } from "./logDataSlice";
@@ -109,7 +108,8 @@ function recordWhetherDuplicate(state: LogDataState, newRecord: JustReceivedLog,
     });
     console.warn(
       "Duplicate log id with different stream; existing:  ",
-      current(existingRecords[0]),
+      // threw exceptions on me: current(existingRecords[0]),
+      existingRecords[0],
       "new:",
       newRecord,
     );

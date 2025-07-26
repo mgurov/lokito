@@ -2,7 +2,7 @@ import { TRACE_ID_FIELDS } from "@/hardcodes";
 import { expect, Page, test } from "@playwright/test";
 
 export const routes = {
-  loki: "/lokiprod/api/v1/query_range?**",
+  loki: "/loki-proxy/api/v1/query_range?**",
 };
 
 // TODO: rename loki logs?

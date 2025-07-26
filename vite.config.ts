@@ -1,24 +1,28 @@
 import react from "@vitejs/plugin-react";
 import path from "path";
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    port: 5175,
-    proxy: {
-      "/lokiprod": {
-        target: "http://localhost:9996/api/datasources/proxy/13/loki",
-        rewrite: (path) => path.replace(/^\/lokiprod/, ""),
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), "");
+  const lokiUrl = env.LOKI_URL || "http://localhost:3100/loki/";
+  return {
+    plugins: [react()],
+    server: {
+      port: 5175,
+      proxy: {
+        "/loki-proxy": {
+          target: lokiUrl,
+          rewrite: (path) => path.replace(/^\/loki-proxy/, ""),
+        },
       },
     },
-  },
-  preview: {
-    port: 5174,
-  },
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
+    preview: {
+      port: 5174,
     },
-  },
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+      },
+    },
+  };
 });

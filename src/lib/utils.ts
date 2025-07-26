@@ -14,7 +14,7 @@ export function buildLokiUrl(query: string, start: string) {
   searchParams.append("limit", "1000");
   searchParams.append("query", query);
 
-  return `/lokiprod/api/v1/query_range?${searchParams.toString()}`;
+  return `/loki-proxy/api/v1/query_range?${searchParams.toString()}`;
 }
 
 export function randomId() {
