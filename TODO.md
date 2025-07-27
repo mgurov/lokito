@@ -1,3 +1,5 @@
+[ ] imporant: alert of handle exceeding the limit of 1000...
+
 [ ] filter by a field
 [ ] notes on a message w/o filter
 

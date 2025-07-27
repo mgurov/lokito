@@ -3,8 +3,10 @@ import { useActiveSourceIds } from "@/data/redux/sourcesSlice";
 import { SourceLocalStorage } from "@/data/source";
 import { PlayIcon } from "@radix-ui/react-icons";
 import { subHours, subMinutes } from "date-fns";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 
 const startOptions: Record<string, () => Date> = {
   "now": () => new Date(),
@@ -81,7 +83,59 @@ export function StartFetchingPanel() {
             {key} <PlayIcon />
           </Button>
         ))}
+        <FreeFormStart />
       </div>
+    </div>
+  );
+}
+
+function FreeFormStart() {
+  const dispatch = useDispatch();
+  const [value, setValue] = useState<string>(new Date().toISOString());
+  const [err, setErr] = useState<string>("");
+
+  const handleValueChange = (newValue: string) => {
+    setValue(newValue);
+    const parsed = Date.parse(newValue);
+    if (isNaN(parsed)) {
+      setErr("Invalid date/time");
+    } else {
+      setErr("");
+    }
+  };
+
+  const handleSubmit = () => {
+    if (err !== "") {
+      return;
+    }
+    dispatch(startFetching({ from: new Date(value).toISOString() }));
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSubmit();
+    }
+  };
+
+  return (
+    <div className="flex w-full max-w-sm items-center gap-2 m-5">
+      <Input
+        data-testid="arbitrary-date-time-start-input"
+        className={["w-52", err === "" ? "" : "border-red-500"].join(" ")}
+        value={value}
+        onChange={(e) => handleValueChange(e.target.value)}
+        onKeyDown={handleKeyDown}
+      />
+      <Button
+        data-testid="arbitrary-date-time-start-button"
+        onClick={handleSubmit}
+        disabled={err !== ""}
+        size="lg"
+        type="submit"
+        variant="secondary"
+      >
+        <PlayIcon />
+      </Button>
     </div>
   );
 }
