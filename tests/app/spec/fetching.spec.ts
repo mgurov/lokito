@@ -62,7 +62,7 @@ test(
   },
 );
 
-test("duplications should be filtered out on fetching", async ({ page, mainPage, consoleLogging, logs }) => {
+test("duplications should be filtered out on fetching", async ({ page, mainPage, logs }) => {
   await page.clock.install();
 
   const sameTimestamp = "2025-02-04T20:00:00.000Z";
@@ -82,13 +82,9 @@ test("duplications should be filtered out on fetching", async ({ page, mainPage,
     { message: "event4", timestamp: sameTimestamp, data: sameData }, // to be skipped
   );
 
-  // haven't seen this on production yet, assuming negligible occurence frequency
-  consoleLogging.ignoreErrorMessagesContaining("Encountered two children with the same key");
-  consoleLogging.ignoreErrorMessagesContaining("Duplicate log id with different stream");
-
   await page.clock.runFor("01:30");
 
-  await mainPage.expectLogMessages("event2", "event1", "event3");
+  await mainPage.expectLogMessages("event2", "event3", "event1");
 });
 
 test(

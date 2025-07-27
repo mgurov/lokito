@@ -149,17 +149,20 @@ async function processSourceFetching(
 async function fetchLokiLogs(params: { query: string; from: string; sourceId: string }) {
   const url = buildLokiUrl(params.query, params.from);
 
-  return axios.get<{ data: { result: LokiResponseEntry[] } }>(url /*{timeout: 1000}*/)
-    .then(response => {
-      return response.data.data.result.map(l => responseEntryToJustReceivedLog(l));
-    });
+  const response = await axios.get<{ data: { result: LokiResponseEntry[] } }>(url /*{timeout: 1000}*/);
+
+  return Promise.all(
+    response.data.data.result.map(responseEntryToJustReceivedLog),
+  );
 }
 
-function responseEntryToJustReceivedLog(l: LokiResponseEntry): JustReceivedLog {
+async function responseEntryToJustReceivedLog(l: LokiResponseEntry): Promise<JustReceivedLog> {
   const [[ts, line]] = l.values;
+  const streamHash = await computeSHA256(JSON.stringify(l.stream));
+  const id = ts.toString() + "_" + streamHash;
   const result = {
+    id,
     stream: { ...l.stream },
-    id: ts.toString(),
     timestamp: new Date(parseInt(ts.slice(0, -6))).toISOString(),
     message: line,
   };
@@ -170,3 +173,12 @@ type LokiResponseEntry = {
   values: [[timestamp: string, messageLine: string]];
   stream: Record<string, unknown>;
 };
+
+export async function computeSHA256(input: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(input);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+  return hashHex;
+}
