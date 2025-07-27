@@ -55,6 +55,42 @@ test("should start with given delay at the moment of click", async ({ mainPage, 
   });
 });
 
+test.describe("arbitrary date time", () => {
+  const openWindowTs = "2025-02-04T20:30:00.000Z";
+
+  test.beforeEach(async ({ mainPage }) => {
+    await mainPage.clock.setFixedTime(openWindowTs);
+    await mainPage.open({ startFetch: false });
+  });
+
+  test("should be able to select an arbitrary date time to start from", async ({ mainPage, logs }) => {
+    await expect(mainPage.getByTestId("arbitrary-date-time-start-input")).toHaveValue(openWindowTs);
+    const desiredTs = "2025-02-01T15:06:00.000Z";
+    await mainPage.getByTestId("arbitrary-date-time-start-input").fill(desiredTs);
+    await mainPage.getByTestId("arbitrary-date-time-start-button").click();
+
+    await expect.poll(() => logs.requests).toHaveLength(1);
+    const requestUrl = logs.requests[0];
+    expect(requestUrl.searchParams.get("start")).toBe(desiredTs);
+  });
+
+  test("should not be able to submit an invalid arbitrary date time", async ({ mainPage }) => {
+    await mainPage.getByTestId("arbitrary-date-time-start-input").fill("2025-02aaa");
+    await expect(mainPage.getByTestId("arbitrary-date-time-start-button")).toBeDisabled();
+  });
+
+  test("should submit the arbitrary date time by pressing the enter in the input", async ({ mainPage, logs }) => {
+    await expect(mainPage.getByTestId("arbitrary-date-time-start-input")).toHaveValue(openWindowTs);
+    const desiredTs = "2025-02-01T15:06:00.000Z";
+    await mainPage.getByTestId("arbitrary-date-time-start-input").fill(desiredTs);
+    await mainPage.getByTestId("arbitrary-date-time-start-input").press("Enter");
+
+    await expect.poll(() => logs.requests).toHaveLength(1);
+    const requestUrl = logs.requests[0];
+    expect(requestUrl.searchParams.get("start")).toBe(desiredTs);
+  });
+});
+
 test.describe("continue from where stopped", () => {
   test(
     "firstly, we should record where we stopped",

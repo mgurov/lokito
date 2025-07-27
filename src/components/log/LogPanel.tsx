@@ -1,4 +1,4 @@
-import NewRule from "@/components/rule-editor";
+import NewRule from "@/components/rule/rule-editor";
 import { Button } from "@/components/ui/button";
 import { CheckIcon, CopyIcon } from "@radix-ui/react-icons";
 import { ReactNode, useContext, useState } from "react";

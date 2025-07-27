@@ -17,13 +17,13 @@ import { CalendarIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
 import { format } from "date-fns";
 import { useState } from "react";
-import { useSelectedSourceMessageLine } from "./context/SelectedSourceContext";
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
-import { Button } from "./ui/button";
-import { Calendar } from "./ui/calendar";
-import { Checkbox } from "./ui/checkbox";
-import { Input } from "./ui/input";
-import { ScrollArea, ScrollBar } from "./ui/scroll-area";
+import { useSelectedSourceMessageLine } from "../context/SelectedSourceContext";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { Button } from "../ui/button";
+import { Calendar } from "../ui/calendar";
+import { Checkbox } from "../ui/checkbox";
+import { Input } from "../ui/input";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
 export default function NewRule({ logEntry }: { logEntry: Log }) {
   const logLine = useSelectedSourceMessageLine(logEntry);
