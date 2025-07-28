@@ -185,7 +185,7 @@ export default class MainPageFixture {
     saveAction?: "apply" | "save" | "none"; // defaults to 'save'
     customActions?: (filterEditor: FilterEditorPageFixture) => Promise<void>;
   }) {
-    const filterEditor = new FilterEditorPageFixture(this.page.getByTestId("rule-dialog"));
+    const filterEditor = new FilterEditorPageFixture(this.page.getByTestId("rule-edit-section"));
 
     await test.step(props.stepName ?? "createFilter", async () => {
       await this.page.getByText(props.logLineText).click();

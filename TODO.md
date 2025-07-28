@@ -1,4 +1,6 @@
 [ ] imporant: alert of handle exceeding the limit of 1000...
+[ ] catch lines with carriage return
+[ ] bug: doesn't catch the second non-acking filter when getting new records
 
 [ ] filter by a field
 [ ] notes on a message w/o filter

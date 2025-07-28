@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "fix": "npx dprint fmt",
+    "fixamen": "npm run fix && git add -u && git commit --amend",
     "validate:static": "npx dprint check && npm run lint && npx tsc -b",
     "validate": "npm run validate:static && npx playwright test",
     "preview": "vite preview",

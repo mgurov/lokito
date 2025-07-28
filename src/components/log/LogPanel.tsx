@@ -1,4 +1,3 @@
-import NewRule from "@/components/rule/rule-editor";
 import { Button } from "@/components/ui/button";
 import { CheckIcon, CopyIcon } from "@radix-ui/react-icons";
 import { ReactNode, useContext, useState } from "react";
@@ -9,27 +8,53 @@ import { Log } from "@/data/logData/logSchema";
 import { TRACE_ID_FIELDS } from "@/hardcodes";
 import React from "react";
 import { useDispatch } from "react-redux";
-import { SelectedSourceContext } from "../context/SelectedSourceContext";
+import { SelectedSourceContext, useSelectedSourceMessageLine } from "../context/SelectedSourceContext";
 import FilterCard from "../rule/FilterCard";
+import { useRuleEditor } from "../rule/rule-editor";
 import SimpleTooltip from "../SimpleTooltip";
 
 // TODO: basic coverage of the fields and copy-pasta
 
 export function LogPanel({ log }: { log: Log }) {
+  const logLine = useSelectedSourceMessageLine(log);
+
+  const {
+    showCreateNewFilter,
+    RuleEditor,
+    EditorToggleButton,
+  } = useRuleEditor();
+
   return (
     <>
       <div className="space-y-2">
-        <div className="flex w-full">
+        <div className="flex w-full px-2">
+          <EditorToggleButton
+            size="sm"
+            variant="outline"
+            data-testid="new-rule-button"
+            className="ml-1 mt-1"
+          >
+            {showCreateNewFilter ? "Never mind" : "Filter like this..."}
+          </EditorToggleButton>
+
           <AckTillThisButton messageId={log.id} />
-          <NewRule logEntry={log} />
         </div>
+
+        {showCreateNewFilter && (
+          <div className="space-y-1 px-3 py-2">
+            <h3 className="text-sm font-semibold">New Filter</h3>
+            <div className="grid rounded-sm bg-white shadow">
+              <RuleEditor logLine={logLine} />
+            </div>
+          </div>
+        )}
 
         <RenderFilters log={log} />
 
         <div className="space-y-1 px-3 py-2">
           <h3 className="text-sm font-semibold">Fields</h3>
           <div className="grid rounded-sm bg-white shadow">
-            <div className="grid cursor-default grid-cols-[auto_1fr] gap-4 px-4 py-2 text-xs">
+            <div className="grid cursor-default grid-cols-[auto_1fr] gap-2 px-4 py-2 text-xs">
               <RenderFields log={log} />
             </div>
           </div>
@@ -41,16 +66,17 @@ export function LogPanel({ log }: { log: Log }) {
 
 function RenderFilters({ log }: { log: Log }) {
   const filters = useFilters();
-  if (!log.filters) {
+  if (Object.keys(log.filters).length === 0) {
     return null;
   }
+
   const thisLineFilters = filters.filter(f => log.filters[f.id]);
 
   return (
     <div className="space-y-1 px-3 py-2">
       <h3 className="text-sm font-semibold">Filter(s)</h3>
       <div className="grid rounded-sm bg-white shadow">
-        <div className="grid cursor-default grid-cols-[auto_1fr] gap-4 px-4 py-2 text-xs">
+        <div className="flex flex-wrap gap-4 px-4 py-2 text-xs">
           {thisLineFilters.map(f => <FilterCard key={f.id} filter={f} />)}
         </div>
       </div>

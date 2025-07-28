@@ -20,9 +20,11 @@ test("should show acked and allow unacking", async ({ mainPage, logs }) => {
 
   await mainPage.unack("event2");
 
+  await mainPage.expectLogMessages("event3", "event1");
+
   await mainPage.ackedUnackedMessagesToggle.click();
 
-  await mainPage.expectLogMessages("event3", "event1");
+  await mainPage.expectLogMessages("event2");
 });
 
 test("navigate correctly in the acked view", AnnotationSuppressDefaultApp, async ({ mainPage, logs, appState }) => {
