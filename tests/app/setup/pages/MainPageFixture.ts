@@ -203,9 +203,6 @@ export default class MainPageFixture {
       if (props.filterRegex) {
         await filterEditor.filterRegex.fill(props.filterRegex);
       }
-      if (props.customActions) {
-        await props.customActions(filterEditor);
-      }
       switch (props.saveAction) {
         case "none":
           break;
@@ -214,6 +211,10 @@ export default class MainPageFixture {
           break;
         case "save":
         case undefined:
+          await filterEditor.persistButton.click();
+          if (props.customActions) {
+            await props.customActions(filterEditor);
+          }
           await filterEditor.saveButton.click();
           break;
       }
@@ -232,6 +233,10 @@ export class FilterEditorPageFixture {
 
   get saveButton() {
     return this.locator.getByTestId("save-rule-button");
+  }
+
+  get persistButton() {
+    return this.locator.getByTestId("persist-rule-button");
   }
 
   get applyButton() {

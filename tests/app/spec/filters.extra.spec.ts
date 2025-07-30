@@ -163,8 +163,8 @@ test("a filter with a date should be autoapplied to the new messages", async ({ 
   await expect(mainPage.matchingFilterButtons).toHaveCount(1);
 });
 
-test("only future dates should be available for selection", async ({ page, mainPage, logs }) => {
-  await page.clock.install({ time: "2025-05-12T08:27:01Z" });
+test("only future dates should be available for selection", async ({ mainPage, logs }) => {
+  await mainPage.clock.install({ time: "2025-05-12T08:27:01Z" });
   logs.givenRecords({ message: "stem 1", timestamp: "2025-05-20T08:27:01Z" });
 
   await mainPage.open();
@@ -174,6 +174,53 @@ test("only future dates should be available for selection", async ({ page, mainP
     saveAction: "none",
   });
 
+  await filterEditor.persistButton.click();
   await filterEditor.autoAckTtlTriggerButton.click();
   await expect(filterEditor.calendarDateButton("2025-05-11")).toBeDisabled();
+});
+
+test("should not reset filter view on logs sync", async ({ mainPage, logs }) => {
+  await mainPage.clock.install();
+  logs.givenRecords("rec1");
+
+  await mainPage.open();
+
+  const filterEditor = await mainPage.createFilter({
+    logLineText: "rec1",
+    saveAction: "none",
+  });
+
+  await filterEditor.persistButton.click();
+  await expect(filterEditor.saveButton).toBeVisible();
+  await expect(filterEditor.persistButton).not.toBeVisible();
+
+  await mainPage.waitNextSyncCycle();
+
+  await expect(filterEditor.saveButton).toBeVisible();
+  await expect(filterEditor.persistButton).not.toBeVisible();
+});
+
+test.skip("should have the filter editor visible on many new logs arrival", async ({ mainPage, logs }) => {
+  await mainPage.clock.install();
+  logs.givenRecords("rec1");
+
+  await mainPage.open();
+
+  const filterEditor = await mainPage.createFilter({
+    logLineText: "rec1",
+    saveAction: "none",
+  });
+
+  await filterEditor.persistButton.click();
+  await expect(filterEditor.saveButton).toBeVisible();
+  await expect(filterEditor.persistButton).not.toBeVisible();
+
+  logs.givenRecords(...Array.from({ length: 45 }).map((_, i) => `new_rec_` + i));
+
+  await mainPage.waitNextSyncCycle();
+
+  await expect(mainPage.page.getByText("new_rec_44")).toBeVisible();
+
+  await expect(filterEditor.saveButton).toBeVisible();
+  await expect(filterEditor.persistButton).not.toBeVisible();
 });

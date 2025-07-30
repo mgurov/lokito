@@ -91,7 +91,7 @@ export function DataTable({ columns, data }: DataTableProps) {
                     {row.getIsExpanded() && (
                       <TableRow className="bg-muted/50">
                         <TableCell colSpan={columns.length}>
-                          <LogPanel log={row.original} />
+                          <MemoedLogRowPanel log={row.original} />
                         </TableCell>
                       </TableRow>
                     )}
@@ -105,6 +105,13 @@ export function DataTable({ columns, data }: DataTableProps) {
       {table.getRowModel().rows?.length > 0 && <DataTablePagination table={table} />}
     </div>
   );
+}
+
+function MemoedLogRowPanel({ log }: { log: Log }) {
+  const { stream, ...lessMutable } = log;
+  const memoKey = JSON.stringify(lessMutable);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return React.useMemo(() => <LogPanel log={log} />, [memoKey]);
 }
 
 function NoData() {

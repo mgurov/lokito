@@ -64,6 +64,41 @@ export type SaveRuleProps = {
 export function RuleEditSection(
   { logLine, onSubmit }: { logLine: string; onSubmit: (p: SaveRuleProps | undefined) => void },
 ) {
+  const [step, setStep] = useState<"filter" | "persistence">("filter");
+  const [messageRegex, setMessageRegex] = useState<string>("");
+
+  const showPersistenceStep = ({ messageRegex }: { messageRegex: string }) => {
+    setMessageRegex(messageRegex);
+    setStep("persistence");
+  };
+
+  return (
+    <div className="px-3 pb-2" data-testid="rule-edit-section">
+      {step === "filter" && (
+        <RuleFilterStep
+          logLine={logLine}
+          onSubmit={onSubmit}
+          showPersistenceStep={showPersistenceStep}
+        />
+      )}
+      {step === "persistence" && (
+        <RulePersistenceStep
+          messageRegex={messageRegex}
+          onSubmit={onSubmit}
+          backToFilterStep={() => setStep("filter")}
+        />
+      )}
+    </div>
+  );
+}
+
+function RuleFilterStep(
+  { logLine, onSubmit, showPersistenceStep }: {
+    logLine: string;
+    onSubmit: (p: SaveRuleProps | undefined) => void;
+    showPersistenceStep: (props: { messageRegex: string }) => void;
+  },
+) {
   const [messageRegex, setMessageRegex] = useState<string>(escapeRegExp(logLine));
   let logLineMatchesRegex: "yes" | "no" | "err" = "no";
   let errorMessage: string | null = null;
@@ -75,22 +110,9 @@ export function RuleEditSection(
     logLineMatchesRegex = "err";
     errorMessage = (e as { message: string }).message;
   }
-  const [autoAck, setAutoAck] = useState(true);
-
-  const [date, setDate] = useState<Date | undefined>(undefined);
-
-  const [description, setDescription] = useState<string | undefined>(undefined);
-
-  const handleSubmitWithBells = (props: SaveRuleProps) => {
-    if (date !== undefined) {
-      onSubmit({ ...props, autoAckTillDate: format(date, "yyyy-MM-dd") });
-    } else {
-      onSubmit(props);
-    }
-  };
 
   return (
-    <div className="px-3 pb-2" data-testid="rule-edit-section">
+    <>
       <div className="grid gap-4 py-4">
         <ScrollArea className="rounded">
           <div
@@ -125,6 +147,72 @@ export function RuleEditSection(
             <AlertDescription>{errorMessage}</AlertDescription>
           </Alert>
         )}
+      </div>
+
+      <div className="flex space-x-2">
+        <Button
+          data-testid="apply-rule-button"
+          disabled={logLineMatchesRegex != "yes"}
+          onClick={() => onSubmit({ save: false, messageRegex })}
+          variant="secondary"
+        >
+          Apply on current
+        </Button>
+        <Button
+          data-testid="persist-rule-button"
+          disabled={logLineMatchesRegex != "yes"}
+          onClick={() => showPersistenceStep({ messageRegex })}
+        >
+          Save for the future
+        </Button>
+        <Button
+          data-testid="close-rule-button"
+          onClick={() => onSubmit(undefined)}
+          variant="secondary"
+        >
+          Never mind
+        </Button>
+      </div>
+    </>
+  );
+}
+
+function RulePersistenceStep(
+  { messageRegex, onSubmit, backToFilterStep }: {
+    messageRegex: string;
+    onSubmit: (p: SaveRuleProps | undefined) => void;
+    backToFilterStep: () => void;
+  },
+) {
+  const [autoAck, setAutoAck] = useState(true);
+
+  const [date, setDate] = useState<Date | undefined>(undefined);
+
+  const [description, setDescription] = useState<string | undefined>(undefined);
+
+  const handleSubmitWithBells = (props: SaveRuleProps) => {
+    if (date !== undefined) {
+      onSubmit({ ...props, autoAckTillDate: format(date, "yyyy-MM-dd") });
+    } else {
+      onSubmit(props);
+    }
+  };
+
+  // TODO: no point allowing autoack-stop-date if non-acking.
+
+  return (
+    <>
+      <div className="grid gap-4 py-4">
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Input
+            data-testid="rule_regex"
+            id="regex"
+            disabled
+            value={messageRegex}
+            className="col-span-4"
+          />
+        </div>
+
         <div className="flex items-center space-x-2">
           <label
             htmlFor="auto-ack"
@@ -163,19 +251,17 @@ export function RuleEditSection(
 
       <div className="flex space-x-2">
         <Button
-          data-testid="apply-rule-button"
-          disabled={logLineMatchesRegex != "yes"}
-          onClick={() => onSubmit({ save: false, messageRegex, autoAck, description })}
+          data-testid="back-to-filter-button"
+          onClick={backToFilterStep}
           variant="secondary"
         >
-          Apply on current
+          Back to filter
         </Button>
         <Button
           data-testid="save-rule-button"
-          disabled={logLineMatchesRegex != "yes"}
           onClick={() => handleSubmitWithBells({ save: true, messageRegex, autoAck, description })}
         >
-          Save for the future
+          Save
         </Button>
         <Button
           data-testid="close-rule-button"
@@ -185,6 +271,6 @@ export function RuleEditSection(
           Never mind
         </Button>
       </div>
-    </div>
+    </>
   );
 }
