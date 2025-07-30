@@ -140,3 +140,27 @@ test("filter description", async ({ page, mainPage, logs }) => {
 
   await expect(page.getByText("This is a somewhat explanation")).toBeVisible();
 });
+
+test("should filter multilined messages", async ({ mainPage, logs }) => {
+  logs.givenRecords("a\nb_\nc");
+  logs.givenRecords("a\nb_\nd");
+  logs.givenRecords("a\ne_\nd");
+
+  await mainPage.open();
+
+  await mainPage.expectLogMessages(
+    "a\ne_\nd",
+    "a\nb_\nd",
+    "a\nb_\nc",
+  );
+
+  await mainPage.createFilter({
+    logLineText: "a\nb_\nc",
+    expectedPrefilledRegex: "a\\nb_\\nc",
+    filterRegex: "a\\nb",
+  });
+
+  await mainPage.expectLogMessages(
+    "a\ne_\nd",
+  );
+});

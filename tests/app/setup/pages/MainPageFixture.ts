@@ -180,6 +180,7 @@ export default class MainPageFixture {
 
   async createFilter(props: {
     logLineText: string;
+    expectedPrefilledRegex?: string;
     filterRegex?: string;
     stepName?: string;
     saveAction?: "apply" | "save" | "none"; // defaults to 'save'
@@ -192,6 +193,10 @@ export default class MainPageFixture {
       await this.page.getByTestId("new-rule-button").click();
 
       await expect(filterEditor.locator).toBeAttached();
+
+      if (props.expectedPrefilledRegex) {
+        await expect(filterEditor.filterRegex).toHaveValue(props.expectedPrefilledRegex);
+      }
 
       if (props.filterRegex) {
         await filterEditor.filterRegex.fill(props.filterRegex);
