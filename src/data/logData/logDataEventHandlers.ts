@@ -1,7 +1,7 @@
-import { JustReceivedLog, Log } from "@/data/logData/logSchema";
+import { Acked, JustReceivedLog, Log } from "@/data/logData/logSchema";
 import { traceIdFields } from "@/lib/traceIds";
 import _ from "lodash";
-import { createFilterMatcher, Filter, FilterMatchResult, FiltersLocalStorage, FilterStats } from "../filters/filter";
+import { createFilterMatcher, Filter, FiltersLocalStorage, FilterStats } from "../filters/filter";
 import { LogDataState } from "./logDataSlice";
 
 export type JustReceivedBatch = {
@@ -22,21 +22,26 @@ export function handleNewLogsBatch(state: LogDataState, justReceivedBatch: JustR
   const matchers = justReceivedBatch.filters.map(createFilterMatcher);
 
   const newRecordsAdapted = newRecords.map(({ stream, id, message, timestamp }) => {
-    const anyMatched = matchers.reduce((acc, matcher) => {
-      // stop reducing if we already found a match
-      if (acc) {
-        return acc;
+    const filtersMatched: Record<string, string> = {};
+    let acked: Acked = null;
+
+    for (const matcher of matchers) {
+      const thisMatch = matcher.match({ messages: [message], timestamp });
+      if (thisMatch) {
+        filtersMatched[thisMatch.filterId] = thisMatch.filterId;
+        if (acked === null) {
+          acked = thisMatch.acked;
+        }
       }
-      return matcher.match({ messages: [message], timestamp });
-    }, undefined as FilterMatchResult);
+    }
 
     return {
       stream,
       id,
       line: message,
       timestamp,
-      acked: anyMatched ? anyMatched.acked : null,
-      filters: anyMatched ? { [anyMatched.filterId]: anyMatched.filterId } : {},
+      acked,
+      filters: filtersMatched,
       sourcesAndMessages: [{ sourceId: justReceivedBatch.sourceId, message }],
     } as Log;
   });

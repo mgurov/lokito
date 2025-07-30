@@ -35,6 +35,84 @@ test("non-acking filter on it", async ({ page, mainPage, logs }) => {
   });
 });
 
+test("multiple non-acking filters should both match and display", async ({ mainPage, logs }) => {
+  await mainPage.clock.install();
+  logs.givenRecords("baz fooe");
+
+  await mainPage.open();
+
+  await mainPage.expectLogMessages("baz fooe");
+
+  await expect(mainPage.matchingFilterButtons).toHaveCount(0);
+
+  // first filter
+  await mainPage.createFilter({
+    logLineText: "baz fooe",
+    filterRegex: "baz",
+    customActions: async (d) => {
+      await d.autoAckCheckbox.click();
+    },
+  });
+  await expect(mainPage.matchingFilterButtons).toHaveCount(1);
+
+  // second filter
+  await mainPage.createFilter({
+    logLineText: undefined,
+    filterRegex: "fooe",
+    customActions: async (d) => {
+      await d.autoAckCheckbox.click();
+    },
+  });
+  await expect(mainPage.matchingFilterButtons).toHaveCount(2);
+
+  // now new record matching both filters arrive
+
+  logs.givenRecords("fooe baz");
+
+  await mainPage.waitNextSyncCycle();
+
+  await mainPage.expectLogMessages("fooe baz", "baz fooe");
+  await expect(mainPage.matchingFilterButtons).toHaveCount(4);
+  // TODO: give filters names
+});
+
+test("when multiple rules match if theres an acking one it should not be saturated nonacking", async ({ mainPage, logs }) => {
+  await mainPage.clock.install();
+  logs.givenRecords("baz fooe");
+
+  await mainPage.open();
+
+  await mainPage.expectLogMessages("baz fooe");
+
+  await expect(mainPage.matchingFilterButtons).toHaveCount(0);
+
+  // first filter
+  await mainPage.createFilter({
+    logLineText: "baz fooe",
+    filterRegex: "baz",
+    customActions: async (d) => {
+      await d.autoAckCheckbox.click(); // nonacking
+    },
+  });
+  await expect(mainPage.matchingFilterButtons).toHaveCount(1);
+
+  // second filter
+  await mainPage.createFilter({
+    logLineText: undefined,
+    filterRegex: "fooe",
+    // acking
+  });
+  await mainPage.expectLogMessages(...[]);
+
+  // now new record matching both filters arrive
+
+  logs.givenRecords("fooe baz");
+
+  await mainPage.waitNextSyncCycle();
+
+  await mainPage.expectLogMessages(...[]);
+});
+
 test("non-acking filter persisted", async ({ appState, mainPage, logs }) => {
   await appState.givenFilters({ messageRegex: "stem", autoAck: false });
   logs.givenRecords("stem 1", "stem 2", "unrelated");

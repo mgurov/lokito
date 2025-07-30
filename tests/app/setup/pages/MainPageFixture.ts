@@ -179,7 +179,7 @@ export default class MainPageFixture {
   }
 
   async createFilter(props: {
-    logLineText: string;
+    logLineText: string | undefined; // undefined for if there's already the log record open
     expectedPrefilledRegex?: string;
     filterRegex?: string;
     stepName?: string;
@@ -189,7 +189,9 @@ export default class MainPageFixture {
     const filterEditor = new FilterEditorPageFixture(this.page.getByTestId("rule-edit-section"));
 
     await test.step(props.stepName ?? "createFilter", async () => {
-      await this.page.getByText(props.logLineText).click();
+      if (props.logLineText) {
+        await this.page.getByText(props.logLineText).click();
+      }
       await this.page.getByTestId("new-rule-button").click();
 
       await expect(filterEditor.locator).toBeAttached();
