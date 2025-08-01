@@ -10,44 +10,35 @@ import React from "react";
 import { useDispatch } from "react-redux";
 import { SelectedSourceContext, useSelectedSourceMessageLine } from "../context/SelectedSourceContext";
 import FilterCard from "../rule/FilterCard";
-import { useRuleEditor } from "../rule/rule-editor";
+import { RuleEditorDispatchContext } from "../rule/ruleEditorContext";
 import SimpleTooltip from "../SimpleTooltip";
 
 // TODO: basic coverage of the fields and copy-pasta
 
 export function LogPanel({ log }: { log: Log }) {
   const logLine = useSelectedSourceMessageLine(log);
-
-  const {
-    showCreateNewFilter,
-    RuleEditor,
-    EditorToggleButton,
-  } = useRuleEditor();
+  const dispatch = useContext(RuleEditorDispatchContext);
 
   return (
     <>
       <div className="space-y-2">
         <div className="flex w-full px-2">
-          <EditorToggleButton
+          <Button
+            className="ml-1 mt-1"
             size="sm"
             variant="outline"
             data-testid="new-rule-button"
-            className="ml-1 mt-1"
+            onClick={() =>
+              dispatch({
+                type: "open",
+                logLine,
+              })}
           >
-            {showCreateNewFilter ? "Never mind" : "Filter like this..."}
-          </EditorToggleButton>
+            Filter like this...
+          </Button>
 
           <AckTillThisButton messageId={log.id} />
         </div>
-
-        {showCreateNewFilter && (
-          <div className="space-y-1 px-3 py-2">
-            <h3 className="text-sm font-semibold">New Filter</h3>
-            <div className="grid rounded-sm bg-white shadow">
-              <RuleEditor logLine={logLine} />
-            </div>
-          </div>
-        )}
 
         <RenderFilters log={log} />
 

@@ -200,7 +200,7 @@ test("should not reset filter view on logs sync", async ({ mainPage, logs }) => 
   await expect(filterEditor.persistButton).not.toBeVisible();
 });
 
-test.skip("should have the filter editor visible on many new logs arrival", async ({ mainPage, logs }) => {
+test("should have the filter editor visible on many new logs arrival", async ({ mainPage, logs }) => {
   await mainPage.clock.install();
   logs.givenRecords("rec1");
 

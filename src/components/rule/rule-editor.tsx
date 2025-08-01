@@ -4,19 +4,22 @@ import { useAppDispatch } from "@/data/redux/reduxhooks";
 import { randomId } from "@/lib/utils";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
-import { Button, ButtonProps } from "../ui/button";
+import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import { Input } from "../ui/input";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "../ui/sheet";
 import { escapeRegExp } from "./regex-utils";
+import { RuleEditorContext, RuleEditorDispatchContext } from "./ruleEditorContext";
 import { TTLDatePicker } from "./TTLDatePicker";
 
-export function useRuleEditor() {
-  const [showCreateNewFilter, setShowCreateNewFilter] = useState<boolean>(false);
+export function RuleEditorSheet() {
+  const ruleEditorDispatch = useContext(RuleEditorDispatchContext);
+  const { open, logline } = useContext(RuleEditorContext);
 
-  const dispatch = useAppDispatch();
+  const appDispatch = useAppDispatch();
 
   function handleSubmit(p: SaveRuleProps | undefined) {
     if (p !== undefined) {
@@ -29,28 +32,39 @@ export function useRuleEditor() {
         autoAckTillDate,
         description,
       };
-      dispatch(createFilter(newFilter));
+      appDispatch(createFilter(newFilter));
     }
-    setShowCreateNewFilter(false);
+    ruleEditorDispatch({ type: "close" });
   }
 
-  const toggleShowCreateNewFilter = () => setShowCreateNewFilter(v => !v);
-
-  const EditorToggleButton = ({ onClick, ...props }: ButtonProps) => {
-    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-      toggleShowCreateNewFilter();
-      if (onClick) {
-        onClick(event);
-      }
-    };
-    return <Button onClick={handleClick} {...props} />;
-  };
-
-  return {
-    showCreateNewFilter,
-    RuleEditor: (props: { logLine: string }) => <RuleEditSection {...props} onSubmit={handleSubmit} />,
-    EditorToggleButton,
-  };
+  return (
+    <>
+      <Sheet
+        open={open}
+        onOpenChange={(open) => {
+          if (!open) {
+            ruleEditorDispatch({
+              type: "close",
+            });
+          }
+        }}
+      >
+        <SheetContent side="bottom" className="min-h-full">
+          <SheetHeader>
+            <SheetTitle>New Rule</SheetTitle>
+            <SheetDescription>
+              Make the regex match the desigred lines and either apply once to the current logs or save for applying to
+              all the future logs.
+            </SheetDescription>
+          </SheetHeader>
+          <RuleEditSection
+            logLine={logline || "Should not happpen"}
+            onSubmit={handleSubmit}
+          />
+        </SheetContent>
+      </Sheet>
+    </>
+  );
 }
 
 export type SaveRuleProps = {
@@ -73,7 +87,7 @@ export function RuleEditSection(
   };
 
   return (
-    <div className="px-3 pb-2" data-testid="rule-edit-section">
+    <div data-testid="rule-edit-section">
       {step === "filter" && (
         <RuleFilterStep
           logLine={logLine}
@@ -149,7 +163,7 @@ function RuleFilterStep(
         )}
       </div>
 
-      <div className="flex space-x-2">
+      <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
         <Button
           data-testid="apply-rule-button"
           disabled={logLineMatchesRegex != "yes"}
@@ -249,7 +263,7 @@ function RulePersistenceStep(
         </div>
       </div>
 
-      <div className="flex space-x-2">
+      <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
         <Button
           data-testid="back-to-filter-button"
           onClick={backToFilterStep}
