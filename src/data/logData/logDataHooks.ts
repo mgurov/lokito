@@ -77,6 +77,19 @@ export const useTraceIdsMultipleMatchesCount = (row: Log): Record<string, number
     ),
   );
 
+export const useFilterLogs = (filterId: string): LogWithSource[] =>
+  useSelector(
+    createSelector(
+      [
+        (state: RootState) => state.logData.logs,
+        (state: RootState) => state.sources.data,
+      ],
+      (all, sources) => {
+        return all.filter((log) => log.filters[filterId]).map(enrichLogWithSourcesFun(sources));
+      },
+    ),
+  );
+
 export const useTraceIdLogs = (traceId: string): LogWithSource[] =>
   useSelector(
     createSelector(

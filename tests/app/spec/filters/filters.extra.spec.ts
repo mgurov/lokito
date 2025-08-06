@@ -36,6 +36,59 @@ test("non-acking filter on it", async ({ page, mainPage, logs }) => {
   }, { box: true });
 });
 
+test("non-acking filter possible to see all matched", async ({ mainPage, logs, appState }) => {
+  await appState.givenFilters({
+    messageRegex: "stem",
+    autoAck: false,
+  });
+
+  logs.givenRecords("stem 1", "stem 2", "unrelated");
+
+  await mainPage.open();
+
+  await mainPage.expectLogMessages("unrelated", "stem 2", "stem 1");
+
+  await expect(mainPage.matchingFilterButtons).toHaveCount(2);
+  await mainPage.matchingFilterButtons.first().click();
+  await mainPage.matchingFilterShowSuchDropdownOption.click();
+
+  await mainPage.expectLogMessages("stem 2", "stem 1");
+  // and the filter button isn't needed here anymore
+  await expect(mainPage.matchingFilterButtons).toHaveCount(0);
+});
+
+test("non-acking filter page should show acked filters as well", async ({ mainPage, logs, appState }) => {
+  const [f1, _f2] = await appState.givenFilters({
+    messageRegex: "stem",
+    autoAck: false,
+  }, {
+    messageRegex: "unrelated",
+    autoAck: false,
+  });
+
+  logs.givenRecords("stem 1", "stem 2", "unrelated");
+
+  await mainPage.open();
+
+  await mainPage.expectLogMessages("unrelated", "stem 2", "stem 1");
+
+  await mainPage.ack("stem 1");
+
+  await mainPage.expectLogMessages("unrelated", "stem 2");
+
+  const stemFilterButton = mainPage.matchingFilterButtons.getByText(f1.id);
+  await stemFilterButton.click();
+  await mainPage.matchingFilterShowSuchDropdownOption.click();
+
+  await mainPage.expectLogMessages("stem 2", "stem 1");
+
+  await mainPage.clickAckAll({ expectedCount: 1 });
+
+  await mainPage.homeLogo.click();
+
+  await mainPage.expectLogMessages("unrelated");
+});
+
 test("multiple non-acking filters should both match and display", async ({ mainPage, logs }) => {
   await mainPage.clock.install();
   logs.givenRecords("baz fooe");

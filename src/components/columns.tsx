@@ -41,7 +41,7 @@ function RowAck({ logId, acked }: { logId: string; acked: Acked }) {
   );
 }
 
-export function columns(opts: { showTraces?: boolean } = {}): ColumnDef<LogWithSource>[] {
+export function columns(opts: { showTraces?: boolean; hideFilterId?: string } = {}): ColumnDef<LogWithSource>[] {
   const columnsTemplate: ColumnDef<LogWithSource>[] = [
     {
       id: "source",
@@ -78,20 +78,24 @@ export function columns(opts: { showTraces?: boolean } = {}): ColumnDef<LogWithS
     {
       accessorKey: "line",
       header: undefined,
-      cell: ({ row }) => <RenderLine row={row.original} showTraces={opts.showTraces ?? true} />,
+      cell: ({ row }) => (
+        <RenderLine row={row.original} showTraces={opts.showTraces ?? true} hideFilterId={opts.hideFilterId} />
+      ),
     },
   ];
 
   return columnsTemplate;
 }
 
-function RenderLine({ row, showTraces }: { row: LogWithSource; showTraces: boolean }) {
+function RenderLine(
+  { row, showTraces, hideFilterId }: { row: LogWithSource; showTraces: boolean; hideFilterId: string | undefined },
+) {
   const stringToShow = useSelectedSourceMessageLine(row);
   return (
     <>
       <div className="h-full cursor-pointer overflow-auto whitespace-nowrap text-xs font-medium">
         <SourceIndicator row={row} />
-        <FilterIndicators row={row} />
+        <FilterIndicators row={row} hideFilterId={hideFilterId} />
         {showTraces && <TraceIndicators row={row} />}
         <span data-testid="log-message">{stringToShow}</span>
       </div>
@@ -119,9 +123,9 @@ function SourceIndicator({ row }: { row: LogWithSource }) {
   ));
 }
 
-function FilterIndicators({ row }: { row: LogWithSource }) {
+function FilterIndicators({ row, hideFilterId }: { row: LogWithSource; hideFilterId: string | undefined }) {
   const dispatch = useDispatch();
-  return Object.entries(row.filters).map(([id, name]) => (
+  return Object.entries(row.filters).filter(([id]) => id !== hideFilterId).map(([id, name]) => (
     <React.Fragment key={id}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -134,8 +138,14 @@ function FilterIndicators({ row }: { row: LogWithSource }) {
             {name}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuLabel>Rule actions</DropdownMenuLabel>
+        <DropdownMenuContent
+          onClick={e => {
+            e.stopPropagation();
+          }}
+        >
+          <DropdownMenuLabel>
+            Rule actions
+          </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             data-testid="matching-filter-ack-such"
@@ -144,6 +154,11 @@ function FilterIndicators({ row }: { row: LogWithSource }) {
             }}
           >
             ACK all matched
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link to={`/filter/${id}`} data-testid="matching-filter-show-such">
+              Show all matched
+            </Link>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

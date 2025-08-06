@@ -1,6 +1,6 @@
 import { expect, test } from "@tests/app/setup/testExtended";
-import { AnnotationSuppressDefaultApp } from "../setup/AppStateFixture";
-import { FilterEditorPageFixture } from "../setup/pages/MainPageFixture";
+import { AnnotationSuppressDefaultApp } from "../../setup/AppStateFixture";
+import { FilterEditorPageFixture } from "../../setup/pages/MainPageFixture";
 
 test("find a line create a filter on it", async ({ page, mainPage, logs }) => {
   logs.givenRecords({ message: "Some<thing> 👻 (H)appened" });

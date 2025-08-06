@@ -68,6 +68,9 @@ export const logDataSlice = createSlice({
       } | {
         type: "ids";
         ids: string[];
+      } | {
+        type: "filterId";
+        filterId: string;
       }
     >) => {
       let ackingPredicate: (l: Log) => boolean;
@@ -82,6 +85,9 @@ export const logDataSlice = createSlice({
           break;
         case "ids":
           ackingPredicate = (l: Log) => payload.ids.includes(l.id);
+          break;
+        case "filterId":
+          ackingPredicate = (l: Log) => !!l.filters[payload.filterId];
           break;
         default:
           console.error("Unknown acking payload type", payload);

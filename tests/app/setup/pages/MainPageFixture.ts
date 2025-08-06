@@ -103,6 +103,10 @@ export default class MainPageFixture {
     return this.getByTestId("matching-filter-ack-such");
   }
 
+  get matchingFilterShowSuchDropdownOption(): Locator {
+    return this.getByTestId("matching-filter-show-such");
+  }
+
   //
 
   get cleanCheck(): Locator {
