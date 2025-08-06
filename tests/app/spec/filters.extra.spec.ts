@@ -21,6 +21,7 @@ test("non-acking filter on it", async ({ page, mainPage, logs }) => {
   // but it is possible to ack all messages matching the filter
   await expect(mainPage.matchingFilterButtons).toHaveCount(2);
   await mainPage.matchingFilterButtons.first().click();
+  await mainPage.matchingFilterAckSuchDropdownOption.click();
   // then
   await mainPage.expectLogMessages("unrelated");
   await mainPage.expectAckMessages(2);
@@ -32,7 +33,7 @@ test("non-acking filter on it", async ({ page, mainPage, logs }) => {
     await mainPage.expectLogMessages("unrelated 2", "stem 3", "unrelated");
     await mainPage.expectAckMessages(2);
     await expect(mainPage.matchingFilterButtons).toHaveCount(1);
-  });
+  }, { box: true });
 });
 
 test("multiple non-acking filters should both match and display", async ({ mainPage, logs }) => {

@@ -12,6 +12,14 @@ import { Link } from "react-router-dom";
 import { Acked, LogSource, LogWithSource } from "../data/logData/logSchema";
 import { SelectedSourceContext, useSelectedSourceMessageLine } from "./context/SelectedSourceContext";
 import { Button } from "./ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 function RowAck({ logId, acked }: { logId: string; acked: Acked }) {
   const dispatch = useDispatch();
@@ -101,7 +109,7 @@ function SourceIndicator({ row }: { row: LogWithSource }) {
           variant="ghost"
           size="sm"
           data-testid="log-row-source-marker"
-          className="border border-red-50"
+          className="border"
         >
           {source.name}
         </Button>
@@ -115,17 +123,30 @@ function FilterIndicators({ row }: { row: LogWithSource }) {
   const dispatch = useDispatch();
   return Object.entries(row.filters).map(([id, name]) => (
     <React.Fragment key={id}>
-      <Button
-        variant="ghost"
-        size="sm"
-        data-testid="matching-filter"
-        className="border boder-red-50"
-        onClick={_e => {
-          dispatch(ackMatchedByFilter(id));
-        }}
-      >
-        {name}
-      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            data-testid="matching-filter"
+            className="border"
+          >
+            {name}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuLabel>Rule actions</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            data-testid="matching-filter-ack-such"
+            onClick={_e => {
+              dispatch(ackMatchedByFilter(id));
+            }}
+          >
+            ACK all matched
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       {" "}
     </React.Fragment>
   ));

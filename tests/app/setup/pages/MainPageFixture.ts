@@ -99,6 +99,12 @@ export default class MainPageFixture {
     return this.getByTestId("matching-filter");
   }
 
+  get matchingFilterAckSuchDropdownOption(): Locator {
+    return this.getByTestId("matching-filter-ack-such");
+  }
+
+  //
+
   get cleanCheck(): Locator {
     return this.page.getByText("Clean ✅");
   }
