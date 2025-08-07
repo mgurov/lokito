@@ -27,13 +27,10 @@ export const filtersSlice = createSlice({
       delete state.data[action.payload];
       FiltersLocalStorage.filters.save(Object.values(state.data));
     },
-    ackMatchedByFilter(_state, _action: PayloadAction<string>) {
-      // a hook for the logData slice
-    },
   },
 });
 
-export const { createFilter, deleteFilter, ackMatchedByFilter } = filtersSlice.actions;
+export const { createFilter, deleteFilter } = filtersSlice.actions;
 
 export default filtersSlice.reducer;
 

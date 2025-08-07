@@ -1,8 +1,8 @@
-import { Acked, Log } from "@/data/logData/logSchema";
+import { Log } from "@/data/logData/logSchema";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import _ from "lodash";
 import { createFilterMatcher, FiltersLocalStorage, FilterStats } from "../filters/filter";
-import { ackMatchedByFilter, createFilter, deleteFilter } from "../filters/filtersSlice";
+import { createFilter, deleteFilter } from "../filters/filtersSlice";
 import { handleNewLogsBatch, JustReceivedBatch } from "./logDataEventHandlers";
 
 export type LogIndexNode = {
@@ -71,6 +71,9 @@ export const logDataSlice = createSlice({
       } | {
         type: "filterId";
         filterId: string;
+      } | {
+        type: "traceId";
+        traceId: string;
       }
     >) => {
       let ackingPredicate: (l: Log) => boolean;
@@ -88,6 +91,15 @@ export const logDataSlice = createSlice({
           break;
         case "filterId":
           ackingPredicate = (l: Log) => !!l.filters[payload.filterId];
+          break;
+        case "traceId":
+          {
+            const traceIdLogIds = state.traceIdIndex[payload.traceId];
+            if (!traceIdLogIds) {
+              return;
+            }
+            ackingPredicate = (l: Log) => traceIdLogIds.includes(l.id);
+          }
           break;
         default:
           console.error("Unknown acking payload type", payload);
@@ -149,18 +161,6 @@ export const logDataSlice = createSlice({
       // 2. clear stats
       delete state.filterStats[filterId];
       FiltersLocalStorage.filterStats.save(state.filterStats);
-    });
-
-    builder.addCase(ackMatchedByFilter, (state, action) => {
-      const filterId = action.payload;
-      const ackMarker: Acked = { type: "filter", filterId: filterId };
-
-      // unack affected lines
-      for (const line of state.logs) {
-        if (line.acked === null && line.filters[filterId] !== undefined) {
-          line.acked = ackMarker;
-        }
-      }
     });
   },
 });

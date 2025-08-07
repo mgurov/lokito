@@ -92,6 +92,7 @@ export default class MainPageFixture {
 
   async openTrace(traceId: string) {
     await this.traceButton(traceId).first().click();
+    await this.getByTestId("trace-show").click();
     await this.page.waitForURL("/by-trace/" + traceId);
   }
 

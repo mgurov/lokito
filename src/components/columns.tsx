@@ -1,8 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 
-import { ackMatchedByFilter } from "@/data/filters/filtersSlice";
 import { useTraceIdsMultipleMatchesCount } from "@/data/logData/logDataHooks";
-import { ack, unack } from "@/data/logData/logDataSlice";
+import { ack, logDataSliceActions, unack } from "@/data/logData/logDataSlice";
 import { simpleDateTimeFormat } from "@/lib/utils";
 import { CheckIcon, MinusIcon } from "@radix-ui/react-icons";
 import { useContext } from "react";
@@ -124,64 +123,110 @@ function SourceIndicator({ row }: { row: LogWithSource }) {
 }
 
 function FilterIndicators({ row, hideFilterId }: { row: LogWithSource; hideFilterId: string | undefined }) {
-  const dispatch = useDispatch();
   return Object.entries(row.filters).filter(([id]) => id !== hideFilterId).map(([id, name]) => (
     <React.Fragment key={id}>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            data-testid="matching-filter"
-            className="border"
-          >
-            {name}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          onClick={e => {
-            e.stopPropagation();
-          }}
-        >
-          <DropdownMenuItem
-            data-testid="matching-filter-ack-such"
-            onClick={_e => {
-              dispatch(ackMatchedByFilter(id));
-            }}
-          >
-            ACK all matched
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to={`/filter/${id}`} data-testid="matching-filter-show-such">
-              Show all matched
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuLabel className="text-gray-500 text-center">
-            Rule actions
-          </DropdownMenuLabel>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <FilterIndicator id={id} name={name} />
       {" "}
     </React.Fragment>
   ));
+}
+
+function FilterIndicator({ id, name }: { id: string; name: string }) {
+  const dispatch = useDispatch();
+  const { ackAll } = logDataSliceActions;
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          data-testid="matching-filter"
+          className="border"
+        >
+          {name}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        onClick={e => {
+          e.stopPropagation();
+        }}
+      >
+        <DropdownMenuItem
+          data-testid="matching-filter-ack-such"
+          onClick={_e => {
+            dispatch(ackAll({ type: "filterId", filterId: id }));
+          }}
+        >
+          ACK all matched
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to={`/filter/${id}`} data-testid="matching-filter-show-such">
+            Show all matched
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel className="text-gray-500 text-center">
+          Rule actions
+        </DropdownMenuLabel>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
 
 function TraceIndicators({ row }: { row: LogWithSource }) {
   const traceIdsMultipleMatchesCount = useTraceIdsMultipleMatchesCount(row);
   return Object.entries(traceIdsMultipleMatchesCount).map(([traceId, count]) => (
     <React.Fragment key={traceId}>
-      <Button
-        variant="ghost"
-        size="sm"
-        data-testid="trace-button"
-        className="border boder-yellow-50"
-        title={`trace: ${traceId}`}
-        asChild
-      >
-        <Link to={`/by-trace/${traceId}`}>✜ {count}</Link>
-      </Button>
+      <TraceIndicator traceId={traceId} count={count} />
       {" "}
     </React.Fragment>
   ));
+}
+
+function useAckByTraceId(traceId: string) {
+  const dispatch = useDispatch();
+  const { ackAll } = logDataSliceActions;
+
+  return () => dispatch(ackAll({ type: "traceId", traceId }));
+}
+
+function TraceIndicator({ traceId, count }: { traceId: string; count: number }) {
+  const ackByTraceId = useAckByTraceId(traceId);
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          data-testid="trace-button"
+          title={`trace: ${traceId}`}
+          className="border"
+        >
+          ✜ {count}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        onClick={e => {
+          e.stopPropagation();
+        }}
+      >
+        <DropdownMenuItem
+          data-testid="trace-ack"
+          onClick={() => ackByTraceId()}
+        >
+          ACK by this trace
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to={`/by-trace/${traceId}`} data-testid="trace-show">
+            Show this trace
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel className="text-gray-500 text-center">
+          TraceId actions
+        </DropdownMenuLabel>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
