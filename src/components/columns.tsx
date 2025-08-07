@@ -143,10 +143,6 @@ function FilterIndicators({ row, hideFilterId }: { row: LogWithSource; hideFilte
             e.stopPropagation();
           }}
         >
-          <DropdownMenuLabel>
-            Rule actions
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
           <DropdownMenuItem
             data-testid="matching-filter-ack-such"
             onClick={_e => {
@@ -160,6 +156,10 @@ function FilterIndicators({ row, hideFilterId }: { row: LogWithSource; hideFilte
               Show all matched
             </Link>
           </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuLabel className="text-gray-500 text-center">
+            Rule actions
+          </DropdownMenuLabel>
         </DropdownMenuContent>
       </DropdownMenu>
       {" "}
