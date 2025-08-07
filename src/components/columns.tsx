@@ -1,8 +1,8 @@
 import { ColumnDef } from "@tanstack/react-table";
 
 import { ackMatchedByFilter } from "@/data/filters/filtersSlice";
-import { useTraceIdsMultipleMatchesCount } from "@/data/logData/logDataHooks";
-import { ack, unack } from "@/data/logData/logDataSlice";
+import { useTraceIdLogs, useTraceIdsMultipleMatchesCount } from "@/data/logData/logDataHooks";
+import { ack, logDataSliceActions, unack } from "@/data/logData/logDataSlice";
 import { simpleDateTimeFormat } from "@/lib/utils";
 import { CheckIcon, MinusIcon } from "@radix-ui/react-icons";
 import { useContext } from "react";
@@ -146,7 +146,7 @@ function FilterIndicators({ row, hideFilterId }: { row: LogWithSource; hideFilte
           <DropdownMenuItem
             data-testid="matching-filter-ack-such"
             onClick={_e => {
-              dispatch(ackMatchedByFilter(id));
+              dispatch(ackMatchedByFilter(id)); // huh?
             }}
           >
             ACK all matched
@@ -171,17 +171,52 @@ function TraceIndicators({ row }: { row: LogWithSource }) {
   const traceIdsMultipleMatchesCount = useTraceIdsMultipleMatchesCount(row);
   return Object.entries(traceIdsMultipleMatchesCount).map(([traceId, count]) => (
     <React.Fragment key={traceId}>
-      <Button
-        variant="ghost"
-        size="sm"
-        data-testid="trace-button"
-        className="border boder-yellow-50"
-        title={`trace: ${traceId}`}
-        asChild
-      >
-        <Link to={`/by-trace/${traceId}`}>✜ {count}</Link>
-      </Button>
+      <TraceIndicator traceId={traceId} count={count} />
       {" "}
     </React.Fragment>
   ));
+}
+
+function TraceIndicator({ traceId, count }: { traceId: string; count: number }) {
+  const dispatch = useDispatch();
+  const traceIdLogs = useTraceIdLogs(traceId); // TODO: move down to a component with use or something
+  const { ackAll } = logDataSliceActions;
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          data-testid="trace-button"
+          title={`trace: ${traceId}`}
+          className="border"
+        >
+          ✜ {count}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        onClick={e => {
+          e.stopPropagation();
+        }}
+      >
+        <DropdownMenuItem
+          data-testid="trace-ack"
+          onClick={_e => {
+            dispatch(ackAll({ type: "ids", ids: traceIdLogs.map(t => t.id) }));
+          }}
+        >
+          ACK by this trace
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to={`/by-trace/${traceId}`} data-testid="trace-show">
+            Show this trace
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel className="text-gray-500 text-center">
+          TraceId actions
+        </DropdownMenuLabel>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
