@@ -6,7 +6,7 @@ import { Source } from "@/data/source";
 import { simpleDateTimeFormat } from "@/lib/utils";
 import { ExclamationTriangleIcon, UpdateIcon } from "@radix-ui/react-icons";
 import { ReactNode, useState } from "react";
-import { columns } from "../columns";
+import { simpleColumns } from "../columns";
 import { AckNackProp } from "../context/AckNackContext";
 import { SelectedSourceContext } from "../context/SelectedSourceContext";
 import { DataTable } from "../data-table";
@@ -127,7 +127,7 @@ function SourceTabButtonsAndContent({ dataFromSources, data, sources, selectedSo
               {thisSourceNaced.length > 0 && (
                 <>
                   <AckAllOnSourceButton notAckedCount={thisSourceNaced.length} ackNack={ackNack} />
-                  <DataTable data={thisSourceNaced} columns={columns()} />
+                  <DataTable data={thisSourceNaced} columns={simpleColumns} />
                 </>
               )}
             </div>
@@ -163,7 +163,7 @@ function ShowAllSourcesData({ data, ...rest }: { data: LogWithSource[] } & AckNa
     <div className="mt-2 space-y-4">
       <StatsLine {...rest} />
 
-      <DataTable data={data} columns={columns()} />
+      <DataTable data={data} columns={simpleColumns} />
     </div>
   );
 }

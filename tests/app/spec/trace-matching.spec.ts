@@ -157,3 +157,21 @@ test("make sure the auto-acked messages don't disappear completely when apres-tr
   await mainPage.openTrace("tr-0");
   await mainPage.expectLogMessages("message2", "autoack");
 });
+
+test("should keep the dropdown open when refetching the messages", async ({ mainPage, logs }) => {
+  await mainPage.clock.install();
+
+  logs.givenRecords(
+    { message: "message1", traceId: "tr-1" },
+    { message: "message2", traceId: "tr-1" },
+  );
+
+  await mainPage.open();
+
+  await mainPage.traceButton("tr-1").first().click();
+  await expect(mainPage.getByTestId("trace-show")).toBeVisible();
+
+  await mainPage.waitNextSyncCycle();
+
+  await expect(mainPage.getByTestId("trace-show")).toBeVisible();
+});
