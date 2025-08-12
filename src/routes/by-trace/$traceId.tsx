@@ -1,4 +1,4 @@
-import { columns } from "@/components/columns";
+import { columnsNoTraces } from "@/components/columns";
 import { DataTable } from "@/components/data-table";
 import { AckAllButton } from "@/components/StatsLine";
 import { useTraceIdLogs } from "@/data/logData/logDataHooks";
@@ -22,7 +22,7 @@ export default function LogsByTraceId() {
 function SourcesData({ data }: { data: LogWithSource[] }) {
   return (
     <div className="mt-2 space-y-4">
-      <DataTable data={data} columns={columns({ showTraces: false })} />
+      <DataTable data={data} columns={columnsNoTraces} />
     </div>
   );
 }

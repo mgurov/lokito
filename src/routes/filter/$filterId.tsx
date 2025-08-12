@@ -4,18 +4,20 @@ import { AckAllButton } from "@/components/StatsLine";
 import { useFilterLogs } from "@/data/logData/logDataHooks";
 import { logDataSliceActions } from "@/data/logData/logDataSlice";
 import { LogWithSource } from "@/data/logData/logSchema";
+import { useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 
 export default function LogsByFilterId() {
   const { filterId = "" } = useParams();
   const logs = useFilterLogs(filterId || "");
+  const columnsNoThisFilter = useMemo(() => columns({ hideFilterId: filterId }), [filterId]);
   return (
     <>
       <h2 className="font-bold">Filter: {filterId}</h2>
       <AckAllOnFilterViewButton data={logs} filterId={filterId} />
       <div className="mt-2 space-y-4">
-        <DataTable data={logs} columns={columns({ hideFilterId: filterId })} />
+        <DataTable data={logs} columns={columnsNoThisFilter} />
       </div>
     </>
   );

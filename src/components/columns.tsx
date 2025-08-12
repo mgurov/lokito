@@ -4,7 +4,7 @@ import { useTraceIdsMultipleMatchesCount } from "@/data/logData/logDataHooks";
 import { ack, logDataSliceActions, unack } from "@/data/logData/logDataSlice";
 import { simpleDateTimeFormat } from "@/lib/utils";
 import { CheckIcon, MinusIcon } from "@radix-ui/react-icons";
-import { useContext } from "react";
+import { useCallback, useContext } from "react";
 import React from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
@@ -39,6 +39,10 @@ function RowAck({ logId, acked }: { logId: string; acked: Acked }) {
     </Button>
   );
 }
+
+export const simpleColumns = columns();
+
+export const columnsNoTraces = columns({ showTraces: false });
 
 export function columns(opts: { showTraces?: boolean; hideFilterId?: string } = {}): ColumnDef<LogWithSource>[] {
   const columnsTemplate: ColumnDef<LogWithSource>[] = [
@@ -77,9 +81,9 @@ export function columns(opts: { showTraces?: boolean; hideFilterId?: string } = 
     {
       accessorKey: "line",
       header: undefined,
-      cell: ({ row }) => (
-        <RenderLine row={row.original} showTraces={opts.showTraces ?? true} hideFilterId={opts.hideFilterId} />
-      ),
+      cell: ({ row }) => {
+        return <RenderLine row={row.original} showTraces={opts.showTraces ?? true} hideFilterId={opts.hideFilterId} />;
+      },
     },
   ];
 
@@ -187,7 +191,7 @@ function useAckByTraceId(traceId: string) {
   const dispatch = useDispatch();
   const { ackAll } = logDataSliceActions;
 
-  return () => dispatch(ackAll({ type: "traceId", traceId }));
+  return useCallback(() => dispatch(ackAll({ type: "traceId", traceId })), [traceId, dispatch, ackAll]);
 }
 
 function TraceIndicator({ traceId, count }: { traceId: string; count: number }) {
