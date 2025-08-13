@@ -9,6 +9,7 @@ class ConsoleLoggingFixture {
   }
 }
 
+// TODO: refactor as per example at https://dou.ua/forums/topic/54967/
 export const consoleLoggingTest = test.extend<{ consoleLogging: ConsoleLoggingFixture }>({
   consoleLogging: [async ({ page }, use) => {
     const consoleLogging = new ConsoleLoggingFixture();
