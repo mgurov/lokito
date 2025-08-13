@@ -11,21 +11,12 @@ class ConsoleLoggingFixture {
 
 // TODO: refactor as per example at https://dou.ua/forums/topic/54967/
 export const consoleLoggingTest = test.extend<{ consoleLogging: ConsoleLoggingFixture }>({
-  consoleLogging: [async ({ page }, use) => {
+  consoleLogging: [async ({ page }, use, testInfo) => {
     const consoleLogging = new ConsoleLoggingFixture();
-
-    consoleLogging.ignoreErrorMessagesContaining("error fetching logs");
-    consoleLogging.ignoreErrorMessagesContaining("Failed to load resource:");
-    consoleLogging.ignoreErrorMessagesContaining(
-      "React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7.",
-    );
-    consoleLogging.ignoreErrorMessagesContaining(
-      "React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7.",
-    );
 
     let consoleErrorDetected: string | null = null;
 
-    page.on("console", msg => {
+    page.on("console", async msg => {
       consoleLogging.messages.push(msg);
       if (msg.type() === "error" || msg.type() === "warning") {
         if (consoleLogging.ignoreErrorMessagesContainingStrings.some(ignoredText => msg.text().includes(ignoredText))) {
@@ -35,6 +26,7 @@ export const consoleLoggingTest = test.extend<{ consoleLogging: ConsoleLoggingFi
         if (consoleLogging.failImmediately) {
           throw new Error(`Console ${msg.type()} detected: ${msg.text()}`);
         } else {
+          await testInfo.attach(`console.${msg.type()}: ${msg.text()}`);
           if (consoleErrorDetected === null) {
             consoleErrorDetected = msg.text();
           }

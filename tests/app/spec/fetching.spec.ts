@@ -115,60 +115,71 @@ test(
   },
 );
 
-test("should show error upon failure to fetch", AnnotationSuppressDefaultApp, async ({ page, appState, mainPage }) => {
-  await page.route(routes.loki, async (request) => {
-    await request.abort();
+test.describe("error handling", () => {
+  test.beforeEach(({ consoleLogging }) => {
+    consoleLogging.ignoreErrorMessagesContaining("error fetching logs");
+    consoleLogging.ignoreErrorMessagesContaining("Failed to load resource:");
   });
 
-  const source = await appState.givenSource();
+  test(
+    "should show error upon failure to fetch",
+    AnnotationSuppressDefaultApp,
+    async ({ page, appState, mainPage }) => {
+      await page.route(routes.loki, async (request) => {
+        await request.abort();
+      });
 
-  await mainPage.open({ startFetch: true });
+      const source = await appState.givenSource();
 
-  await expect(mainPage.sourceTabHeader(source).getByTestId("source-name")).toHaveClass("animate-pulse");
-  await expect(mainPage.sourceTabHeader(source).getByTestId("source-in-error-indicator")).toBeVisible();
-});
+      await mainPage.open({ startFetch: true });
 
-test("should keep fetching after a delayed response", async ({ page, mainPage, logs }) => {
-  await page.clock.install();
+      await expect(mainPage.sourceTabHeader(source).getByTestId("source-name")).toHaveClass("animate-pulse");
+      await expect(mainPage.sourceTabHeader(source).getByTestId("source-in-error-indicator")).toBeVisible();
+    },
+  );
 
-  logs.givenRecords({ message: "e1" });
+  test("should keep fetching after a delayed response", async ({ page, mainPage, logs }) => {
+    await page.clock.install();
 
-  await mainPage.open({ startFetch: true });
+    logs.givenRecords({ message: "e1" });
 
-  await mainPage.expectLogMessages("e1");
+    await mainPage.open({ startFetch: true });
 
-  // next cycle
-  logs.givenRecords({ message: "e2" });
+    await mainPage.expectLogMessages("e1");
 
-  const delayedResponse = new Deferred<void>();
-  await page.route(routes.loki, async (request) => {
-    await delayedResponse.promise;
-    await request.abort();
-  }, { times: 1 });
+    // next cycle
+    logs.givenRecords({ message: "e2" });
 
-  await page.clock.runFor("01:30");
+    const delayedResponse = new Deferred<void>();
+    await page.route(routes.loki, async (request) => {
+      await delayedResponse.promise;
+      await request.abort();
+    }, { times: 1 });
 
-  await mainPage.expectLogMessages("e1");
+    await page.clock.runFor("01:30");
 
-  delayedResponse.resolve();
+    await mainPage.expectLogMessages("e1");
 
-  await page.clock.runFor("01:30");
+    delayedResponse.resolve();
 
-  await mainPage.expectLogMessages("e2", "e1");
+    await page.clock.runFor("01:30");
 
-  // next cycle
-  logs.givenRecords({ message: "e3" });
-  await page.clock.runFor("01:30");
-  await mainPage.expectLogMessages("e3", "e2", "e1");
-});
+    await mainPage.expectLogMessages("e2", "e1");
 
-test("should show error on no responses", async ({ page, mainPage }) => {
-  await page.route(routes.loki, async (request) => {
-    await request.abort();
+    // next cycle
+    logs.givenRecords({ message: "e3" });
+    await page.clock.runFor("01:30");
+    await mainPage.expectLogMessages("e3", "e2", "e1");
   });
-  await mainPage.open({ startFetch: true });
-  // NB: shouldn't actually be clean on error, but never mind for now.
-  await expect(mainPage.cleanCheck).toBeVisible();
+
+  test("should show error on no responses", async ({ page, mainPage }) => {
+    await page.route(routes.loki, async (request) => {
+      await request.abort();
+    });
+    await mainPage.open({ startFetch: true });
+    // NB: shouldn't actually be clean on error, but never mind for now.
+    await expect(mainPage.cleanCheck).toBeVisible();
+  });
 });
 
 test(
