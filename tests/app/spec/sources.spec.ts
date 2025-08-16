@@ -122,6 +122,84 @@ test(
 );
 
 test(
+  "delete a source should remove its entries",
+  AnnotationSuppressDefaultApp,
+  async ({ mainPage, appState, logs }) => {
+    await mainPage.clock.install();
+
+    const [toBeRemoved, toBeKept] = await appState.givenSources({ name: "to be removed" }, {});
+
+    logs.givenSourceRecords(toBeRemoved, "to-be-removed");
+    logs.givenSourceRecords(toBeKept, "to-be-kept");
+
+    await mainPage.open();
+
+    await mainPage.expectLogMessages("to-be-kept", "to-be-removed");
+
+    const sourcesPage = await mainPage.clickToSources();
+    await sourcesPage.deleteSource(toBeRemoved.id);
+    await mainPage.homeLogo.click();
+
+    await mainPage.expectLogMessages("to-be-kept");
+  },
+);
+
+test(
+  "delete a source allow for later source addition and refetch same messages",
+  AnnotationSuppressDefaultApp,
+  async ({ mainPage, appState, logs, consoleLogging }) => {
+    consoleLogging.ignoreErrorMessagesContaining(
+      "Dialog is changing from uncontrolled to controlled.", // TODO: fix me
+    );
+
+    await mainPage.clock.install();
+
+    const [toBeRemoved, toBeKept] = await appState.givenSources({ name: "to be removed" }, {});
+
+    const toBeRemovedTs = "2025-02-04T20:00:00.000Z";
+    const toBeRemovedData = { "event": "event1" };
+    logs.givenSourceRecords(
+      toBeRemoved,
+      { message: "to-be-removed", timestamp: toBeRemovedTs, data: toBeRemovedData },
+      { message: "checking-deduplication", timestamp: toBeRemovedTs, data: toBeRemovedData },
+    );
+
+    logs.givenSourceRecords(toBeKept, "to-be-kept");
+
+    await mainPage.open();
+
+    await mainPage.expectLogMessages("to-be-kept", "to-be-removed");
+
+    const sourcesPage = await mainPage.clickToSources();
+    await sourcesPage.deleteSource(toBeRemoved.id);
+    await mainPage.homeLogo.click();
+
+    await mainPage.expectLogMessages("to-be-kept");
+
+    // now add back a source
+
+    const queryMarker = "{job=\"fenix\"}";
+    // normally, the logs would be staying on the server and wouldn't even be often
+    // refetched except for if feel into the safety zone fetching interval
+    logs.givenSourceRecords({ query: queryMarker }, {
+      message: "resurrected like a fenix",
+      timestamp: toBeRemovedTs,
+      data: toBeRemovedData,
+    }, { message: "checking-deduplication", timestamp: toBeRemovedTs, data: toBeRemovedData });
+    logs.givenSourceRecords(toBeKept, "to-be-kept2");
+
+    await mainPage.getByTestId("new-source-button").click();
+    await mainPage.page.fill("text=Name", "fenix");
+    await mainPage.page.fill("text=Loki query", queryMarker);
+    await mainPage.page.click("text=Save changes");
+
+    await mainPage.waitNextSyncCycle();
+
+    await mainPage.expectLogMessages("to-be-kept2", "to-be-kept", "resurrected like a fenix");
+  },
+);
+
+test(
   "many many sources should all be visible",
   AnnotationSuppressDefaultApp,
   async ({ mainPage, appState }) => {

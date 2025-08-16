@@ -28,3 +28,11 @@ export function simpleDateTimeFormat(dateTime: string) {
 export function daysToHours(days: number) {
   return days * 24;
 }
+
+export function reverseDeleteFromArray<T>(arr: T[], predicate: (t: T) => boolean) {
+  for (let index = arr.length - 1; index >= 0; index--) {
+    if (predicate(arr[index])) {
+      arr.splice(index, 1);
+    }
+  }
+}
