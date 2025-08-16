@@ -90,6 +90,7 @@ fetchingMiddleware.startListening({
     const deletedSource = Object.values(beforeSources).find(source => !afterSources[source.id]);
     if (deletedSource) {
       listenerApi.dispatch(fetchingActions.removeSourceFetching(deletedSource.id));
+      // ok, here we should also dispatch the removal for the logs API
     }
   },
 });

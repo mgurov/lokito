@@ -122,6 +122,31 @@ test(
 );
 
 test(
+  "delete a source should remove its entries",
+  AnnotationSuppressDefaultApp,
+  async ({ mainPage, appState, logs }) => {
+    await mainPage.clock.install();
+
+    const [toBeRemoved, toBeKept] = await appState.givenSources({ name: "to be removed" }, {});
+
+    logs.givenSourceRecords(toBeRemoved, "to-be-removed");
+    logs.givenSourceRecords(toBeKept, "to-be-kept");
+
+    await mainPage.open();
+
+    await mainPage.expectLogMessages("to-be-kept", "to-be-removed");
+
+    const sourcesPage = await mainPage.clickToSources();
+    await sourcesPage.deleteSource(toBeRemoved.id);
+    await mainPage.homeLogo.click();
+
+    await mainPage.expectLogMessages("to-be-kept");
+  },
+);
+
+// TODO: delete a source and then add back, fetch the same entries -> should appear.
+
+test(
   "many many sources should all be visible",
   AnnotationSuppressDefaultApp,
   async ({ mainPage, appState }) => {
