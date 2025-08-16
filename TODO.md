@@ -10,25 +10,32 @@
 
 [ ] preview filter appliance
 
-
-[ ] select exact moment when to continue (previously left)
-[ ] continue after first non-acked
-[ ] date-time to fetch from;
+[ ] continue fetch after first non-acked
 
 [ ] force fetch cycle
 
 [ ] link to Tempo
 
-[ ] persist in the session storage of the browser w. GC
+[ ] persist in the session storage / db of the browser w. GC
 
 [ ] move from table to flex
-
-[ ] loki setup
 
 [ ] visual examples
 
 [ ] zod to validate the server schema
 
+[ ] log generator 
+    https://github.com/QuesmaOrg/blog-5-ways-to-get-started-with-grafana/tree/main/03_logs_with_loki/log-generator 
+    via https://quesma.com/blog-detail/5-grafana-docker-examples-to-get-started-with-metrics-logs-and-traces 
 
-A talk points
+## before "release"
+
+[ ] configuraiton 
+    [v] url
+    [ ] trace fields 
+[ ] multiple loki URLs 
+[ ] warn on log saturation (>1K)
+
+## points
+
 [ ] MVP - error handling. Like the check of the 1000 messages ingested not overspilled.
