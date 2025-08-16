@@ -3,6 +3,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import _ from "lodash";
 import { createFilterMatcher, FiltersLocalStorage, FilterStats } from "../filters/filter";
 import { createFilter, deleteFilter } from "../filters/filtersSlice";
+import { deleteSource } from "../redux/sourcesSlice";
 import { handleNewLogsBatch, JustReceivedBatch } from "./logDataEventHandlers";
 
 export type LogIndexNode = {
@@ -161,6 +162,28 @@ export const logDataSlice = createSlice({
       // 2. clear stats
       delete state.filterStats[filterId];
       FiltersLocalStorage.filterStats.save(state.filterStats);
+    });
+
+    builder.addCase(deleteSource, (state, action) => {
+      const sourceId = action.payload;
+      const logIdsToRemove = new Set<string>();
+      for (const log of state.logs) {
+        for (let sourceIndex = log.sourcesAndMessages.length - 1; sourceIndex >= 0; sourceIndex--) {
+          if (log.sourcesAndMessages[sourceIndex].sourceId === sourceId) {
+            log.sourcesAndMessages.splice(sourceIndex, 1);
+          }
+        }
+        if (log.sourcesAndMessages.length === 0) {
+          logIdsToRemove.add(log.id);
+        }
+      }
+      // TODO: check other things to remove.
+      for (const logId of logIdsToRemove) {
+        const index = state.logs.findIndex(l => l.id === logId);
+        if (index !== -1) {
+          state.logs.splice(index, 1);
+        }
+      }
     });
   },
 });
