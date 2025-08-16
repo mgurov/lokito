@@ -1,3 +1,18 @@
+# Lokito - don't miss a single important line of log!
+
+Lokito is a visual tool for keeping track of the logs from [loki](https://github.com/grafana/loki) . 
+
+Think of a mailbox, where the messages are landing and staying until read and archived. With convenient filters/rules to auto-acknowledge the events of known type that don't require actions.
+
+Lokito is not a replacement to the powers if [Grafana](https://github.com/grafana/grafana), but a complementary tool focused on a single task of finding deviation from the normal in otherwise noisy world of running own service on production. 
+
+![Screen shoot](./content/01-test-demo.png)
+
+Technically, Lokito pulls logs for given loki `source`'s every minute into the browser's memory. The messages fetched are preserved while the window is open. The "sources" and "rules" are persisted in the browser's local storage.
+
+![Schematics](./content/02-schematics.png)
+
+
 # Config
 
 
