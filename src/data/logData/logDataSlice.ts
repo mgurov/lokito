@@ -1,4 +1,6 @@
 import { Log } from "@/data/logData/logSchema";
+import { traceIdFields } from "@/lib/traceIds";
+import { reverseDeleteFromArray } from "@/lib/utils";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import _ from "lodash";
 import { createFilterMatcher, FiltersLocalStorage, FilterStats } from "../filters/filter";
@@ -166,22 +168,30 @@ export const logDataSlice = createSlice({
 
     builder.addCase(deleteSource, (state, action) => {
       const sourceId = action.payload;
-      const logIdsToRemove = new Set<string>();
+      const logsToRemove = new Array<Log>();
       for (const log of state.logs) {
-        for (let sourceIndex = log.sourcesAndMessages.length - 1; sourceIndex >= 0; sourceIndex--) {
-          if (log.sourcesAndMessages[sourceIndex].sourceId === sourceId) {
-            log.sourcesAndMessages.splice(sourceIndex, 1);
-          }
-        }
+        reverseDeleteFromArray(log.sourcesAndMessages, scm => scm.sourceId === sourceId);
         if (log.sourcesAndMessages.length === 0) {
-          logIdsToRemove.add(log.id);
+          logsToRemove.push(log);
         }
       }
-      // TODO: check other things to remove.
-      for (const logId of logIdsToRemove) {
-        const index = state.logs.findIndex(l => l.id === logId);
+      for (const log of logsToRemove) {
+        const index = state.logs.findIndex(l => l.id === log.id);
         if (index !== -1) {
           state.logs.splice(index, 1);
+        }
+
+        delete state.deduplicationIndex[log.id]; // technically might be a bit too large
+
+        for (const { traceIdValue } of traceIdFields(log)) {
+          const recordsByTrace = state.traceIdIndex[traceIdValue];
+          if (recordsByTrace) {
+            if (recordsByTrace.length <= 1) {
+              delete state.traceIdIndex[traceIdValue];
+            } else {
+              reverseDeleteFromArray(recordsByTrace, id => id === log.id);
+            }
+          }
         }
       }
     });

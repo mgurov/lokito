@@ -194,14 +194,11 @@ test(
     await mainPage.page.fill("text=Loki query", queryMarker);
     await mainPage.page.click("text=Save changes"); // TODO: a page helper
 
-    // await mainPage.homeLogo.click();
     await mainPage.waitNextSyncCycle();
 
-    await mainPage.expectLogMessages("to-be-kept", "resurrected like a fenix", "to-be-kept2");
+    await mainPage.expectLogMessages("to-be-kept2", "to-be-kept", "resurrected like a fenix");
   },
 );
-
-// TODO: delete a source and then add back, fetch the same entries -> should appear.
 
 test(
   "many many sources should all be visible",
