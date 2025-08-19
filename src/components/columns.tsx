@@ -127,9 +127,9 @@ function SourceIndicator({ row }: { row: LogWithSource }) {
 }
 
 function FilterIndicators({ row, hideFilterId }: { row: LogWithSource; hideFilterId: string | undefined }) {
-  return Object.entries(row.filters).filter(([id]) => id !== hideFilterId).map(([id, name]) => (
+  return Object.entries(row.filters).filter(([id]) => id !== hideFilterId).map(([id]) => (
     <React.Fragment key={id}>
-      <FilterIndicator id={id} name={name} />
+      <FilterIndicator id={id} name={id} />
       {" "}
     </React.Fragment>
   ));

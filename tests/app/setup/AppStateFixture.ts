@@ -59,13 +59,19 @@ function specToFilter(spec: FilterSpec): Filter {
       messageRegex: spec,
     };
   }
-  return {
+  const result = {
     id: spec.id ?? nextId(),
     messageRegex: spec.messageRegex ?? "",
     transient: spec.transient,
     autoAck: spec.autoAck,
     autoAckTillDate: spec.autoAckTillDate,
-  };
+  } as Filter;
+
+  if ("captureWholeTrace" in spec) {
+    result.captureWholeTrace = spec.captureWholeTrace;
+  }
+
+  return result;
 }
 
 type SourceSpec = { id?: string; name?: string; query?: string; color?: string; active?: boolean };

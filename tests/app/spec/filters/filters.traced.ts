@@ -1,0 +1,89 @@
+import { test } from "@tests/app/setup/testExtended";
+
+test("should ack by trace by existing filter", async ({ mainPage, logs, appState }) => {
+  await appState.givenFilters({
+    // filter1
+    messageRegex: "ack_trace_stem",
+    autoAck: true,
+    captureWholeTrace: true,
+  }, {
+    // filter2
+    messageRegex: "leave_unacked_trace_stem",
+    autoAck: true,
+    captureWholeTrace: false,
+  });
+
+  logs.givenRecords(
+    {
+      message: "unmatched regex after still trace-1", // not matched but the trace of the filter1
+      traceId: "trace-1",
+    },
+    {
+      message: "ack_trace_stem 1", // matched by the filter1
+      traceId: "trace-1",
+    },
+    {
+      message: "unmatched regex before still trace-1", // not matched but the trace of the filter1
+      traceId: "trace-1",
+    },
+    {
+      message: "leave_unacked_trace_stem 2", // matched by the filter2
+      traceId: "trace-2",
+    },
+    {
+      message: "unmatched regex should stay trace-2", // not mached and filter2 doesn't capture the trace
+      traceId: "trace-2",
+    },
+  );
+
+  await mainPage.open();
+
+  await mainPage.expectLogMessages("unmatched regex should stay trace-2");
+});
+
+test("ack by trace for non-acking filer should result in affected records seen and acked by that filter", async ({ mainPage, logs, appState }) => {
+  await appState.givenFilters({
+    messageRegex: "trace-match",
+    autoAck: false,
+    captureWholeTrace: true,
+  });
+
+  logs.givenRecords(
+    {
+      message: "pre-trace", // not matched but the trace of the filter1
+      traceId: "trace-1",
+    },
+    {
+      message: "trace-match", // matched by the filter1
+      traceId: "trace-1",
+    },
+    {
+      message: "after-trace", // not matched but the trace of the filter1
+      traceId: "trace-1",
+    },
+    {
+      message: "unrelated",
+      traceId: "trace-2",
+    },
+  );
+
+  await mainPage.open();
+
+  await mainPage.expectLogMessages(
+    "unrelated",
+    "after-trace",
+    "trace-match",
+    "pre-trace",
+  );
+
+  await test.step("and now ack them all by trace", async () => {
+    await mainPage.ackTrace("trace-1");
+
+    await mainPage.expectLogMessages(
+      "unrelated",
+    );
+  });
+});
+
+// TODO: adding the filter.
+// TODO: removing the filter.

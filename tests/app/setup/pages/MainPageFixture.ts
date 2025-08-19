@@ -90,6 +90,11 @@ export default class MainPageFixture {
     return this.page.getByTitle(`trace: ${traceId}`);
   }
 
+  async ackTrace(traceId: string) {
+    await this.traceButton(traceId).first().click();
+    await this.getByTestId("trace-ack").click();
+  }
+
   async openTrace(traceId: string) {
     await this.traceButton(traceId).first().click();
     await this.getByTestId("trace-show").click();

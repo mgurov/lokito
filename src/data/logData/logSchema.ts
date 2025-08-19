@@ -12,13 +12,19 @@ export type JustReceivedLog = {
   message: string;
 };
 
+export type FilterLogNote = {
+  filterId: string;
+  captureWholeTrace: boolean;
+  autoAck: boolean;
+};
+
 export type Log = {
   stream: { [key: string]: string };
   id: string;
   line: string;
   timestamp: string; // iso string
   acked: Acked;
-  filters: Record<string, string>;
+  filters: Record<string, FilterLogNote>;
   sourcesAndMessages: [SourceAndMessage, ...SourceAndMessage[]];
 };
 

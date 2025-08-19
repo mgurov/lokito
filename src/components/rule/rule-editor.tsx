@@ -31,6 +31,7 @@ export function RuleEditorSheet() {
         autoAck,
         autoAckTillDate,
         description,
+        captureWholeTrace: true, // TODO: a checkbox
       };
       appDispatch(createFilter(newFilter));
     }
