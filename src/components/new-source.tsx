@@ -25,7 +25,7 @@ export function NewSource(
   },
 ) {
   const dispatch = useDispatch();
-  const [open, setOpen] = useState(props.preOpen);
+  const [open, setOpen] = useState(props.preOpen || false);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

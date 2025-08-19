@@ -2,9 +2,7 @@ import { Download, Page } from "@playwright/test";
 import { expect, test } from "@tests/app/setup/testExtended";
 import { AnnotationSuppressDefaultApp } from "../setup/AppStateFixture";
 
-test("download sources", AnnotationSuppressDefaultApp, async ({ page, consoleLogging }) => {
-  consoleLogging.ignoreErrorMessagesContaining("Dialog is changing from uncontrolled to controlled.");
-
+test("download sources", AnnotationSuppressDefaultApp, async ({ page }) => {
   await page.goto("/");
 
   await page.click("text=\"create a new one\"");

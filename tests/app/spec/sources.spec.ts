@@ -2,9 +2,7 @@ import { expect, test } from "@tests/app/setup/testExtended";
 import { AnnotationSuppressDefaultApp } from "../setup/AppStateFixture";
 import { NewSourceRollover } from "../setup/pages/SourcesPageFixture";
 
-test("add source", AnnotationSuppressDefaultApp, async ({ page, appState, consoleLogging }) => {
-  consoleLogging.ignoreErrorMessagesContaining("Dialog is changing from uncontrolled to controlled.");
-
+test("add source", AnnotationSuppressDefaultApp, async ({ page, appState }) => {
   await page.goto("/");
 
   await page.click("text=\"create a new one\"");
@@ -27,14 +25,10 @@ test("add source", AnnotationSuppressDefaultApp, async ({ page, appState, consol
 test(
   "add a source from the sourceless main screen",
   AnnotationSuppressDefaultApp,
-  async ({ page, appState, consoleLogging }) => {
-    consoleLogging.failImmediately = true;
-
+  async ({ page, appState }) => {
     await page.goto("/");
 
     await expect(page.getByText(/There are no active sources/)).toBeVisible();
-
-    consoleLogging.ignoreErrorMessagesContaining("Dialog is changing from uncontrolled to controlled.");
 
     await page.getByTestId("new-source-button").getByText("create a new one").click();
 
@@ -54,10 +48,8 @@ test(
 test(
   "add a source to an existing list from main page",
   AnnotationSuppressDefaultApp,
-  async ({ mainPage, appState, consoleLogging }) => {
+  async ({ mainPage, appState }) => {
     await appState.givenSources({ name: "existing" });
-
-    consoleLogging.ignoreErrorMessagesContaining("Dialog is changing from uncontrolled to controlled.");
 
     await mainPage.open({ startFetch: false });
 
@@ -69,9 +61,7 @@ test(
   },
 );
 
-test("add a source should have immediate effect on fetching", async ({ mainPage, logs, consoleLogging }) => {
-  consoleLogging.ignoreErrorMessagesContaining("Dialog is changing from uncontrolled to controlled.");
-
+test("add a source should have immediate effect on fetching", async ({ mainPage, logs }) => {
   await mainPage.clock.install();
 
   await mainPage.open();
@@ -147,11 +137,7 @@ test(
 test(
   "delete a source allow for later source addition and refetch same messages",
   AnnotationSuppressDefaultApp,
-  async ({ mainPage, appState, logs, consoleLogging }) => {
-    consoleLogging.ignoreErrorMessagesContaining(
-      "Dialog is changing from uncontrolled to controlled.", // TODO: fix me
-    );
-
+  async ({ mainPage, appState, logs }) => {
     await mainPage.clock.install();
 
     const [toBeRemoved, toBeKept] = await appState.givenSources({ name: "to be removed" }, {});
@@ -177,7 +163,6 @@ test(
     await mainPage.expectLogMessages("to-be-kept");
 
     // now add back a source
-
     const queryMarker = "{job=\"fenix\"}";
     // normally, the logs would be staying on the server and wouldn't even be often
     // refetched except for if feel into the safety zone fetching interval
@@ -283,10 +268,8 @@ test("deactivate and then activate", AnnotationSuppressDefaultApp, async ({ main
 test(
   "add a source to an existing list from sources page",
   AnnotationSuppressDefaultApp,
-  async ({ appState, sourcePage, consoleLogging }) => {
+  async ({ appState, sourcePage }) => {
     await appState.givenSources({ name: "existing" });
-
-    consoleLogging.ignoreErrorMessagesContaining("Dialog is changing from uncontrolled to controlled.");
 
     await sourcePage.open();
 
