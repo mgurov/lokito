@@ -263,6 +263,10 @@ export class FilterEditorPageFixture {
     return this.locator.getByTestId("auto-ack");
   }
 
+  get ackWholeTraceCheckbox() {
+    return this.locator.getByTestId("ack-whole-trace");
+  }
+
   get autoAckTtlTriggerButton() {
     return this.locator.getByTestId("auto-ack-ttl-trigger-button");
   }

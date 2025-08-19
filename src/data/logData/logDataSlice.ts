@@ -6,7 +6,7 @@ import _ from "lodash";
 import { createFilterMatcher, FiltersLocalStorage, FilterStats } from "../filters/filter";
 import { createFilter, deleteFilter } from "../filters/filtersSlice";
 import { deleteSource } from "../redux/sourcesSlice";
-import { handleNewLogsBatch, JustReceivedBatch } from "./logDataEventHandlers";
+import { apresAck, handleNewLogsBatch, JustReceivedBatch } from "./logDataEventHandlers";
 
 export type LogIndexNode = {
   stream: { [key: string]: unknown };
@@ -126,6 +126,7 @@ export const logDataSlice = createSlice({
       const filter = action.payload;
       const matcher = createFilterMatcher(filter);
       let matched = 0;
+      const linesToSpreadByTraceId = {} as Record<string, FilterLogNote>;
       for (const line of state.logs) {
         const lineMatched = matcher.match({
           timestamp: line.timestamp,
@@ -146,9 +147,20 @@ export const logDataSlice = createSlice({
         if (line.acked === null) {
           line.acked = lineMatched.acked;
         }
+        if (filter.captureWholeTrace) {
+          for (const { traceIdValue } of traceIdFields(line)) {
+            // TODO: update the filter list
+            for (const potentialSpread of state.traceIdIndex[traceIdValue].logIds) {
+              if (potentialSpread === line.id) {
+                continue;
+              }
+              linesToSpreadByTraceId[potentialSpread] = lineMatched.filterNote;
+            }
+          }
+        }
       }
 
-      // TODO: also mark the traceIds captures as such
+      apresAck(state.logs, linesToSpreadByTraceId);
 
       if (!filter.transient && matched > 0) {
         state.filterStats[filter.id] = matched;

@@ -1,5 +1,47 @@
 import { test } from "@tests/app/setup/testExtended";
 
+// TODO: test default to trace-acking and vice versa.
+// TODO: test apply also acks the traces by default
+
+test("should ack by trace by new filter", async ({ mainPage, logs }) => {
+  logs.givenRecords(
+    {
+      message: "pre-trace", // not matched but the trace of the filter1
+      traceId: "trace-1",
+    },
+    {
+      message: "trace-acking-filter-stem", // matched by the filter1
+      traceId: "trace-1",
+    },
+    {
+      message: "apres-trace", // not matched but the trace of the filter1
+      traceId: "trace-1",
+    },
+    {
+      message: "unrelated",
+      traceId: "trace-2",
+    },
+  );
+
+  await mainPage.open();
+
+  await mainPage.expectLogMessages(
+    "unrelated",
+    "apres-trace",
+    "trace-acking-filter-stem",
+    "pre-trace",
+  );
+
+  await mainPage.createFilter({
+    logLineText: "trace-acking-filter-stem",
+    customActions: async (_d) => {
+      // await expect(d.ackWholeTraceCheckbox).toBeChecked();
+    },
+  });
+
+  await mainPage.expectLogMessages("unrelated");
+});
+
 test("should ack by trace by existing filter", async ({ mainPage, logs, appState }) => {
   await appState.givenFilters({
     // filter1

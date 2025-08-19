@@ -50,9 +50,14 @@ export function handleNewLogsBatch(state: LogDataState, justReceivedBatch: JustR
 
   const toApresAck = updateTraceIdIndex(state.traceIdIndex, newRecordsAdapted);
 
+  apresAck(state.logs, toApresAck);
+
+  updateFilterStats(state.filterStats, newRecordsAdapted);
+}
+
+export function apresAck(logs: Log[], toApresAck: Record<string, FilterLogNote>) {
   if (Object.keys(toApresAck).length > 0) {
-    // todo: extract the below
-    for (const log of state.logs) {
+    for (const log of logs) {
       const toAckThisLogFilter = toApresAck[log.id];
       if (!toAckThisLogFilter) {
         continue;
@@ -65,8 +70,6 @@ export function handleNewLogsBatch(state: LogDataState, justReceivedBatch: JustR
       }
     }
   }
-
-  updateFilterStats(state.filterStats, newRecordsAdapted);
 }
 
 /**
@@ -77,6 +80,7 @@ function updateTraceIdIndex(
   newRecords: Log[],
 ): Record<string, FilterLogNote> // by logId
 {
+  // to the proper result
   const toAck = new Array<[string, FilterLogNote]>();
 
   for (const rec of newRecords) {
@@ -87,6 +91,7 @@ function updateTraceIdIndex(
     for (const { traceIdValue } of traceIdFields(rec)) {
       const existingTraceRecord = traceIdIndex[traceIdValue];
       if (existingTraceRecord) {
+        // TODO: do we need to do these precautions or could just pushed back on the apres-administration?
         { // apres-ack newly added record if already existing trace-spanning filters
           for (const previouslyExistingFilter of Object.values(existingTraceRecord.capturingFilters)) {
             if (previouslyExistingFilter.filterId in thisRecordTraceCapturingFiltersMap) {
