@@ -85,9 +85,11 @@ export function RuleEditSection(
   const [captureWholeTrace, setCaptureWholeTrace] = useState(true);
 
   // TODO: subtype
-  const showPersistenceStep = ({ messageRegex }: { messageRegex: string; captureWholeTrace: boolean }) => {
+  const showPersistenceStep = (
+    { messageRegex, captureWholeTrace: thisCaptureWholeTrace }: { messageRegex: string; captureWholeTrace: boolean },
+  ) => {
     setMessageRegex(messageRegex);
-    setCaptureWholeTrace(captureWholeTrace);
+    setCaptureWholeTrace(thisCaptureWholeTrace);
     setStep("persistence");
   };
 
@@ -178,7 +180,7 @@ function RuleFilterStep(
           </label>
           <Checkbox
             id="ack-trace"
-            data-testid="auto-ack"
+            data-testid="ack-trace"
             checked={captureWholeTrace}
             onCheckedChange={(checked) => setCaptureWholeTrace(!!checked)}
           />

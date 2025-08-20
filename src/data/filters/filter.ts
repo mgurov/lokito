@@ -7,7 +7,7 @@ export type Filter = {
   autoAck?: boolean; // default true
   autoAckTillDate?: string;
   description?: string;
-  captureWholeTrace?: boolean; // default false
+  captureWholeTrace: boolean;
 };
 
 export type FilterMatched = {
@@ -25,7 +25,7 @@ export type FilterStats = Record<string, number>;
 
 export function createFilterMatcher(filter: Filter): FilterMatcher {
   const regex = new RegExp(filter.messageRegex);
-  const captureWholeTrace = filter.captureWholeTrace ?? false;
+  const captureWholeTrace = filter.captureWholeTrace;
 
   const acker: (line: { timestamp: string }) => Acked | null = (() => {
     if (filter.autoAck === false) {
@@ -67,7 +67,8 @@ export const FiltersLocalStorage = {
     load(): Filter[] {
       const storedJson = localStorage.getItem(this.STORAGE_KEY);
       const result = storedJson ? JSON.parse(storedJson) as Filter[] : [];
-      return result;
+      const resultDefaulted = result.map(f => Object.assign({ captureWholeTrace: true }, f));
+      return resultDefaulted;
     },
     save(filters: Filter[]) {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filters));

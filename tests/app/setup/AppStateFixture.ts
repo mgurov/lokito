@@ -57,6 +57,7 @@ function specToFilter(spec: FilterSpec): Filter {
     return {
       id: nextId(),
       messageRegex: spec,
+      captureWholeTrace: true,
     };
   }
   const result = {
@@ -65,11 +66,8 @@ function specToFilter(spec: FilterSpec): Filter {
     transient: spec.transient,
     autoAck: spec.autoAck,
     autoAckTillDate: spec.autoAckTillDate,
+    captureWholeTrace: spec.captureWholeTrace ?? true,
   } as Filter;
-
-  if ("captureWholeTrace" in spec) {
-    result.captureWholeTrace = spec.captureWholeTrace;
-  }
 
   return result;
 }
