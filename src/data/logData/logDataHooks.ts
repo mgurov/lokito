@@ -95,7 +95,7 @@ export const useTraceIdLogs = (traceId: string): LogWithSource[] =>
     createSelector(
       [
         (state: RootState) => state.logData.logs,
-        (state: RootState) => state.logData.traceIdIndex[traceId].logIds,
+        (state: RootState) => state.logData.traceIdIndex[traceId]?.logIds,
         (state: RootState) => state.sources.data,
       ],
       (all, toShow, sources) => {

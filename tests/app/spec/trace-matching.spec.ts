@@ -181,3 +181,8 @@ test("should keep the dropdown open when refetching the messages", async ({ main
 
   await expect(mainPage.getByTestId("trace-show")).toBeVisible();
 });
+
+test("trace path shouldnt fail on nothing found", async ({ page }) => {
+  await page.goto("/by-trace/not-yet-registered-anything");
+  await expect(page.getByTestId("trace-id-header")).toContainText("not-yet-registered-anything");
+});

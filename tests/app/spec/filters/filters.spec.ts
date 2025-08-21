@@ -164,3 +164,15 @@ test("should filter multilined messages", async ({ mainPage, logs }) => {
     "a\ne_\nd",
   );
 });
+
+test("minimal historical local storage load", async ({ mainPage, storage }) => {
+  await storage.setLocalItem("filters", [{ "id": "minimal", "messageRegex": "a_regex" }], false);
+
+  await mainPage.open({ startFetch: false });
+
+  const filtersPage = await mainPage.openFiltersPage();
+
+  const cart = filtersPage.getFilterCard({ regex: "a_regex" });
+
+  await expect(cart.autoAckSign).toContainText("Auto Ack");
+});
