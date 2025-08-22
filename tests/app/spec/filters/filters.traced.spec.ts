@@ -1,8 +1,5 @@
 import { expect, test } from "@tests/app/setup/testExtended";
 
-// TODO: test default to trace-acking and vice versa.
-// TODO: show trackacking on filter deck
-
 test("should ack by trace by new filter", async ({ mainPage, logs }) => {
   logs.givenRecords(
     {
@@ -253,4 +250,47 @@ test("ack by trace for non-acking filer should result in affected records seen a
   });
 });
 
-// TODO: removing the filter.
+test("should show again the entries after the filter removal", async ({ mainPage, logs, appState }) => {
+  const [filter] = await appState.givenFilters({
+    messageRegex: "ack-trace-stem",
+    autoAck: true,
+    captureWholeTrace: true,
+  });
+
+  logs.givenRecords(
+    {
+      message: "pre-trace", // not matched but the trace of the filter1
+      traceId: "trace-1",
+    },
+    {
+      message: filter.messageRegex, // matched by the filter1
+      traceId: "trace-1",
+    },
+    {
+      message: "apres-trace", // not matched but the trace of the filter1
+      traceId: "trace-1",
+    },
+    {
+      message: "unrelated",
+      traceId: "trace-2",
+    },
+  );
+
+  await mainPage.open();
+
+  await mainPage.expectLogMessages(
+    "unrelated",
+  );
+
+  const filtersPage = await mainPage.openFiltersPage();
+
+  await filtersPage.getFilterCard({ regex: filter.messageRegex }).deleteButton.click();
+  await mainPage.homeLogo.click();
+
+  await mainPage.expectLogMessages(
+    "unrelated",
+    "apres-trace",
+    filter.messageRegex,
+    "pre-trace",
+  );
+});
