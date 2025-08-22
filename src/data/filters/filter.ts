@@ -1,4 +1,4 @@
-import { Acked } from "../logData/logSchema";
+import { Acked, FilterLogNote } from "../logData/logSchema";
 
 export type Filter = {
   id: string;
@@ -7,10 +7,11 @@ export type Filter = {
   autoAck?: boolean; // default true
   autoAckTillDate?: string;
   description?: string;
+  captureWholeTrace: boolean;
 };
 
 export type FilterMatched = {
-  filterId: string;
+  filterNote: FilterLogNote;
   acked: Acked;
 };
 
@@ -24,6 +25,7 @@ export type FilterStats = Record<string, number>;
 
 export function createFilterMatcher(filter: Filter): FilterMatcher {
   const regex = new RegExp(filter.messageRegex);
+  const captureWholeTrace = filter.captureWholeTrace;
 
   const acker: (line: { timestamp: string }) => Acked | null = (() => {
     if (filter.autoAck === false) {
@@ -45,7 +47,11 @@ export function createFilterMatcher(filter: Filter): FilterMatcher {
         const matches = regex.test(msg);
         if (matches) {
           return {
-            filterId: filter.id,
+            filterNote: {
+              filterId: filter.id,
+              captureWholeTrace,
+              autoAck: filter.autoAck ?? true, // TODO: solve the problem of spreading defaults.
+            },
             acked: acker(line),
           };
         }
@@ -60,7 +66,9 @@ export const FiltersLocalStorage = {
     STORAGE_KEY: "filters",
     load(): Filter[] {
       const storedJson = localStorage.getItem(this.STORAGE_KEY);
-      return storedJson ? JSON.parse(storedJson) as Filter[] : [];
+      const result = storedJson ? JSON.parse(storedJson) as Filter[] : [];
+      const resultDefaulted = result.map(f => Object.assign({ captureWholeTrace: true }, f));
+      return resultDefaulted;
     },
     save(filters: Filter[]) {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filters));

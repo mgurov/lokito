@@ -1,6 +1,10 @@
 [ ] imporant: alert of handle exceeding the limit of 1000...
 [ ] bug: doesn't catch the second non-acking filter when getting new records
 
+[ ] handle error on to long of a range
+
+[ ] don't show clean when error or pending
+
 [ ] filter by a field
 [ ] notes on a message w/o filter
 

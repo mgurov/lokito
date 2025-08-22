@@ -13,8 +13,11 @@ export default function FilterCard({ filter }: { filter: Filter }) {
     <Card data-testid="filter-card">
       <CardHeader>
         <div className="space-x-4">
-          <span className="text-sm text-muted-foreground">#{filter.id}</span>
-          {filter.autoAck !== false && <span data-testid="auto-ack-sign" className="text-green-500">Auto Ack</span>}
+          <span className="text-sm text-muted-foreground" data-testid="filter-id">#{filter.id}</span>
+          {filter.autoAck !== false && <span data-testid="auto-ack-sign" className="text-green-400">Auto Ack</span>}
+          {filter.captureWholeTrace && (
+            <span data-testid="ack-whole-trace" className="text-blue-400">Capture Whole Trace</span>
+          )}
           {filter.autoAckTillDate && (
             <span className="text-sm text-muted-foreground" data-testid="autoack-till">
               till {filter.autoAckTillDate}

@@ -90,6 +90,11 @@ export default class MainPageFixture {
     return this.page.getByTitle(`trace: ${traceId}`);
   }
 
+  async ackTrace(traceId: string) {
+    await this.traceButton(traceId).first().click();
+    await this.getByTestId("trace-ack").click();
+  }
+
   async openTrace(traceId: string) {
     await this.traceButton(traceId).first().click();
     await this.getByTestId("trace-show").click();
@@ -195,7 +200,8 @@ export default class MainPageFixture {
     filterRegex?: string;
     stepName?: string;
     saveAction?: "apply" | "save" | "none"; // defaults to 'save'
-    customActions?: (filterEditor: FilterEditorPageFixture) => Promise<void>;
+    customActionsFirstScreen?: (filterEditor: FilterEditorPageFixture) => Promise<void>;
+    customActions?: (filterEditor: FilterEditorPageFixture) => Promise<void>; // TODO: rename
   }) {
     const filterEditor = new FilterEditorPageFixture(this.page.getByTestId("rule-edit-section"));
 
@@ -218,10 +224,16 @@ export default class MainPageFixture {
         case "none":
           break;
         case "apply":
+          if (props.customActionsFirstScreen) {
+            await props.customActionsFirstScreen(filterEditor);
+          }
           await filterEditor.applyButton.click();
           break;
         case "save":
         case undefined:
+          if (props.customActionsFirstScreen) {
+            await props.customActionsFirstScreen(filterEditor);
+          }
           await filterEditor.persistButton.click();
           if (props.customActions) {
             await props.customActions(filterEditor);
@@ -256,6 +268,10 @@ export class FilterEditorPageFixture {
 
   get autoAckCheckbox() {
     return this.locator.getByTestId("auto-ack");
+  }
+
+  get ackWholeTraceCheckbox() {
+    return this.locator.getByTestId("ack-trace");
   }
 
   get autoAckTtlTriggerButton() {

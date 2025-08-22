@@ -1,4 +1,4 @@
-import { Log } from "@/data/logData/logSchema";
+import { FilterLogNote, Log } from "@/data/logData/logSchema";
 import { traceIdFields } from "@/lib/traceIds";
 import { reverseDeleteFromArray } from "@/lib/utils";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
@@ -6,7 +6,7 @@ import _ from "lodash";
 import { createFilterMatcher, FiltersLocalStorage, FilterStats } from "../filters/filter";
 import { createFilter, deleteFilter } from "../filters/filtersSlice";
 import { deleteSource } from "../redux/sourcesSlice";
-import { handleNewLogsBatch, JustReceivedBatch } from "./logDataEventHandlers";
+import { apresAck, handleNewLogsBatch, JustReceivedBatch } from "./logDataEventHandlers";
 
 export type LogIndexNode = {
   stream: { [key: string]: unknown };
@@ -17,9 +17,14 @@ export type LogIndexNode = {
 export interface LogDataState {
   logs: Log[];
   deduplicationIndex: Record<string, LogIndexNode[]>;
-  traceIdIndex: Record<string, string[]>; // traceId -> [log.id]
+  traceIdIndex: Record<string, TraceRecord>;
   filterStats: FilterStats;
 }
+
+export type TraceRecord = {
+  logIds: string[];
+  capturingFilters: Record<string, FilterLogNote>;
+};
 
 const initialState: LogDataState = {
   logs: [],
@@ -101,7 +106,7 @@ export const logDataSlice = createSlice({
             if (!traceIdLogIds) {
               return;
             }
-            ackingPredicate = (l: Log) => traceIdLogIds.includes(l.id);
+            ackingPredicate = (l: Log) => traceIdLogIds.logIds.includes(l.id);
           }
           break;
         default:
@@ -121,6 +126,7 @@ export const logDataSlice = createSlice({
       const filter = action.payload;
       const matcher = createFilterMatcher(filter);
       let matched = 0;
+      const linesToSpreadByTraceId = {} as Record<string, FilterLogNote>;
       for (const line of state.logs) {
         const lineMatched = matcher.match({
           timestamp: line.timestamp,
@@ -131,17 +137,30 @@ export const logDataSlice = createSlice({
           continue;
         }
 
-        if (line.filters[lineMatched.filterId] !== undefined) {
+        if (line.filters[lineMatched.filterNote.filterId] !== undefined) {
           continue;
         }
 
         matched += 1;
-        line.filters[lineMatched.filterId] = lineMatched.filterId;
+        line.filters[lineMatched.filterNote.filterId] = lineMatched.filterNote;
 
         if (line.acked === null) {
           line.acked = lineMatched.acked;
         }
+        if (filter.captureWholeTrace) {
+          for (const { traceIdValue } of traceIdFields(line)) {
+            // TODO: update the filter list
+            for (const potentialSpread of state.traceIdIndex[traceIdValue].logIds) {
+              if (potentialSpread === line.id) {
+                continue;
+              }
+              linesToSpreadByTraceId[potentialSpread] = lineMatched.filterNote;
+            }
+          }
+        }
       }
+
+      apresAck(state.logs, linesToSpreadByTraceId);
 
       if (!filter.transient && matched > 0) {
         state.filterStats[filter.id] = matched;
@@ -186,10 +205,10 @@ export const logDataSlice = createSlice({
         for (const { traceIdValue } of traceIdFields(log)) {
           const recordsByTrace = state.traceIdIndex[traceIdValue];
           if (recordsByTrace) {
-            if (recordsByTrace.length <= 1) {
+            if (recordsByTrace.logIds.length <= 1) {
               delete state.traceIdIndex[traceIdValue];
             } else {
-              reverseDeleteFromArray(recordsByTrace, id => id === log.id);
+              reverseDeleteFromArray(recordsByTrace.logIds, id => id === log.id);
             }
           }
         }

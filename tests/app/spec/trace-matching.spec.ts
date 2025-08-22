@@ -39,7 +39,10 @@ test(
 );
 
 test("acked and non-acked messages should be visible by trace id", async ({ appState, mainPage, logs }) => {
-  await appState.givenFilters("autoack");
+  await appState.givenFilters({
+    messageRegex: "autoack",
+    captureWholeTrace: false,
+  });
 
   logs.givenRecords(
     { message: "non-acked", traceId: "tr-1", timestamp: "1" },
@@ -135,7 +138,10 @@ test("same trace same message twice", async ({ mainPage, logs }) => {
 });
 
 test("make sure the auto-acked messages don't disappear completely when apres-trace-id ingested", async ({ appState, mainPage, logs }) => {
-  await appState.givenFilters("autoack");
+  await appState.givenFilters({
+    messageRegex: "autoack",
+    captureWholeTrace: false,
+  });
   await mainPage.clock.install();
 
   logs.givenRecords(
@@ -174,4 +180,9 @@ test("should keep the dropdown open when refetching the messages", async ({ main
   await mainPage.waitNextSyncCycle();
 
   await expect(mainPage.getByTestId("trace-show")).toBeVisible();
+});
+
+test("trace path shouldnt fail on nothing found", async ({ page }) => {
+  await page.goto("/by-trace/not-yet-registered-anything");
+  await expect(page.getByTestId("trace-id-header")).toContainText("not-yet-registered-anything");
 });

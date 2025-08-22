@@ -67,10 +67,10 @@ export const useTraceIdsMultipleMatchesCount = (row: Log): Record<string, number
             console.error("Unexpected missing traceIdIndex", traceIdValue, "field", traceIdValue);
             continue;
           }
-          if (matches.length == 1) {
+          if (matches.logIds.length == 1) {
             continue; // one count is us perhaps, not interesting
           }
-          result[traceIdValue] = matches.length;
+          result[traceIdValue] = matches.logIds.length;
         }
         return result;
       },
@@ -95,7 +95,7 @@ export const useTraceIdLogs = (traceId: string): LogWithSource[] =>
     createSelector(
       [
         (state: RootState) => state.logData.logs,
-        (state: RootState) => state.logData.traceIdIndex[traceId],
+        (state: RootState) => state.logData.traceIdIndex[traceId]?.logIds,
         (state: RootState) => state.sources.data,
       ],
       (all, toShow, sources) => {

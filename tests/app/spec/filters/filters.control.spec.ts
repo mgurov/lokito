@@ -1,6 +1,42 @@
 import { FiltersLocalStorage } from "@/data/filters/filter";
 import { expect, test } from "@tests/app/setup/testExtended";
 
+test("minimal historical and maximum fully speced local storage load", async ({ mainPage, storage }) => {
+  await storage.setLocalItem("filters", [
+    { "id": "minimal", "messageRegex": "min_regex" },
+    {
+      "id": "maximal",
+      "messageRegex": "max_regex",
+      autoAck: false,
+      autoAckTillDate: "2002-03-04",
+      description: "this is a full filter",
+      captureWholeTrace: false,
+    },
+  ], false);
+
+  await mainPage.open({ startFetch: false });
+
+  const filtersPage = await mainPage.openFiltersPage();
+
+  await test.step("minimal filter with defaults", async () => {
+    const cart = filtersPage.getFilterCard({ regex: "min_regex" });
+
+    await expect(cart.id).toContainText("#minimal");
+    await expect(cart.autoAckSign).toContainText("Auto Ack");
+    await expect(cart.ackTraceSign).toBeVisible();
+    await expect(cart.ttl).not.toBeVisible();
+  });
+
+  await test.step("maximal filter with all attributes specified", async () => {
+    const cart = filtersPage.getFilterCard({ regex: "max_regex" });
+
+    await expect(cart.id).toContainText("#maximal");
+    await expect(cart.autoAckSign).not.toBeVisible();
+    await expect(cart.ackTraceSign).not.toBeVisible();
+    await expect(cart.ttl).toContainText("2002-03-04");
+  });
+});
+
 test("created filter should be visible and show acked elements", async ({ mainPage, logs }) => {
   logs.givenRecords("yes1", "yes2", "xxx");
 

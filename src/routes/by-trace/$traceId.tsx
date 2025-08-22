@@ -12,7 +12,7 @@ export default function LogsByTraceId() {
   const traceIdLogs = useTraceIdLogs(traceId || "");
   return (
     <>
-      <h1 className="font-bold">Trace ID: {traceId}</h1>
+      <h1 className="font-bold" data-testid="trace-id-header">Trace ID: {traceId}</h1>
       <AckAllOnTraceViewButton data={traceIdLogs} />
       <SourcesData data={traceIdLogs} />
     </>
