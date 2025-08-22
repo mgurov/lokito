@@ -24,6 +24,10 @@ export default class FiltersPageFixture {
 export class FilterCard {
   constructor(readonly locator: Locator) {}
 
+  get id() {
+    return this.locator.getByTestId("filter-id");
+  }
+
   get currentHitCount() {
     return this.locator.getByTestId("current-hit-count");
   }
@@ -40,7 +44,15 @@ export class FilterCard {
     return this.locator.getByTestId("auto-ack-sign");
   }
 
+  get ackTraceSign() {
+    return this.locator.getByTestId("ack-whole-trace");
+  }
+
   get ttl() {
     return this.locator.getByTestId("autoack-till");
+  }
+
+  get description() {
+    return this.locator.getByTestId("filter-message-description");
   }
 }
