@@ -4,7 +4,7 @@ import { useAppDispatch } from "@/data/redux/reduxhooks";
 import { randomId } from "@/lib/utils";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
-import { useContext, useState } from "react";
+import { Dispatch, SetStateAction, useContext, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
@@ -21,17 +21,15 @@ export function RuleEditorSheet() {
 
   const appDispatch = useAppDispatch();
 
-  function handleSubmit(p: SaveRuleProps | undefined) {
-    if (p !== undefined) {
-      const { save, messageRegex, autoAck, autoAckTillDate, description, captureWholeTrace } = p;
+  function handleSubmit(p: SaveRuleProps) {
+    if (p !== "cancel") {
+      const { save, messageRegex, extra, captureWholeTrace } = p;
       const newFilter: Filter = {
         id: randomId(),
         transient: !save,
         messageRegex,
-        autoAck,
-        autoAckTillDate,
-        description,
         captureWholeTrace,
+        ...(extra || {}),
       };
       appDispatch(createFilter(newFilter));
     }
@@ -68,29 +66,60 @@ export function RuleEditorSheet() {
   );
 }
 
-export type SaveRuleProps = {
+export type SaveRuleProps =
+  | "cancel"
+  | Step1PersistAction & Step1FilterProps
+    & {
+      extra: Step2FilterProps | undefined;
+    };
+
+export type Step1PersistAction = {
   save: boolean;
+}
+
+export type Step1FilterProps = {
   messageRegex: string;
-  autoAck?: boolean;
-  autoAckTillDate?: string;
-  description?: string;
   captureWholeTrace: boolean;
 };
 
+export type Step2FilterProps = {
+  autoAck: boolean;
+  autoAckTillDate: string | undefined;
+  description: string | undefined;
+};
+
 export function RuleEditSection(
-  { logLine, onSubmit }: { logLine: string; onSubmit: (p: SaveRuleProps | undefined) => void },
+  { logLine, onSubmit }: { logLine: string; onSubmit: (p: SaveRuleProps) => void },
 ) {
   const [step, setStep] = useState<"filter" | "persistence">("filter");
-  const [messageRegex, setMessageRegex] = useState<string>("");
-  const [captureWholeTrace, setCaptureWholeTrace] = useState(true);
+  const step1State = useState<Step1FilterProps>({
+    messageRegex: escapeRegExp(logLine),
+    captureWholeTrace: true,
+  });
 
-  // TODO: subtype
-  const showPersistenceStep = (
-    { messageRegex, captureWholeTrace: thisCaptureWholeTrace }: { messageRegex: string; captureWholeTrace: boolean },
+  const onStep1Submit = (
+    step1: Step1PersistAction | "cancel",
   ) => {
-    setMessageRegex(messageRegex);
-    setCaptureWholeTrace(thisCaptureWholeTrace);
-    setStep("persistence");
+    if (step1 === "cancel") {
+      onSubmit("cancel");
+      return;
+    }
+    // setStep1Props(step1);
+    if (!step1.save) {
+      onSubmit({ ...step1, ...step1State[0], extra: undefined });
+    } else {
+      setStep("persistence");
+    }
+  };
+
+  const onStep2Submit = (
+    step2: Step2FilterProps | "cancel",
+  ) => {
+    if (step2 === "cancel") {
+      onSubmit("cancel");
+      return;
+    }
+    onSubmit({ ...step1Props, extra: step2 });
   };
 
   return (
@@ -98,15 +127,13 @@ export function RuleEditSection(
       {step === "filter" && (
         <RuleFilterStep
           logLine={logLine}
-          onSubmit={onSubmit}
-          showPersistenceStep={showPersistenceStep}
+          onSubmit={onStep1Submit}
         />
       )}
       {step === "persistence" && (
         <RulePersistenceStep
-          messageRegex={messageRegex}
-          captureWholeTrace={captureWholeTrace}
-          onSubmit={onSubmit}
+          step1Props={step1State[0]}
+          onSubmit={onStep2Submit}
           backToFilterStep={() => setStep("filter")}
         />
       )}
@@ -115,18 +142,19 @@ export function RuleEditSection(
 }
 
 function RuleFilterStep(
-  { logLine, onSubmit, showPersistenceStep }: {
+  { step1State, logLine, onSubmit }: {
+    step1State: [Step1FilterProps, Dispatch<SetStateAction<Step1FilterProps>>];
     logLine: string;
-    onSubmit: (p: SaveRuleProps | undefined) => void;
-    showPersistenceStep: (props: { messageRegex: string; captureWholeTrace: boolean }) => void;
+    onSubmit: (p: Step1FilterProps | "cancel") => void;
   },
 ) {
-  const [captureWholeTrace, setCaptureWholeTrace] = useState(true);
-  const [messageRegex, setMessageRegex] = useState<string>(escapeRegExp(logLine));
+  const [step1Props, setStep1Props] = step1State;
+  // const [captureWholeTrace, setCaptureWholeTrace] = useState(true);
+  // const [messageRegex, setMessageRegex] = useState<string>(escapeRegExp(logLine));
   let logLineMatchesRegex: "yes" | "no" | "err" = "no";
   let errorMessage: string | null = null;
   try {
-    if (RegExp(messageRegex).test(logLine)) {
+    if (RegExp(step1Props.messageRegex).test(logLine)) {
       logLineMatchesRegex = "yes";
     }
   } catch (e: unknown) {
@@ -152,8 +180,8 @@ function RuleFilterStep(
           <Input
             data-testid="rule_regex"
             id="regex"
-            value={messageRegex}
-            onChange={(e) => setMessageRegex(e.target.value)}
+            value={step1Props.messageRegex}
+            onChange={(e) => setStep1Props(current => ({ ...current, messageRegex: e.target.value }))}
             className="col-span-4"
           />
         </div>
@@ -181,8 +209,8 @@ function RuleFilterStep(
           <Checkbox
             id="ack-trace"
             data-testid="ack-trace"
-            checked={captureWholeTrace}
-            onCheckedChange={(checked) => setCaptureWholeTrace(!!checked)}
+            checked={step1Props.captureWholeTrace}
+            onCheckedChange={(checked) => setStep1Props(current => ({ ...current, captureWholeTrace: !!checked }))}
           />
           <p className="text-sm text-muted-foreground">
             Acks all messages with the same trace IDs as the matched one
@@ -194,7 +222,7 @@ function RuleFilterStep(
         <Button
           data-testid="apply-rule-button"
           disabled={logLineMatchesRegex != "yes"}
-          onClick={() => onSubmit({ save: false, messageRegex, captureWholeTrace })}
+          onClick={() => onSubmit({ save: false })}
           variant="secondary"
         >
           Apply on current
@@ -202,13 +230,13 @@ function RuleFilterStep(
         <Button
           data-testid="persist-rule-button"
           disabled={logLineMatchesRegex != "yes"}
-          onClick={() => showPersistenceStep({ messageRegex, captureWholeTrace })}
+          onClick={() => onSubmit({ save: true })}
         >
           Save for the future
         </Button>
         <Button
           data-testid="close-rule-button"
-          onClick={() => onSubmit(undefined)}
+          onClick={() => onSubmit("cancel")}
           variant="secondary"
         >
           Never mind
@@ -219,10 +247,9 @@ function RuleFilterStep(
 }
 
 function RulePersistenceStep(
-  { messageRegex, onSubmit, backToFilterStep, captureWholeTrace }: {
-    messageRegex: string;
-    captureWholeTrace: boolean;
-    onSubmit: (p: SaveRuleProps | undefined) => void;
+  { step1Props, onSubmit, backToFilterStep }: {
+    step1Props: Step1FilterProps;
+    onSubmit: (p: Step2FilterProps | "cancel") => void;
     backToFilterStep: () => void;
   },
 ) {
@@ -232,15 +259,16 @@ function RulePersistenceStep(
 
   const [description, setDescription] = useState<string | undefined>(undefined);
 
-  const handleSubmitWithBells = (props: SaveRuleProps) => {
-    if (date !== undefined) {
-      onSubmit({ ...props, autoAckTillDate: format(date, "yyyy-MM-dd") });
-    } else {
-      onSubmit(props);
-    }
+  const handleSubmit = () => {
+    const autoAckTillDate = date !== undefined ? format(date, "yyyy-MM-dd") : undefined;
+    onSubmit({
+      autoAckTillDate,
+      autoAck,
+      description,
+    });
   };
 
-  // TODO: no point allowing autoack-stop-date if non-acking.
+  // TODO: no point allowing autoack-stop-date if non-acking...
 
   return (
     <>
@@ -250,7 +278,7 @@ function RulePersistenceStep(
             data-testid="rule_regex"
             id="regex"
             disabled
-            value={messageRegex}
+            value={step1Props.messageRegex}
             className="col-span-4"
           />
         </div>
@@ -301,13 +329,13 @@ function RulePersistenceStep(
         </Button>
         <Button
           data-testid="save-rule-button"
-          onClick={() => handleSubmitWithBells({ save: true, messageRegex, autoAck, description, captureWholeTrace })}
+          onClick={() => handleSubmit()}
         >
           Save
         </Button>
         <Button
           data-testid="close-rule-button"
-          onClick={() => onSubmit(undefined)}
+          onClick={() => onSubmit("cancel")}
           variant="secondary"
         >
           Never mind
