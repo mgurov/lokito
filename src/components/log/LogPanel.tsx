@@ -16,26 +16,11 @@ import SimpleTooltip from "../SimpleTooltip";
 // TODO: basic coverage of the fields and copy-pasta
 
 export function LogPanel({ log }: { log: Log }) {
-  const logLine = useSelectedSourceMessageLine(log);
-  const dispatch = useContext(RuleEditorDispatchContext);
-
   return (
     <>
       <div className="space-y-2">
         <div className="flex w-full px-2">
-          <Button
-            className="ml-1 mt-1"
-            size="sm"
-            variant="outline"
-            data-testid="new-rule-button"
-            onClick={() =>
-              dispatch({
-                type: "open",
-                logLine,
-              })}
-          >
-            Filter like this...
-          </Button>
+          <FilterLikeThisButton log={log} />
 
           <AckTillThisButton messageId={log.id} />
         </div>
@@ -139,5 +124,30 @@ function AckTillThisButton({ messageId }: { messageId: string }) {
         ACK till here
       </Button>
     </SimpleTooltip>
+  );
+}
+
+function FilterLikeThisButton({ log }: { log: Log }) {
+  const dispatch = useContext(RuleEditorDispatchContext);
+  const logLine = useSelectedSourceMessageLine(log);
+  return (
+    <Button
+      className="ml-1 mt-1"
+      size="sm"
+      variant="outline"
+      data-testid="new-rule-button"
+      disabled={!dispatch}
+      onClick={() => {
+        if (!dispatch) {
+          return;
+        }
+        dispatch({
+          type: "open",
+          logLine,
+        });
+      }}
+    >
+      Filter like this...
+    </Button>
   );
 }

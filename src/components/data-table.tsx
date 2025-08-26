@@ -15,6 +15,7 @@ import { useOverallFetchingState } from "@/data/fetching/fetchingSlice";
 import { Log, LogWithSource } from "@/data/logData/logSchema";
 import { cn } from "@/lib/utils";
 import { DataTablePagination } from "./data-table-pagination";
+import { RuleEditorContextProvider } from "./rule/ruleEditorContext";
 
 interface DataTableProps {
   columns: ColumnDef<LogWithSource>[];
@@ -24,7 +25,15 @@ interface DataTableProps {
 // TODO: move to redux together with interceptor logic
 const REFRESH_RATE = 60;
 
-export function DataTable({ columns, data }: DataTableProps) {
+export function DataTable(props: DataTableProps) {
+  return (
+    <RuleEditorContextProvider>
+      <DataTableUnwrapped {...props} />
+    </RuleEditorContextProvider>
+  );
+}
+
+export function DataTableUnwrapped({ columns, data }: DataTableProps) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
   const table = useReactTable<LogWithSource>({

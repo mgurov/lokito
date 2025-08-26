@@ -35,7 +35,14 @@ export function RuleEditorSheet() {
       };
       appDispatch(createFilter(newFilter));
     }
-    ruleEditorDispatch({ type: "close" });
+    if (ruleEditorDispatch) {
+      ruleEditorDispatch({ type: "close" });
+    }
+  }
+
+  if (!ruleEditorDispatch) {
+    console.error("Internal error: no expected dispatch");
+    return <Alert>Internal error: no expected dispatch</Alert>;
   }
 
   return (

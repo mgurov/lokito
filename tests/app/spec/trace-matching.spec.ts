@@ -186,3 +186,22 @@ test("trace path shouldnt fail on nothing found", async ({ page }) => {
   await page.goto("/by-trace/not-yet-registered-anything");
   await expect(page.getByTestId("trace-id-header")).toContainText("not-yet-registered-anything");
 });
+
+test("should be able to create a filter from the trace page", async ({ mainPage, logs }) => {
+  logs.givenRecords(
+    { message: "message1", traceId: "tr-1" },
+    { message: "message2", traceId: "tr-1" },
+  );
+
+  await mainPage.open();
+
+  await mainPage.openTrace("tr-1");
+
+  await expect(mainPage.getByTestId("ack-message-button")).toHaveCount(2);
+
+  await mainPage.createFilter({
+    logLineText: "message1",
+  });
+
+  await expect(mainPage.getByTestId("ack-message-button")).toHaveCount(0);
+});

@@ -7,7 +7,7 @@ const initialState = { open: false };
 
 export const RuleEditorContext = createContext<RuleEditorState>(initialState);
 
-export const RuleEditorDispatchContext = createContext<Dispatch<RuleEditorAction>>(() => {});
+export const RuleEditorDispatchContext = createContext<Dispatch<RuleEditorAction> | undefined>(undefined);
 
 type RuleEditorAction =
   | { type: "open"; logLine: string }

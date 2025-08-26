@@ -11,7 +11,6 @@ import { AckNackProp } from "../context/AckNackContext";
 import { SelectedSourceContext } from "../context/SelectedSourceContext";
 import { DataTable } from "../data-table";
 import { NewSource } from "../new-source";
-import { RuleEditorContextProvider } from "../rule/ruleEditorContext";
 import { SourceCard } from "../source/SourceCard";
 import { StartFetchingPanel } from "../StartFetchingPanel";
 import { AckAllOnSourceButton, StatsLine } from "../StatsLine";
@@ -29,10 +28,8 @@ type LogsPageProps = {
 export default function LogsPage(props: LogsPageProps) {
   return (
     <>
-      <RuleEditorContextProvider>
-        <NoActiveSourcesHint /> {/** TODO: only on index */}
-        <ShowData {...props} />
-      </RuleEditorContextProvider>
+      <NoActiveSourcesHint />
+      <ShowData {...props} />
     </>
   );
 }
