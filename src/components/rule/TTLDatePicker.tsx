@@ -7,7 +7,7 @@ import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
 
 export function TTLDatePicker(
-  { date, setDate }: { date: Date | undefined; setDate: (date: Date | undefined) => void },
+  { date, setDate, enabled }: { date: Date | undefined; setDate: (date: Date | undefined) => void; enabled: boolean },
 ) {
   const [open, setOpen] = useState(false);
 
@@ -17,6 +17,7 @@ export function TTLDatePicker(
         <Button
           data-testid="auto-ack-ttl-trigger-button"
           variant={"outline"}
+          disabled={!enabled}
           className={cn(
             "w-[15ch] justify-start text-left font-normal",
             !date && "text-muted-foreground",

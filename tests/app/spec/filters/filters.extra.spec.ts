@@ -201,6 +201,21 @@ test("should be possible to define a date for which a filter would be auto-acked
   await expect(mainPage.matchingFilterButtons).toHaveCount(1);
 });
 
+test("ttl should be disabled when the filter is not acking anyways", async ({ mainPage, logs }) => {
+  logs.givenRecords("message");
+
+  await mainPage.open();
+
+  await mainPage.createFilter({
+    logLineText: "message",
+    customActions: async (filterEditor) => {
+      await expect(filterEditor.autoAckTtlTriggerButton).toBeEnabled();
+      await filterEditor.autoAckCheckbox.click();
+      await expect(filterEditor.autoAckTtlTriggerButton).toBeDisabled();
+    },
+  });
+});
+
 test("a filter with a date should be autoapplied to the new messages", async ({ appState, mainPage, logs }) => {
   await appState.givenFilters({ messageRegex: "stem", autoAckTillDate: "2025-05-22" });
   logs.givenRecords(

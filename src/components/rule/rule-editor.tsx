@@ -316,7 +316,7 @@ function RulePersistenceStep(
         </div>
 
         <div className="flex items-center space-x-2">
-          <TTLDatePicker date={date} setDate={setDate} />
+          <TTLDatePicker date={date} setDate={setDate} enabled={autoAck} />
           <p className="text-sm text-muted-foreground">
             stop auto-ack'ing after this date (inclusive, UTC)
           </p>
