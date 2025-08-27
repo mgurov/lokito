@@ -31,7 +31,7 @@ test("should ack by trace by new filter", async ({ mainPage, logs }) => {
 
   await mainPage.createFilter({
     logLineText: "trace-acking-filter-stem",
-    customActionsFirstScreen: async (d) => {
+    onFirstScreenShown: async (d) => {
       await expect(d.ackWholeTraceCheckbox).toBeChecked();
     },
   });
@@ -107,7 +107,7 @@ test("should not ack by trace by new filter if check unticked", async ({ mainPag
 
   await mainPage.createFilter({
     logLineText: "trace-acking-filter-stem",
-    customActionsFirstScreen: async (d) => {
+    onFirstScreenShown: async (d) => {
       await d.ackWholeTraceCheckbox.click();
       await expect(d.ackWholeTraceCheckbox).not.toBeChecked();
     },
@@ -152,7 +152,7 @@ test("should not ack by trace by transient filter if check unticked", async ({ m
   await mainPage.createFilter({
     logLineText: "trace-acking-filter-stem",
     saveAction: "apply",
-    customActionsFirstScreen: async (d) => {
+    onFirstScreenShown: async (d) => {
       await d.ackWholeTraceCheckbox.click();
       await expect(d.ackWholeTraceCheckbox).not.toBeChecked();
     },

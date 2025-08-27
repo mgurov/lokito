@@ -200,8 +200,8 @@ export default class MainPageFixture {
     filterRegex?: string;
     stepName?: string;
     saveAction?: "apply" | "save" | "none"; // defaults to 'save'
-    customActionsFirstScreen?: (filterEditor: FilterEditorPageFixture) => Promise<void>;
-    customActions?: (filterEditor: FilterEditorPageFixture) => Promise<void>; // TODO: rename
+    onFirstScreenShown?: (filterEditor: FilterEditorPageFixture) => Promise<void>;
+    onSecondScreenShown?: (filterEditor: FilterEditorPageFixture) => Promise<void>;
   }) {
     const filterEditor = new FilterEditorPageFixture(this.page.getByTestId("rule-edit-section"));
 
@@ -224,19 +224,19 @@ export default class MainPageFixture {
         case "none":
           break;
         case "apply":
-          if (props.customActionsFirstScreen) {
-            await props.customActionsFirstScreen(filterEditor);
+          if (props.onFirstScreenShown) {
+            await props.onFirstScreenShown(filterEditor);
           }
           await filterEditor.applyButton.click();
           break;
         case "save":
         case undefined:
-          if (props.customActionsFirstScreen) {
-            await props.customActionsFirstScreen(filterEditor);
+          if (props.onFirstScreenShown) {
+            await props.onFirstScreenShown(filterEditor);
           }
           await filterEditor.persistButton.click();
-          if (props.customActions) {
-            await props.customActions(filterEditor);
+          if (props.onSecondScreenShown) {
+            await props.onSecondScreenShown(filterEditor);
           }
           await filterEditor.saveButton.click();
           break;

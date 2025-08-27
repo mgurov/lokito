@@ -132,7 +132,7 @@ test("filter description", async ({ page, mainPage, logs }) => {
 
   await mainPage.createFilter({
     logLineText: "message1",
-    customActions: async (filterEditor: FilterEditorPageFixture) => {
+    onSecondScreenShown: async (filterEditor: FilterEditorPageFixture) => {
       await filterEditor.descriptionTextEditor.fill("This is a somewhat explanation");
       await filterEditor.autoAckCheckbox.click();
     },

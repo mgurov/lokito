@@ -9,7 +9,7 @@ test("non-acking filter on it", async ({ page, mainPage, logs }) => {
   await mainPage.createFilter({
     logLineText: "stem 1",
     filterRegex: "stem",
-    customActions: async (d) => {
+    onSecondScreenShown: async (d) => {
       await d.autoAckCheckbox.click(); // to uncheck
     },
   });
@@ -103,7 +103,7 @@ test("multiple non-acking filters should both match and display", async ({ mainP
   await mainPage.createFilter({
     logLineText: "baz fooe",
     filterRegex: "baz",
-    customActions: async (d) => {
+    onSecondScreenShown: async (d) => {
       await d.autoAckCheckbox.click();
     },
   });
@@ -113,7 +113,7 @@ test("multiple non-acking filters should both match and display", async ({ mainP
   await mainPage.createFilter({
     logLineText: undefined,
     filterRegex: "fooe",
-    customActions: async (d) => {
+    onSecondScreenShown: async (d) => {
       await d.autoAckCheckbox.click();
     },
   });
@@ -144,7 +144,7 @@ test("when multiple rules match if theres an acking one it should not be saturat
   await mainPage.createFilter({
     logLineText: "baz fooe",
     filterRegex: "baz",
-    customActions: async (d) => {
+    onSecondScreenShown: async (d) => {
       await d.autoAckCheckbox.click(); // nonacking
     },
   });
@@ -191,7 +191,7 @@ test("should be possible to define a date for which a filter would be auto-acked
   await mainPage.createFilter({
     logLineText: "stem 1",
     filterRegex: "stem",
-    customActions: async (filterEditor) => {
+    onSecondScreenShown: async (filterEditor) => {
       await filterEditor.pickTTLDate("2025-05-22");
     },
   });
@@ -208,7 +208,7 @@ test("ttl should be disabled when the filter is not acking anyways", async ({ ma
 
   await mainPage.createFilter({
     logLineText: "message",
-    customActions: async (filterEditor) => {
+    onSecondScreenShown: async (filterEditor) => {
       await expect(filterEditor.autoAckTtlTriggerButton).toBeEnabled();
       await filterEditor.autoAckCheckbox.click();
       await expect(filterEditor.autoAckTtlTriggerButton).toBeDisabled();
