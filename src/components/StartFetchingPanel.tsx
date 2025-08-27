@@ -58,33 +58,31 @@ export function StartFetchingPanel() {
 
   return (
     <div data-testid="start-fetching-panel" className="mt-2 rounded-md border p-4 text-center">
-      <div>
-        {showWhenWeStopped && (
-          <Button
-            className="m-5"
-            size="lg"
-            variant={"default"}
-            data-testid="fetch-option"
-            onClick={() => startFetchingWhereStopped()}
-            title={showWhenWeStopped}
-          >
-            since stopped <PlayIcon />
-          </Button>
-        )}
-        {Object.keys(startOptions).map((key) => (
-          <Button
-            className="m-5"
-            size="lg"
-            variant={key === "last 1 hour" ? "default" : "secondary"}
-            data-testid="fetch-option"
-            key={key}
-            onClick={() => startFetchingSources(key)}
-          >
-            {key} <PlayIcon />
-          </Button>
-        ))}
-        <FreeFormStart />
-      </div>
+      {showWhenWeStopped && (
+        <Button
+          className="m-5"
+          size="lg"
+          variant={"default"}
+          data-testid="fetch-option"
+          onClick={() => startFetchingWhereStopped()}
+          title={showWhenWeStopped}
+        >
+          since stopped <PlayIcon />
+        </Button>
+      )}
+      {Object.keys(startOptions).map((key) => (
+        <Button
+          className="m-5"
+          size="lg"
+          variant={key === "last 1 hour" ? "default" : "secondary"}
+          data-testid="fetch-option"
+          key={key}
+          onClick={() => startFetchingSources(key)}
+        >
+          {key} <PlayIcon />
+        </Button>
+      ))}
+      <FreeFormStart />
     </div>
   );
 }
@@ -118,7 +116,7 @@ function FreeFormStart() {
   };
 
   return (
-    <div className="flex w-full max-w-sm items-center gap-2 m-5">
+    <div className="inline-flex flex w-full max-w-sm items-center gap-0 m-5">
       <Input
         data-testid="arbitrary-date-time-start-input"
         className={["w-52", err === "" ? "" : "border-red-500"].join(" ")}
@@ -130,9 +128,10 @@ function FreeFormStart() {
         data-testid="arbitrary-date-time-start-button"
         onClick={handleSubmit}
         disabled={err !== ""}
-        size="lg"
+        size="icon"
         type="submit"
         variant="secondary"
+        className="ml-1px"
       >
         <PlayIcon />
       </Button>

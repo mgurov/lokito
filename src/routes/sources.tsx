@@ -38,6 +38,8 @@ export default function Index() {
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
         {sources.map((source) => <SourceCard key={source.id} source={source} />)}
       </div>
+      {sources.length === 0 && <p>Sources are loki queries that are executed every minute to fetch new log messages.
+      </p>}
     </div>
   );
 }

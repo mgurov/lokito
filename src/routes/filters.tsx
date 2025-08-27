@@ -14,6 +14,7 @@ function FiltersCards({ filters }: { filters: Filter[] }) {
       <h3 className="text-2xl font-bold tracking-tight">Filters</h3>
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
         {filters.map(f => <FilterCard key={f.id} filter={f} />)}
+        {filters.length === 0 && <div>No filtering rules have been created yet.</div>}
       </div>
     </div>
   );

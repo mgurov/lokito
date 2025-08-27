@@ -17,7 +17,8 @@ export function NoActiveSourcesHint() {
       <Button size="sm" variant="outline" asChild>
         <Link to="/sources">activate an existing one</Link>
       </Button>{" "}
-      or upload a configuration from a file <UploadSourcesConfiguration /> to start fetching data.
+      or upload a configuration from a file <UploadSourcesConfiguration />{" "}
+      to start fetching data. Sources are loki queries that are executed every minute to fetch new log messages.
     </div>
   );
 }
