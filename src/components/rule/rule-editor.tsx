@@ -15,6 +15,9 @@ import { escapeRegExp } from "./regex-utils";
 import { RuleEditorContext, RuleEditorDispatchContext } from "./ruleEditorContext";
 import { TTLDatePicker } from "./TTLDatePicker";
 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import { Switch } from "../ui/switch";
+
 export function RuleEditorSheet() {
   const ruleEditorDispatch = useContext(RuleEditorDispatchContext);
   const { open, logline } = useContext(RuleEditorContext);
@@ -287,23 +290,33 @@ function RulePersistenceStep(
           />
         </div>
 
-        <div className="flex items-center space-x-2">
-          <label
-            htmlFor="auto-ack"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            Autoack
-          </label>
-          <Checkbox
-            id="auto-ack"
-            data-testid="auto-ack"
-            checked={autoAck}
-            onCheckedChange={(checked) => setAutoAck(!!checked)}
-          />
-          <p className="text-sm text-muted-foreground">
-            Uncheck to leave matched messages on the incoming list.
-          </p>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <Switch
+                id="auto-ack"
+                data-testid="auto-ack"
+                checked={autoAck}
+                onCheckedChange={(checked) => setAutoAck(!!checked)}
+              />{" "}
+              <label
+                htmlFor="auto-ack"
+                className="leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Autoack
+              </label>
+            </CardTitle>
+            <CardDescription>Remove matched messages from the "need attention" list</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center space-x-2">
+              <TTLDatePicker date={date} setDate={setDate} enabled={autoAck} />
+              <p className="text-sm text-muted-foreground">
+                stop auto-ack'ing after this date (inclusive, UTC)
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-4 items-center gap-4">
           <Input
@@ -313,13 +326,6 @@ function RulePersistenceStep(
             value={description || ""}
             onChange={(e) => setDescription(e.target.value)}
           />
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <TTLDatePicker date={date} setDate={setDate} enabled={autoAck} />
-          <p className="text-sm text-muted-foreground">
-            stop auto-ack'ing after this date (inclusive, UTC)
-          </p>
         </div>
       </div>
 
