@@ -1,7 +1,7 @@
 import { Filter } from "@/data/filters/filter";
 import { createFilter } from "@/data/filters/filtersSlice";
 import { useAppDispatch } from "@/data/redux/reduxhooks";
-import { randomId } from "@/lib/utils";
+import { cn, randomId } from "@/lib/utils";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
 import { Dispatch, SetStateAction, useContext, useState } from "react";
@@ -17,6 +17,7 @@ import { TTLDatePicker } from "./TTLDatePicker";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Switch } from "../ui/switch";
+import { Textarea } from "../ui/textarea";
 
 export function RuleEditorSheet() {
   const ruleEditorDispatch = useContext(RuleEditorDispatchContext);
@@ -171,7 +172,7 @@ function RuleFilterStep(
 
   return (
     <>
-      <div className="grid gap-4 py-4">
+      <div className="flex flex-col gap-4 py-4">
         <ScrollArea className="rounded">
           <div
             id="line"
@@ -183,19 +184,23 @@ function RuleFilterStep(
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Input
-            data-testid="rule_regex"
-            id="regex"
-            value={step1Props.messageRegex}
-            onChange={(e) => setStep1Props(current => ({ ...current, messageRegex: e.target.value }))}
-            className="col-span-4"
-          />
-        </div>
+
+        <Input
+          data-testid="rule_regex"
+          id="regex"
+          value={step1Props.messageRegex}
+          onChange={(e) => setStep1Props(current => ({ ...current, messageRegex: e.target.value }))}
+          className={cn(
+            logLineMatchesRegex === "no" && "border-amber-700/50 focus-visible:ring-amber-700/50",
+            logLineMatchesRegex === "err" && "border-destructive/50 focus-visible:ring-destructive/50",
+          )}
+        />
+
         {logLineMatchesRegex === "no" && (
-          <Alert>
+          <Alert variant="warn">
             <ExclamationTriangleIcon className="h-4 w-4" />
-            <AlertTitle>The regular expression doesn't match the line</AlertTitle>
+            <AlertTitle>Not a match</AlertTitle>
+            <AlertDescription>The regular expression doesn't match the line</AlertDescription>
           </Alert>
         )}
         {logLineMatchesRegex === "err" && (
@@ -225,7 +230,7 @@ function RuleFilterStep(
         </div>
       </div>
 
-      <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
+      <div className="flex flex-col-reverse sm:flex-row sm:space-x-2">
         <Button
           data-testid="apply-rule-button"
           disabled={logLineMatchesRegex != "yes"}
@@ -275,20 +280,15 @@ function RulePersistenceStep(
     });
   };
 
-  // TODO: no point allowing autoack-stop-date if non-acking...
-
   return (
     <>
-      <div className="grid gap-4 py-4">
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Input
-            data-testid="rule_regex"
-            id="regex"
-            disabled
-            value={step1Props.messageRegex}
-            className="col-span-4"
-          />
-        </div>
+      <div className="flex flex-col gap-4 py-4">
+        <Input
+          data-testid="rule_regex"
+          id="regex"
+          disabled
+          value={step1Props.messageRegex}
+        />
 
         <Card>
           <CardHeader>
@@ -318,38 +318,35 @@ function RulePersistenceStep(
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Input
-            data-testid="filter-description-input"
-            className="col-span-4"
-            placeholder="details"
-            value={description || ""}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </div>
-      </div>
+        <Textarea
+          data-testid="filter-description-input"
+          placeholder="More details about the filter"
+          value={description || ""}
+          onChange={(e) => setDescription(e.target.value)}
+        />
 
-      <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
-        <Button
-          data-testid="back-to-filter-button"
-          onClick={backToFilterStep}
-          variant="secondary"
-        >
-          Back to filter
-        </Button>
-        <Button
-          data-testid="save-rule-button"
-          onClick={() => handleSubmit()}
-        >
-          Save
-        </Button>
-        <Button
-          data-testid="close-rule-button"
-          onClick={() => onSubmit("cancel")}
-          variant="secondary"
-        >
-          Never mind
-        </Button>
+        <div className="flex flex-col-reverse sm:flex-row sm:space-x-2">
+          <Button
+            data-testid="back-to-filter-button"
+            onClick={backToFilterStep}
+            variant="secondary"
+          >
+            Back to filter
+          </Button>
+          <Button
+            data-testid="save-rule-button"
+            onClick={() => handleSubmit()}
+          >
+            Save
+          </Button>
+          <Button
+            data-testid="close-rule-button"
+            onClick={() => onSubmit("cancel")}
+            variant="secondary"
+          >
+            Never mind
+          </Button>
+        </div>
       </div>
     </>
   );

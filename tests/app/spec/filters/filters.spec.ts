@@ -138,7 +138,7 @@ test("filter description", async ({ page, mainPage, logs }) => {
     },
   });
 
-  await expect(page.getByText("This is a somewhat explanation")).toBeVisible();
+  await expect(page.getByTestId("filter-message-description")).toContainText("This is a somewhat explanation");
 });
 
 test("should filter multilined messages", async ({ mainPage, logs }) => {
