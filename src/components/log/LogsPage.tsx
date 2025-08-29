@@ -159,7 +159,7 @@ function ShowAllSourcesData({ data, ...rest }: { data: LogWithSource[] } & AckNa
     <div className="mt-2 space-y-4">
       <StatsLine {...rest} />
 
-      <LogList data={data} />
+      <LogList data={data} ackNack={rest.ackNack} />
     </div>
   );
 }
