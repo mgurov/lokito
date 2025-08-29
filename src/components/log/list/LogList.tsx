@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/shadcn/button";
 import { LogWithSource } from "@/data/logData/logSchema";
 import { simpleDateTimeFormat } from "@/lib/utils";
 
+import { AckNack } from "@/components/context/AckNackContext";
 import { useSelectedSourceMessageLine } from "@/components/context/SelectedSourceContext";
 import { RuleEditorContextProvider } from "@/components/rule/ruleEditorContext";
 import { useState } from "react";
@@ -18,6 +19,7 @@ type LogListProps = {
 type DisplayOptions = {
   hideTraces?: boolean;
   hideFilterId?: string;
+  ackNack?: AckNack;
 };
 
 const DATA_WINDOW_INCREMENT = 20;
@@ -63,7 +65,7 @@ function LogListBare({ data, ...displayOpts }: LogListProps) {
   );
 }
 
-const LogEntry = ({ logEntry, hideTraces, hideFilterId }: { logEntry: LogWithSource } & DisplayOptions) => {
+const LogEntry = ({ logEntry, hideTraces, hideFilterId, ackNack }: { logEntry: LogWithSource } & DisplayOptions) => {
   const stringToShow = useSelectedSourceMessageLine(logEntry);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -87,7 +89,7 @@ const LogEntry = ({ logEntry, hideTraces, hideFilterId }: { logEntry: LogWithSou
             <RowAck buttonClassName="w-6 h-6" logId={logEntry.id} acked={logEntry.acked} />
           </div>
 
-          <SourceIndicator row={logEntry} />
+          <SourceIndicator row={logEntry} ackNack={ackNack || "nack"} />
 
           <FilterIndicators row={logEntry} hideFilterId={hideFilterId} />
 
