@@ -19,6 +19,17 @@ export const useData = (acked: boolean): LogWithSource[] =>
     ),
   );
 
+export const useAllData = (): LogWithSource[] =>
+  useSelector(
+    createSelector(
+      [(state: RootState) => state.logData.logs, (state: RootState) => state.sources.data],
+      (logs, sources) => {
+        return logs
+          .map(enrichLogWithSourcesFun(sources));
+      },
+    ),
+  );
+
 export const useAckedDataLength = () =>
   useSelector(
     createSelector(

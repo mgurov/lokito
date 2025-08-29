@@ -9,6 +9,10 @@ export default function ListTestExamples() {
           <Link to="./log-list">Log list</Link>
         </li>
 
+        <li>
+          <Link to="./log-list-6h">Log list fetched 6h</Link>
+        </li>
+
         <Link to="./test-rule-section">
           <li>Rule section</li>
         </Link>

@@ -46,15 +46,15 @@ interface LogListProps {
 function LogList({ data }: LogListProps) {
   return (
     <div className="bg-white shadow sm:rounded-md">
-      <ul className="divide-y divide-gray-200">
+      <div className="flex flex-col">
         {data.map(logEntry => (
-          <li key={logEntry.id}>
+          <div key={logEntry.id}>
             <LogEntry
               logEntry={logEntry}
             />
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
@@ -72,11 +72,9 @@ const LogEntry = ({ logEntry }: { logEntry: LogWithSource }) => {
         className="px-4 py-4 sm:px-6 cursor-pointer hover:bg-gray-50"
         onClick={toggleExpand}
       >
-        <div className="flex items-center justify-between">
-          <div className="text-sm font-medium text-gray-900">
-            <div className="font-semibold">{logEntry.timestamp}</div>
-            <div>{logEntry.line}</div>
-          </div>
+        <div className="flex items-center text-sm font-medium text-gray-900 gap-1">
+          <div>{logEntry.timestamp}</div>
+          <div>{logEntry.line}</div>
         </div>
       </div>
       {isExpanded && (

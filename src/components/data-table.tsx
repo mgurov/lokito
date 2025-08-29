@@ -117,7 +117,7 @@ export function DataTableUnwrapped({ columns, data, excludeFilterId }: DataTable
   );
 }
 
-function MemoedLogRowPanel({ log, excludeFilterId }: { log: Log; excludeFilterId?: string }) {
+export function MemoedLogRowPanel({ log, excludeFilterId }: { log: Log; excludeFilterId?: string }) {
   const { stream, ...lessMutable } = log;
   const memoKey = JSON.stringify(lessMutable);
   // eslint-disable-next-line react-hooks/exhaustive-deps

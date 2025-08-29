@@ -2,7 +2,7 @@ import { ColumnDef } from "@tanstack/react-table";
 
 import { useTraceIdsMultipleMatchesCount } from "@/data/logData/logDataHooks";
 import { ack, logDataSliceActions, unack } from "@/data/logData/logDataSlice";
-import { simpleDateTimeFormat } from "@/lib/utils";
+import { cn, simpleDateTimeFormat } from "@/lib/utils";
 import { CheckIcon, MinusIcon } from "@radix-ui/react-icons";
 import { useCallback, useContext } from "react";
 import React from "react";
@@ -19,26 +19,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-
-function RowAck({ logId, acked }: { logId: string; acked: Acked }) {
-  const dispatch = useDispatch();
-  const ActionIcon = acked ? MinusIcon : CheckIcon;
-  return (
-    <Button
-      data-testid={acked ? "unack-message-button" : "ack-message-button"}
-      size="icon"
-      variant="ghost"
-      className="hover:bg-gray-200"
-      onClick={(e) => {
-        const action = acked ? unack : ack;
-        dispatch(action(logId));
-        e.stopPropagation();
-      }}
-    >
-      <ActionIcon className="h-4 w-4" />
-    </Button>
-  );
-}
 
 export const simpleColumns = columns();
 
@@ -232,5 +212,32 @@ function TraceIndicator({ traceId, count }: { traceId: string; count: number }) 
         </DropdownMenuLabel>
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+export function RowAck(
+  { logId, acked, buttonClassName, iconClassName }: {
+    logId: string;
+    acked: Acked;
+    buttonClassName?: string;
+    iconClassName?: string;
+  },
+) {
+  const dispatch = useDispatch();
+  const ActionIcon = acked ? MinusIcon : CheckIcon;
+  return (
+    <Button
+      data-testid={acked ? "unack-message-button" : "ack-message-button"}
+      size="icon"
+      variant="ghost"
+      className={cn("hover:bg-gray-200", buttonClassName)}
+      onClick={(e) => {
+        const action = acked ? unack : ack;
+        dispatch(action(logId));
+        e.stopPropagation();
+      }}
+    >
+      <ActionIcon className={cn("h-4 w-4", iconClassName)} />
+    </Button>
   );
 }
