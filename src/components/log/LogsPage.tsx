@@ -59,7 +59,7 @@ function ShowData({ ackNack, sourceId }: LogsPageProps) {
     </>
   );
 }
-// TODO: expose counts as slice function
+
 function SourceTabButtonsAndContent({ dataFromSources, data, sources, selectedSourceId, ackNack }: {
   dataFromSources: { [sourceId: string]: SourceFetchingState };
   data: LogWithSource[];
