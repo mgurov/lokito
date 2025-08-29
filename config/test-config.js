@@ -3,4 +3,4 @@ const datasources = [
   { id: "proxy", url: "http://localhost:3000/api/datasources/proxy/3/loki" },
 ];
 
-export default datasources;
+export default {datasources};

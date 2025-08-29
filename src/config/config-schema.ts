@@ -7,8 +7,11 @@ const datasourceSchema = z.object({
   headers: z.record(z.string(), z.union([z.string(), z.number(), z.array(z.string())])).optional(),
 });
 
-export function validateDatasources(data: unknown) {
-  return z.array(datasourceSchema).parse(data);
+export function validateConfig(data: unknown) {
+  const parsedConfig = z.object({
+    datasources: z.array(datasourceSchema),
+  }).parse(data);
+  return parsedConfig.datasources;
 }
 
 export type ServerDatasource = z.infer<typeof datasourceSchema>;

@@ -1,5 +1,5 @@
 import { Plugin, PreviewServer, ProxyOptions, ViteDevServer } from "vite";
-import { datasourcesOverWireSchema, ServerDatasource, validateDatasources } from "./config-schema";
+import { datasourcesOverWireSchema, ServerDatasource, validateConfig } from "./config-schema";
 
 export async function datasourcesVitePlugin({ datasourcesFileName }: { datasourcesFileName: string }): Promise<Plugin> {
   // eslint-disable-next-line no-console
@@ -30,7 +30,7 @@ export async function datasourcesVitePlugin({ datasourcesFileName }: { datasourc
 
 async function loadDatasources(fileName: string): Promise<Array<ServerDatasource>> {
   const { default: datasources } = await import(fileName);
-  return validateDatasources(datasources);
+  return validateConfig(datasources);
 }
 
 function buildProxies(datasources: Array<ServerDatasource>): Record<string, string | ProxyOptions> {
