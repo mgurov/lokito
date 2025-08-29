@@ -379,3 +379,33 @@ test(
     await mainPage.expectLogMessages("s1 m");
   },
 );
+
+test(
+  "should stay in acked mode when navigating to a source",
+  AnnotationSuppressDefaultApp,
+  async ({ mainPage, appState, logs }) => {
+    const [source1] = await appState.givenSources({ name: "source1" });
+
+    logs.givenSourceRecords(source1, "s1 m");
+
+    await mainPage.open();
+
+    await mainPage.ack("s1 m");
+
+    await mainPage.ackedUnackedMessagesToggle.click();
+
+    await mainPage.expectLogMessages("s1 m");
+
+    // TODO: something reusable.
+    const sourceMaker = mainPage.page.getByTestId("log-table-row")
+      .filter({ hasText: /s1 m/ })
+      .getByTestId("log-row-source-marker");
+
+    await sourceMaker.click();
+
+    // NB: interesting that this click works actually
+    // await mainPage.selectSourceTab(source1);
+
+    await mainPage.expectLogMessages("s1 m");
+  },
+);
