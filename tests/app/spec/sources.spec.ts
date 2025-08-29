@@ -404,7 +404,7 @@ test(
     await sourceMaker.click();
 
     // NB: interesting that this click works actually
-     await mainPage.selectSourceTab(source1);
+    await mainPage.selectSourceTab(source1);
 
     await mainPage.expectLogMessages("s1 m");
   },

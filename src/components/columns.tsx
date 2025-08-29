@@ -9,6 +9,7 @@ import React from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { Acked, LogSource, LogWithSource } from "../data/logData/logSchema";
+import { AckNack } from "./context/AckNackContext";
 import { SelectedSourceContext, useSelectedSourceMessageLine } from "./context/SelectedSourceContext";
 import { Button } from "./ui/button";
 import {
@@ -19,7 +20,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { AckNack } from "./context/AckNackContext";
 
 function RowAck({ logId, acked }: { logId: string; acked: Acked }) {
   const dispatch = useDispatch();
@@ -45,7 +45,7 @@ export const simpleColumns = columns();
 
 export const columnsNoTraces = columns({ showTraces: false });
 
-export function columns(opts: { showTraces?: boolean; hideFilterId?: string, ackNack: AckNack } = {}): ColumnDef<LogWithSource>[] {
+export function columns(opts: { showTraces?: boolean; hideFilterId?: string } = {}): ColumnDef<LogWithSource>[] {
   const columnsTemplate: ColumnDef<LogWithSource>[] = [
     {
       id: "source",
@@ -83,7 +83,14 @@ export function columns(opts: { showTraces?: boolean; hideFilterId?: string, ack
       accessorKey: "line",
       header: undefined,
       cell: ({ row }) => {
-        return <RenderLine row={row.original} ackNack={ackNack} showTraces={opts.showTraces ?? true} hideFilterId={opts.hideFilterId} />;
+        return (
+          <RenderLine
+            row={row.original}
+            ackNack={"nack"}
+            showTraces={opts.showTraces ?? true}
+            hideFilterId={opts.hideFilterId}
+          />
+        );
       },
     },
   ];
@@ -92,13 +99,18 @@ export function columns(opts: { showTraces?: boolean; hideFilterId?: string, ack
 }
 
 function RenderLine(
-  { row, showTraces, hideFilterId, ackNack }: { row: LogWithSource; showTraces: boolean; hideFilterId: string | undefined; ackNack: AckNack },
+  { row, showTraces, hideFilterId, ackNack }: {
+    row: LogWithSource;
+    showTraces: boolean;
+    hideFilterId: string | undefined;
+    ackNack: AckNack;
+  },
 ) {
   const stringToShow = useSelectedSourceMessageLine(row);
   return (
     <>
       <div className="h-full cursor-pointer overflow-auto whitespace-nowrap text-xs font-medium">
-        <SourceIndicator row={row} ackNack={ackNack}  />
+        <SourceIndicator row={row} ackNack={ackNack} />
         <FilterIndicators row={row} hideFilterId={hideFilterId} />
         {showTraces && <TraceIndicators row={row} />}
         <span data-testid="log-message">{stringToShow}</span>
@@ -107,10 +119,10 @@ function RenderLine(
   );
 }
 
-function SourceIndicator({ row, ackNack }: { row: LogWithSource, ackNack: AckNack }) {
+function SourceIndicator({ row, ackNack }: { row: LogWithSource; ackNack: AckNack }) {
   const selectedSource = useContext(SelectedSourceContext);
   const sourcesToShow = row.sources.filter(s => s.id !== selectedSource?.sourceId);
-  const logUrlPrefix = `/logs${ackNack === "ack" ? "/acked" : ""}`
+  const logUrlPrefix = `/logs${ackNack === "ack" ? "/acked" : ""}`;
   return sourcesToShow.map(source => (
     <React.Fragment key={source.id}>
       <Link to={`${logUrlPrefix}/${source.id}`}>
