@@ -20,6 +20,7 @@ import { RuleEditorContextProvider } from "./rule/ruleEditorContext";
 interface DataTableProps {
   columns: ColumnDef<LogWithSource>[];
   data: LogWithSource[];
+  excludeFilterId?: string;
 }
 
 // TODO: move to redux together with interceptor logic
@@ -33,7 +34,7 @@ export function DataTable(props: DataTableProps) {
   );
 }
 
-export function DataTableUnwrapped({ columns, data }: DataTableProps) {
+export function DataTableUnwrapped({ columns, data, excludeFilterId }: DataTableProps) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
   const table = useReactTable<LogWithSource>({
@@ -100,7 +101,7 @@ export function DataTableUnwrapped({ columns, data }: DataTableProps) {
                     {row.getIsExpanded() && (
                       <TableRow className="bg-muted/50">
                         <TableCell colSpan={columns.length}>
-                          <MemoedLogRowPanel log={row.original} />
+                          <MemoedLogRowPanel log={row.original} excludeFilterId={excludeFilterId} />
                         </TableCell>
                       </TableRow>
                     )}
@@ -116,11 +117,11 @@ export function DataTableUnwrapped({ columns, data }: DataTableProps) {
   );
 }
 
-function MemoedLogRowPanel({ log }: { log: Log }) {
+function MemoedLogRowPanel({ log, excludeFilterId }: { log: Log; excludeFilterId?: string }) {
   const { stream, ...lessMutable } = log;
   const memoKey = JSON.stringify(lessMutable);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  return React.useMemo(() => <LogPanel log={log} />, [memoKey]);
+  return React.useMemo(() => <LogPanel log={log} excludeFilterId={excludeFilterId} />, [memoKey, excludeFilterId]);
 }
 
 function NoData() {

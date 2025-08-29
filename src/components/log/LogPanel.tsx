@@ -15,7 +15,7 @@ import SimpleTooltip from "../SimpleTooltip";
 
 // TODO: basic coverage of the fields and copy-pasta
 
-export function LogPanel({ log }: { log: Log }) {
+export function LogPanel({ log, excludeFilterId }: { log: Log; excludeFilterId?: string }) {
   return (
     <>
       <div className="space-y-2">
@@ -25,7 +25,7 @@ export function LogPanel({ log }: { log: Log }) {
           <AckTillThisButton messageId={log.id} />
         </div>
 
-        <RenderFilters log={log} />
+        <RenderFilters log={log} excludeFilterId={excludeFilterId} />
 
         <div className="space-y-1 px-3 py-2">
           <h3 className="text-sm font-semibold">Fields</h3>
@@ -40,13 +40,14 @@ export function LogPanel({ log }: { log: Log }) {
   );
 }
 
-function RenderFilters({ log }: { log: Log }) {
+function RenderFilters({ log, excludeFilterId }: { log: Log; excludeFilterId?: string }) {
   const filters = useFilters();
-  if (Object.keys(log.filters).length === 0) {
+
+  const thisLineFilters = filters.filter(f => excludeFilterId !== f.id && log.filters[f.id]);
+
+  if (thisLineFilters.length === 0) {
     return null;
   }
-
-  const thisLineFilters = filters.filter(f => log.filters[f.id]);
 
   return (
     <div className="space-y-1 px-3 py-2">

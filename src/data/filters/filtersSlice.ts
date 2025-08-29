@@ -36,3 +36,6 @@ export default filtersSlice.reducer;
 
 export const useFilters = () =>
   useSelector(createSelector([(state: RootState) => state.filters.data], (filters) => Object.values(filters)));
+
+export const useFilter = (id: string) =>
+  useSelector(createSelector([(state: RootState) => state.filters.data], (filters) => filters[id]));

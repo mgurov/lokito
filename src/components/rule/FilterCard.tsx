@@ -6,14 +6,19 @@ import { deleteFilter } from "@/data/filters/filtersSlice";
 import { useFilterHitCount, useFilterTotalCount } from "@/data/logData/logDataHooks";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
 
-export default function FilterCard({ filter }: { filter: Filter }) {
+export default function FilterCard({ filter, hideId }: { filter: Filter; hideId?: boolean }) {
   const dispatch = useDispatch();
   return (
     <Card data-testid="filter-card">
       <CardHeader>
         <div className="space-x-4">
-          <span className="text-sm text-muted-foreground" data-testid="filter-id">#{filter.id}</span>
+          {!hideId && (
+            <Link to={`/filter/${filter.id}`}>
+              <span className="text-sm text-muted-foreground" data-testid="filter-id">#{filter.id}</span>
+            </Link>
+          )}
           {filter.autoAck !== false && <span data-testid="auto-ack-sign" className="text-green-400">Auto Ack</span>}
           {filter.captureWholeTrace && (
             <span data-testid="ack-whole-trace" className="text-blue-400">Capture Whole Trace</span>
