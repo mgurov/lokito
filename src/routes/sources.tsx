@@ -1,5 +1,5 @@
 import { DownloadSourcesConfiguration } from "@/components/download-config";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/shadcn/button";
 import { useDispatch } from "react-redux";
 
 import { NewSource } from "@/components/new-source";

@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/shadcn/button";
 import {
   Dialog,
   DialogContent,
@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/ui/shadcn/dialog";
 import { Filter } from "@/data/filters/filter";
 import { createFilter } from "@/data/filters/filtersSlice";
 import { setAllSources } from "@/data/redux/sourcesSlice";
@@ -15,7 +15,7 @@ import { UploadIcon } from "@radix-ui/react-icons";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
-import { Alert, AlertTitle } from "./ui/alert";
+import { Alert, AlertTitle } from "./ui/shadcn/alert";
 
 function UploadConfig({ onConfigLoad }: { onConfigLoad: (config: { sources: Source[]; filters: Filter[] }) => void }) {
   const [isDragActive, setIsDragActive] = useState(false);

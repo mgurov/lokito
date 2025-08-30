@@ -1,13 +1,13 @@
 import { Link, Outlet, RouterProvider, useLocation } from "react-router-dom";
 
 import "./App.css";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/shadcn/sonner";
 import { store } from "@/data/redux/store";
 import { useEffect } from "react";
 import { Provider } from "react-redux";
-import { Button } from "./components/ui/button";
 import { LokitoLogo } from "./components/ui/lokito-logo";
-import { TooltipProvider } from "./components/ui/tooltip";
+import { Button } from "./components/ui/shadcn/button";
+import { TooltipProvider } from "./components/ui/shadcn/tooltip";
 import { useNotAckedDataLength } from "./data/logData/logDataHooks";
 import { createRouter } from "./routing";
 

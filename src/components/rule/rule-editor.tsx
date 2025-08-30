@@ -5,19 +5,19 @@ import { cn, randomId } from "@/lib/utils";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
 import { Dispatch, SetStateAction, useContext, useState } from "react";
-import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
-import { Button } from "../ui/button";
-import { Checkbox } from "../ui/checkbox";
-import { Input } from "../ui/input";
-import { ScrollArea, ScrollBar } from "../ui/scroll-area";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "../ui/sheet";
+import { Alert, AlertDescription, AlertTitle } from "../ui/shadcn/alert";
+import { Button } from "../ui/shadcn/button";
+import { Checkbox } from "../ui/shadcn/checkbox";
+import { Input } from "../ui/shadcn/input";
+import { ScrollArea, ScrollBar } from "../ui/shadcn/scroll-area";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "../ui/shadcn/sheet";
 import { escapeRegExp } from "./regex-utils";
 import { RuleEditorContext, RuleEditorDispatchContext } from "./ruleEditorContext";
 import { TTLDatePicker } from "./TTLDatePicker";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { Switch } from "../ui/switch";
-import { Textarea } from "../ui/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/shadcn/card";
+import { Switch } from "../ui/shadcn/switch";
+import { Textarea } from "../ui/shadcn/textarea";
 
 export function RuleEditorSheet() {
   const ruleEditorDispatch = useContext(RuleEditorDispatchContext);

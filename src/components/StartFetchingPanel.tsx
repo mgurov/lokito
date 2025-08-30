@@ -5,8 +5,8 @@ import { PlayIcon } from "@radix-ui/react-icons";
 import { subHours, subMinutes } from "date-fns";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+import { Button } from "./ui/shadcn/button";
+import { Input } from "./ui/shadcn/input";
 
 const startOptions: Record<string, () => Date> = {
   "now": () => new Date(),

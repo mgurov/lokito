@@ -1,6 +1,6 @@
-import { Button, buttonVariantSizes, buttonVariantVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button, buttonVariantSizes, buttonVariantVariants } from "@/components/ui/shadcn/button";
+import { Input } from "@/components/ui/shadcn/input";
+import { Label } from "@/components/ui/shadcn/label";
 import {
   Sheet,
   SheetContent,
@@ -9,8 +9,8 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
-import { Textarea } from "@/components/ui/textarea";
+} from "@/components/ui/shadcn/sheet";
+import { Textarea } from "@/components/ui/shadcn/textarea";
 import { createNewSource } from "@/data/redux/sourcesSlice";
 import { SourceMutation } from "@/data/source";
 import { useState } from "react";

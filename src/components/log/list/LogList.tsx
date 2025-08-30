@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/shadcn/button";
 import { LogWithSource } from "@/data/logData/logSchema";
 import { simpleDateTimeFormat } from "@/lib/utils";
 

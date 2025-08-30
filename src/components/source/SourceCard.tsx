@@ -1,10 +1,10 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/shadcn/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/shadcn/card";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { useDispatch } from "react-redux";
 
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/shadcn/switch";
+import { Textarea } from "@/components/ui/shadcn/textarea";
 import { changeSourceActive, changeSourceColor, changeSourceQuery, deleteSource } from "@/data/redux/sourcesSlice";
 import { Source } from "@/data/source";
 import { useCallback, useState } from "react";

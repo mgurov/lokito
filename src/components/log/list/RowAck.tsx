@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/shadcn/button";
 import { ack, unack } from "@/data/logData/logDataSlice";
 import { Acked } from "@/data/logData/logSchema";
 import { cn } from "@/lib/utils";

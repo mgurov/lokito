@@ -12,10 +12,10 @@ import { NewSource } from "../new-source";
 import { SourceCard } from "../source/SourceCard";
 import { StartFetchingPanel } from "../StartFetchingPanel";
 import { AckAllOnSourceButton, StatsLine } from "../StatsLine";
-import { Alert } from "../ui/alert";
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
 import { TabLink } from "../ui/custom/tabs";
+import { Alert } from "../ui/shadcn/alert";
+import { Badge } from "../ui/shadcn/badge";
+import { Button } from "../ui/shadcn/button";
 import { LogList } from "./list/LogList";
 import { NoActiveSourcesHint } from "./ShowData";
 

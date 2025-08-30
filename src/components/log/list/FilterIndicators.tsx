@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/shadcn/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -6,7 +6,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/shadcn/dropdown-menu";
 import { logDataSliceActions } from "@/data/logData/logDataSlice";
 import { LogWithSource } from "@/data/logData/logSchema";
 import React from "react";
