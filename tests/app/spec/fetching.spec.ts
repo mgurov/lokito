@@ -241,3 +241,25 @@ test(
     await mainPage.expectLogMessages("m1");
   },
 );
+
+test("should show more messages when requested", async ({ mainPage, logs }) => {
+  const logLines = Array.from({ length: 50 }, (_, i) => `message ${i}`);
+
+  logs.givenRecords(...[...logLines].reverse()); // log lines appear reverse their registration in the logs fixture
+
+  await mainPage.open();
+
+  await mainPage.expectLogMessages(...logLines.slice(0, 20));
+  await expect.poll(async () => mainPage.page.title()).toBe("Lokito🔥50");
+
+  await expect(mainPage.showMoreButton).toHaveText("Show 20 more of 30 remaining...");
+  await mainPage.showMoreButton.click();
+
+  await mainPage.expectLogMessages(...logLines.slice(0, 40));
+
+  await expect(mainPage.showMoreButton).toHaveText("Show remaining 10...");
+  await mainPage.showMoreButton.click();
+
+  await mainPage.expectLogMessages(...logLines);
+  await expect(mainPage.showMoreButton).not.toBeVisible();
+});

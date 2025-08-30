@@ -22,8 +22,6 @@
 
 [ ] persist in the session storage / db of the browser w. GC
 
-[ ] move from table to flex
-
 [ ] visual examples
 
 [ ] zod to validate the server schema

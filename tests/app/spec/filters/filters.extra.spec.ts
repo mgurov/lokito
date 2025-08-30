@@ -52,9 +52,17 @@ test("non-acking filter possible to see all matched", async ({ mainPage, logs, a
   await mainPage.matchingFilterButtons.first().click();
   await mainPage.matchingFilterShowSuchDropdownOption.click();
 
+  // here we should see the filter card on top
+  await expect(mainPage.page.getByTestId("delete-filter-button")).toHaveCount(1);
+
   await mainPage.expectLogMessages("stem 2", "stem 1");
   // and the filter button isn't needed here anymore
   await expect(mainPage.matchingFilterButtons).toHaveCount(0);
+
+  await test.step("the filter card should also not be present on the expansion of the log line", async () => {
+    await mainPage.page.getByText("stem 1").click();
+    await expect(mainPage.page.getByTestId("delete-filter-button")).toHaveCount(1);
+  });
 });
 
 test("non-acking filter page should show acked filters as well", async ({ mainPage, logs, appState }) => {

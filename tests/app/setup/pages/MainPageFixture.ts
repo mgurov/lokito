@@ -73,12 +73,12 @@ export default class MainPageFixture {
   }
 
   async unack(message: string) {
-    const row = this.page.getByTestId("log-table-row").filter({ hasText: message });
+    const row = this.logRowByMessage(message);
     await row.getByTestId("unack-message-button").click();
   }
 
   async ack(message: string) {
-    const row = this.page.getByTestId("log-table-row").filter({ hasText: message });
+    const row = this.logRowByMessage(message);
     await row.getByTestId("ack-message-button").click();
   }
 
@@ -136,12 +136,24 @@ export default class MainPageFixture {
     return this.page.getByTestId("log-message");
   }
 
+  logByMessage(message: string) {
+    return this.logMessage.getByText(message);
+  }
+
+  logRowByMessage(message: string) {
+    return this.page.getByTestId("log-table-row").filter({ hasText: message });
+  }
+
+  get showMoreButton() {
+    return this.page.getByTestId("show-more-button");
+  }
+
   async expectLogMessages(...expected: string[]) {
     await test.step("expectLogMessages", () => expectTexts(this.logMessage, ...expected), { box: true });
   }
 
   async expandRow(message: string): Promise<RowLine> {
-    const locator = this.logMessage.getByText(message);
+    const locator = this.logByMessage(message);
     await locator.click();
     return new RowLine(this.page);
   }
