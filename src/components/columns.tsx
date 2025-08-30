@@ -86,7 +86,7 @@ function RenderLine(
   );
 }
 
-function SourceIndicator({ row }: { row: LogWithSource }) {
+export function SourceIndicator({ row }: { row: LogWithSource }) {
   const selectedSource = useContext(SelectedSourceContext);
   const sourcesToShow = row.sources.filter(s => s.id !== selectedSource?.sourceId);
   return sourcesToShow.map(source => (
@@ -106,7 +106,7 @@ function SourceIndicator({ row }: { row: LogWithSource }) {
   ));
 }
 
-function FilterIndicators({ row, hideFilterId }: { row: LogWithSource; hideFilterId: string | undefined }) {
+export function FilterIndicators({ row, hideFilterId }: { row: LogWithSource; hideFilterId: string | undefined }) {
   return Object.entries(row.filters).filter(([id]) => id !== hideFilterId).map(([id]) => (
     <React.Fragment key={id}>
       <FilterIndicator id={id} name={id} />
@@ -157,7 +157,7 @@ function FilterIndicator({ id, name }: { id: string; name: string }) {
   );
 }
 
-function TraceIndicators({ row }: { row: LogWithSource }) {
+export function TraceIndicators({ row }: { row: LogWithSource }) {
   const traceIdsMultipleMatchesCount = useTraceIdsMultipleMatchesCount(row);
   return Object.entries(traceIdsMultipleMatchesCount).map(([traceId, count]) => (
     <React.Fragment key={traceId}>
