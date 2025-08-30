@@ -3,8 +3,8 @@ import { CalendarIcon } from "@radix-ui/react-icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
 import { format } from "date-fns";
 import { useState } from "react";
-import { Button } from "../ui/button";
-import { Calendar } from "../ui/calendar";
+import { Button } from "../ui/shadcn/button";
+import { Calendar } from "../ui/shadcn/calendar";
 
 export function TTLDatePicker(
   { date, setDate, enabled }: { date: Date | undefined; setDate: (date: Date | undefined) => void; enabled: boolean },

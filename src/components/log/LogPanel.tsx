@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/shadcn/button";
 import { CheckIcon, CopyIcon } from "@radix-ui/react-icons";
 import { ReactNode, useContext, useState } from "react";
 

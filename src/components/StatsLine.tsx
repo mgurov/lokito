@@ -1,4 +1,4 @@
-import { Alert } from "@/components/ui/alert";
+import { Alert } from "@/components/ui/shadcn/alert";
 import { useAckedDataLength, useNotAckedDataLength } from "@/data/logData/logDataHooks";
 import { logDataSliceActions } from "@/data/logData/logDataSlice";
 import { useContext } from "react";
@@ -7,8 +7,8 @@ import { Link } from "react-router-dom";
 import { AckNackProp } from "./context/AckNackContext";
 import { SelectedSourceContext } from "./context/SelectedSourceContext";
 import SimpleTooltip from "./SimpleTooltip";
-import { Button } from "./ui/button";
-import { Toggle } from "./ui/toggle";
+import { Button } from "./ui/shadcn/button";
+import { Toggle } from "./ui/shadcn/toggle";
 
 export function StatsLine(prop: AckNackProp) {
   const notAckedDataLength = useNotAckedDataLength();

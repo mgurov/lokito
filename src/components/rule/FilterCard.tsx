@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/shadcn/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/shadcn/card";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/shadcn/tooltip";
 import { Filter } from "@/data/filters/filter";
 import { deleteFilter } from "@/data/filters/filtersSlice";
 import { useFilterHitCount, useFilterTotalCount } from "@/data/logData/logDataHooks";

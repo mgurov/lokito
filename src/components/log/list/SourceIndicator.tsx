@@ -1,5 +1,5 @@
 import { SelectedSourceContext } from "@/components/context/SelectedSourceContext";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/shadcn/button";
 import { LogWithSource } from "@/data/logData/logSchema";
 import { useContext } from "react";
 import React from "react";

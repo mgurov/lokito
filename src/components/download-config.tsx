@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/shadcn/button";
 import { useFilters } from "@/data/filters/filtersSlice";
 import { useSources } from "@/data/redux/sourcesSlice";
 import { DownloadIcon } from "@radix-ui/react-icons";

@@ -2,7 +2,7 @@ import { UploadSourcesConfiguration } from "@/components/upload-config";
 import { useSources } from "@/data/redux/sourcesSlice";
 import { Link } from "react-router-dom";
 import { NewSource } from "../new-source";
-import { Button } from "../ui/button";
+import { Button } from "../ui/shadcn/button";
 
 // TODO: move somewhere around
 export function NoActiveSourcesHint() {
