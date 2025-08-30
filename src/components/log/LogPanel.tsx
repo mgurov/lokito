@@ -13,7 +13,12 @@ import FilterCard from "../rule/FilterCard";
 import { RuleEditorDispatchContext } from "../rule/ruleEditorContext";
 import SimpleTooltip from "../SimpleTooltip";
 
-// TODO: basic coverage of the fields and copy-pasta
+export function MemoedLogRowPanel({ log, excludeFilterId }: { log: Log; excludeFilterId?: string }) {
+  const { stream, ...lessMutable } = log;
+  const memoKey = JSON.stringify(lessMutable);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return React.useMemo(() => <LogPanel log={log} excludeFilterId={excludeFilterId} />, [memoKey, excludeFilterId]);
+}
 
 export function LogPanel({ log, excludeFilterId }: { log: Log; excludeFilterId?: string }) {
   return (

@@ -1,7 +1,7 @@
 import { startFetching } from "@/data/fetching/fetchingSlice";
 import { useAllData } from "@/data/logData/logDataHooks";
 
-import { LogList } from "@/components/log/LogList";
+import { LogList } from "@/components/log/list/LogList";
 import { subHours } from "date-fns";
 import { useDispatch } from "react-redux";
 

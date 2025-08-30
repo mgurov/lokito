@@ -6,10 +6,8 @@ import { Source } from "@/data/source";
 import { simpleDateTimeFormat } from "@/lib/utils";
 import { ExclamationTriangleIcon, UpdateIcon } from "@radix-ui/react-icons";
 import { ReactNode, useState } from "react";
-import { simpleColumns } from "../columns";
 import { AckNackProp } from "../context/AckNackContext";
 import { SelectedSourceContext } from "../context/SelectedSourceContext";
-import { DataTable } from "../data-table";
 import { NewSource } from "../new-source";
 import { SourceCard } from "../source/SourceCard";
 import { StartFetchingPanel } from "../StartFetchingPanel";
@@ -18,6 +16,7 @@ import { Alert } from "../ui/alert";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { TabLink } from "../ui/custom/tabs";
+import { LogList } from "./list/LogList";
 import { NoActiveSourcesHint } from "./ShowData";
 
 type LogsPageProps = {
@@ -124,7 +123,7 @@ function SourceTabButtonsAndContent({ dataFromSources, data, sources, selectedSo
               {thisSourceNaced.length > 0 && (
                 <>
                   <AckAllOnSourceButton notAckedCount={thisSourceNaced.length} ackNack={ackNack} />
-                  <DataTable data={thisSourceNaced} columns={simpleColumns} />
+                  <LogList data={thisSourceNaced} />
                 </>
               )}
             </div>
@@ -160,7 +159,7 @@ function ShowAllSourcesData({ data, ...rest }: { data: LogWithSource[] } & AckNa
     <div className="mt-2 space-y-4">
       <StatsLine {...rest} />
 
-      <DataTable data={data} columns={simpleColumns} />
+      <LogList data={data} />
     </div>
   );
 }

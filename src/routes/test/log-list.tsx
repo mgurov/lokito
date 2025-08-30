@@ -1,4 +1,4 @@
-import { LogList } from "@/components/log/LogList";
+import { LogList } from "@/components/log/list/LogList";
 import { LogWithSource } from "@/data/logData/logSchema";
 
 export default function LogListTest() {

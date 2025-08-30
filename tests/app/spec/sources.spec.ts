@@ -379,3 +379,31 @@ test(
     await mainPage.expectLogMessages("s1 m");
   },
 );
+
+test(
+  "source lines should be coloured with such color",
+  AnnotationSuppressDefaultApp,
+  async ({ mainPage, appState, logs }) => {
+    const [source1, source2] = await appState.givenSources({ name: "source1", color: "rgb(206, 49, 49)" }, {
+      name: "source2",
+      color: "#23bc90ff",
+    });
+
+    logs.givenSourceRecords(source1, "s1 m");
+    logs.givenSourceRecords(source2, "s2 m");
+
+    await mainPage.open();
+
+    await mainPage.expectLogMessages("s2 m", "s1 m");
+
+    await expect(mainPage.logRowByMessage("s1 m").getByTestId("log-table-row-header")).toHaveCSS(
+      "border-color",
+      "rgb(206, 49, 49)",
+    );
+
+    await expect(mainPage.logRowByMessage("s2 m").getByTestId("log-table-row-header")).toHaveCSS(
+      "border-color",
+      "rgb(35, 188, 144)",
+    );
+  },
+);
