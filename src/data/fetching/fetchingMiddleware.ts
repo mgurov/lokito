@@ -1,6 +1,7 @@
 import { buildLokiUrl } from "@/lib/utils";
 import { createListenerMiddleware, ListenerEffectAPI } from "@reduxjs/toolkit";
 import axios from "axios";
+import { DataTuple, LokiGrafanaResponseSchema } from "../logData/grafanaApiLokiSchema";
 import { receiveBatch } from "../logData/logDataSlice";
 import { JustReceivedLog } from "../logData/logSchema";
 import { createNewSource, deleteSource } from "../redux/sourcesSlice";
@@ -124,7 +125,6 @@ async function processSourceFetching(
     const logs = await fetchLokiLogs({
       query: source.query,
       from: newFetchStart,
-      sourceId: source.id,
     });
 
     listenerApi.dispatch(receiveBatch({
@@ -146,14 +146,66 @@ async function processSourceFetching(
   }
 }
 
-async function fetchLokiLogs(params: { query: string; from: string; sourceId: string }) {
+const LOKI_API_TYPE: "loki" | "grafana_ds" = "grafana_ds";
+
+async function fetchLokiLogs(params: { query: string; from: string }) {
+  if (LOKI_API_TYPE == "loki") {
+    return fetchLokiLogsDirect(params);
+  } else {
+    return fetchLokiLogsGrafanaDs(params);
+  }
+}
+
+async function fetchLokiLogsDirect(params: { query: string; from: string }) {
   const url = buildLokiUrl(params.query, params.from);
 
   const response = await axios.get<{ data: { result: LokiResponseEntry[] } }>(url /*{timeout: 1000}*/);
 
-  return Promise.all(
-    response.data.data.result.map(responseEntryToJustReceivedLog),
-  );
+  return Promise.all(response.data.data.result.map(responseEntryToJustReceivedLog));
+}
+
+async function fetchLokiLogsGrafanaDs({ query, from }: { query: string; from: string }) {
+  const url = "/loki-proxy/api/ds/query";
+
+  const queryPayload = {
+    from,
+    to: new Date().toISOString(),
+    "queries": [
+      {
+        "refId": "A",
+        "datasource": {
+          "type": "loki",
+          "uid": "loki", // TODO: how would we configure?
+        },
+        "expr": query,
+      },
+    ],
+  };
+
+  const response = await axios.post<{ data: { result: LokiResponseEntry[] } }>(url, /*{timeout: 1000}*/ queryPayload);
+
+  const lokiGrafanaResponse = LokiGrafanaResponseSchema.parse(response.data);
+
+  const framesDataValues = lokiGrafanaResponse.results["A"].frames[0].data.values;
+
+  const results = framesDataValues[0].map((_, index) => dataTupleToJustReceivedLog(index, framesDataValues));
+
+  return Promise.all(results);
+}
+
+async function dataTupleToJustReceivedLog(index: number, data: DataTuple): Promise<JustReceivedLog> {
+  const stream = data[0][index];
+  const ts = data[1][index];
+  const line = data[2][index];
+  const streamHash = await computeSHA256(JSON.stringify(stream));
+  const id = ts.toString() + "_" + streamHash;
+  const result = {
+    id,
+    stream,
+    timestamp: new Date(ts).toISOString(),
+    message: line,
+  };
+  return result;
 }
 
 async function responseEntryToJustReceivedLog(l: LokiResponseEntry): Promise<JustReceivedLog> {

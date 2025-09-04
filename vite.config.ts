@@ -4,7 +4,8 @@ import { defineConfig, loadEnv } from "vite";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  const lokiUrl = env.LOKI_URL || "http://localhost:3100/loki/";
+  // const lokiUrl = env.LOKI_URL || "http://localhost:3100/loki/";
+  const lokiUrl = env.LOKI_URL || "http://localhost:3000/";
   return {
     plugins: [react()],
     server: {

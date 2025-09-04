@@ -26,6 +26,8 @@
 
 [ ] zod to validate the server schema
 
+[ ] markdown for the descriptions
+
 [ ] log generator 
     https://github.com/QuesmaOrg/blog-5-ways-to-get-started-with-grafana/tree/main/03_logs_with_loki/log-generator 
     via https://quesma.com/blog-detail/5-grafana-docker-examples-to-get-started-with-metrics-logs-and-traces 
