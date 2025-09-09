@@ -2,10 +2,10 @@ import { DownloadSourcesConfiguration } from "@/components/download-config";
 import { Button } from "@/components/ui/shadcn/button";
 import { useDispatch } from "react-redux";
 
-import { NewSource } from "@/components/new-source";
+import { NewSource } from "@/components/source/new-source";
 import { SourceCard } from "@/components/source/SourceCard";
 import { UploadSourcesConfiguration } from "@/components/upload-config";
-import { changeSourceActive, useSources } from "@/data/redux/sourcesSlice";
+import { changeSourceProperty, useSources } from "@/data/redux/sourcesSlice";
 
 export default function Index() {
   const dispatch = useDispatch();
@@ -13,13 +13,13 @@ export default function Index() {
 
   function activateAllSources() {
     sources.forEach((source) => {
-      dispatch(changeSourceActive({ sourceId: source.id, newValue: true }));
+      dispatch(changeSourceProperty({ sourceId: source.id, property: "active" as const, newValue: true }));
     });
   }
 
   function deactivateAllSources() {
     sources.forEach((source) => {
-      dispatch(changeSourceActive({ sourceId: source.id, newValue: false }));
+      dispatch(changeSourceProperty({ sourceId: source.id, property: "active" as const, newValue: false }));
     });
   }
 

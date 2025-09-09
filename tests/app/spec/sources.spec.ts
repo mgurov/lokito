@@ -2,10 +2,10 @@ import { expect, test } from "@tests/app/setup/testExtended";
 import { AnnotationSuppressDefaultApp } from "../setup/AppStateFixture";
 import { NewSourceRollover } from "../setup/pages/SourcesPageFixture";
 
-test("add source", AnnotationSuppressDefaultApp, async ({ page, appState }) => {
-  await page.goto("/");
+test("add source", AnnotationSuppressDefaultApp, async ({ mainPage, page, appState }) => {
+  await mainPage.open({ startFetch: false });
 
-  await page.click("text=\"create a new one\"");
+  await mainPage.newSourceButton.click();
 
   await page.fill("text=Name", "Test Source");
   await page.fill("text=Loki query", "{job=\"test\"}");
@@ -44,6 +44,82 @@ test(
     expect(await appState.sourceNames()).toEqual(["Test Source"]);
   },
 );
+
+test.describe("datasources", () => {
+  test(
+    "should be able to select a datasource when configuring a source",
+    AnnotationSuppressDefaultApp,
+    async ({ appState, mainPage, page, logs }) => {
+      await appState.givenDatasourcesConfig(
+        { id: "default", name: "Primary" },
+        { id: "second" },
+      );
+
+      await mainPage.open({ startFetch: false });
+
+      await mainPage.newSourceButton.click();
+
+      const newSourceRollover = new NewSourceRollover(page);
+
+      await newSourceRollover.fillSourceForm({ query: "{job='secondus'}" });
+      await expect(newSourceRollover.datasourceSelect).toHaveValue("default");
+      // await expect(newSourceRollover.datasourceSelect).toHaveText("Primary");
+      await newSourceRollover.datasourceSelect.selectOption("second");
+      await newSourceRollover.saveSource();
+
+      await mainPage.startFetchingButton("now").click();
+
+      await expect.poll(() => {
+        return logs.requests.map(u => u.pathname + "?" + u.searchParams.get("query"));
+      }).toStrictEqual([
+        "/loki-proxy/second/api/v1/query_range?{job='secondus'}",
+      ]);
+    },
+  );
+
+  test(
+    "precreated source with no source should have no source visible",
+    AnnotationSuppressDefaultApp,
+    async ({ appState, sourcePage }) => {
+      await appState.givenDatasourcesConfig(
+        { id: "default", name: "Primary" },
+        { id: "second" },
+      );
+
+      await appState.givenSource({ name: "existing", query: "{job=\"initial query\"}", datasource: null });
+
+      await sourcePage.open();
+
+      const sourceCard = sourcePage.sourceCard("existing");
+
+      await expect(sourceCard.getByTestId("datasource-select")).toHaveValue("Select Datasource");
+      await sourceCard.getByTestId("datasource-select").selectOption("default");
+
+      await expect.poll(async () => (await appState.sources()).map(s => [s.name, s.datasource]))
+        .toStrictEqual([["existing", "default"]]);
+    },
+  );
+
+  test("edit a source datasource", AnnotationSuppressDefaultApp, async ({ appState, sourcePage }) => {
+    await appState.givenDatasourcesConfig(
+      { id: "default", name: "Primary" },
+      { id: "second" },
+    );
+
+    await appState.givenSources({ name: "existing", query: "{job=\"initial query\"}", datasource: "second" });
+
+    await sourcePage.open();
+
+    const sourceCard = sourcePage.sourceCard("existing");
+
+    await expect(sourceCard.getByTestId("datasource-select")).toHaveValue("second");
+    await expect(sourceCard.getByTestId("save-query-changes")).not.toBeAttached();
+    await sourceCard.getByTestId("datasource-select").selectOption("default");
+
+    await expect.poll(async () => (await appState.sources()).map(s => [s.name, s.datasource]))
+      .toStrictEqual([["existing", "default"]]);
+  });
+});
 
 test(
   "add a source to an existing list from main page",
