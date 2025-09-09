@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     server: {
-      port: 5175,
+      port: 5174,
       proxy: {
         "/loki-proxy": {
           target: lokiUrl,
