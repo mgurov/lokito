@@ -2,6 +2,7 @@ export type SourceMutation = {
   name: string;
   query: string;
   color: string;
+  datasource: string | undefined; // undefined for historical reasons; might consider ditching after main consumers upgrade.
 };
 
 export type Source = SourceMutation & {

@@ -5,17 +5,18 @@ import { useDispatch } from "react-redux";
 
 import { Switch } from "@/components/ui/shadcn/switch";
 import { Textarea } from "@/components/ui/shadcn/textarea";
-import { changeSourceActive, changeSourceColor, changeSourceQuery, deleteSource } from "@/data/redux/sourcesSlice";
+import { changeSourceProperty, deleteSource } from "@/data/redux/sourcesSlice";
 import { Source } from "@/data/source";
 import { useCallback, useState } from "react";
+import { DatasourceSelect } from "./DatasourceSelect";
 
 export function SourceCard({ source }: { source: Source }) {
   const dispatch = useDispatch();
-  const [changedValue, setChangedValue] = useState(source.query);
+  const [changedValue, setChangedValue] = useState<string>(source.query);
 
   const handleSaveClick = useCallback(() => {
-    const payload = { sourceId: source.id, newQueryValue: changedValue };
-    dispatch(changeSourceQuery(payload));
+    const payload = { sourceId: source.id, property: "query" as const, newValue: changedValue };
+    dispatch(changeSourceProperty(payload));
   }, [dispatch, source.id, changedValue]);
 
   return (
@@ -56,7 +57,10 @@ export function SourceCard({ source }: { source: Source }) {
               value={source.color}
               className="h-8 w-8 cursor-pointer rounded-md border border-input bg-transparent p-[2px] text-sm shadow-sm transition-colors"
               title="Color of the source"
-              onChange={(e) => dispatch(changeSourceColor({ sourceId: source.id, newValue: e.target.value }))}
+              onChange={(e) =>
+                dispatch(
+                  changeSourceProperty({ sourceId: source.id, property: "color" as const, newValue: e.target.value }),
+                )}
             />
             <Button
               data-testid={`delete-source-${source.id}`}
@@ -73,7 +77,7 @@ export function SourceCard({ source }: { source: Source }) {
               title="Active/deactivate the source"
               onClick={() =>
                 dispatch(
-                  changeSourceActive({ sourceId: source.id, newValue: !source.active }),
+                  changeSourceProperty({ sourceId: source.id, property: "active" as const, newValue: !source.active }),
                 )}
             />
           </div>
@@ -86,6 +90,14 @@ export function SourceCard({ source }: { source: Source }) {
           onChange={(event) => setChangedValue(event.target.value)}
           rows={6}
           defaultValue={source.query}
+        />
+        <DatasourceSelect
+          defaultValue={source.datasource}
+          showEmptyOptionOnNoDefaultValue
+          onChange={(e) =>
+            dispatch(
+              changeSourceProperty({ sourceId: source.id, property: "datasource" as const, newValue: e.target.value }),
+            )}
         />
       </CardContent>
     </Card>
