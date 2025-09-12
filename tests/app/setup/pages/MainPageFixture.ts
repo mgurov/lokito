@@ -62,8 +62,12 @@ export default class MainPageFixture {
     return this.page.getByTestId("home-page-logo");
   }
 
+  get newSourceButton() {
+    return this.page.getByTestId("new-source-button").getByText("New Source");
+  }
+
   async clickNewSourceButton() {
-    await this.page.getByTestId("new-source-button").getByText("New Source").click();
+    await this.newSourceButton.click();
 
     const newSourceRollover = new NewSourceRollover(this.page);
 

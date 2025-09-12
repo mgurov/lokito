@@ -8,7 +8,7 @@ import { ExclamationTriangleIcon, UpdateIcon } from "@radix-ui/react-icons";
 import { ReactNode, useState } from "react";
 import { AckNackProp } from "../context/AckNackContext";
 import { SelectedSourceContext } from "../context/SelectedSourceContext";
-import { NewSource } from "../new-source";
+import { NewSource } from "../source/new-source";
 import { SourceCard } from "../source/SourceCard";
 import { StartFetchingPanel } from "../StartFetchingPanel";
 import { AckAllOnSourceButton, StatsLine } from "../StatsLine";

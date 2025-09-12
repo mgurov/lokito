@@ -9,20 +9,15 @@ export interface CreateNewSource {
   source: SourceMutation;
 }
 
-export interface ChangeSourceActive {
+export type ChangeSourceProperty = {
   sourceId: string;
-  newValue: boolean;
-}
+} & SourcePropertyChange;
 
-export interface ChangeSourceQuery {
-  sourceId: string;
-  newQueryValue: string;
-}
-
-export interface ChangeSourceColor {
-  sourceId: string;
-  newValue: string;
-}
+type SourcePropertyChange =
+  | { property: "color"; newValue: string }
+  | { property: "datasource"; newValue: string }
+  | { property: "query"; newValue: string }
+  | { property: "active"; newValue: boolean };
 
 export interface SourcesState {
   data: { [id: string]: Source };
@@ -58,16 +53,16 @@ export const sourcesSlice = createSlice({
       delete state.data[action.payload];
       SourceLocalStorage.sources.save(Object.values(state.data));
     },
-    changeSourceActive: (state, action: PayloadAction<ChangeSourceActive>) => {
-      state.data[action.payload.sourceId].active = action.payload.newValue;
-      SourceLocalStorage.sources.save(Object.values(state.data));
-    },
-    changeSourceColor: (state, action: PayloadAction<ChangeSourceColor>) => {
-      state.data[action.payload.sourceId].color = action.payload.newValue;
-      SourceLocalStorage.sources.save(Object.values(state.data));
-    },
-    changeSourceQuery: (state, action: PayloadAction<ChangeSourceQuery>) => {
-      state.data[action.payload.sourceId].query = action.payload.newQueryValue;
+    changeSourceProperty: (state, { payload }: PayloadAction<ChangeSourceProperty>) => {
+      const source = state.data[payload.sourceId];
+      switch (payload.property) {
+        case "active":
+          source.active = payload.newValue;
+          break;
+        default:
+          source[payload.property] = payload.newValue;
+          break;
+      }
       SourceLocalStorage.sources.save(Object.values(state.data));
     },
     setAllSources: (state, action: PayloadAction<Source[]>) => {
@@ -80,10 +75,8 @@ export const sourcesSlice = createSlice({
 export const {
   createNewSource,
   deleteSource,
-  changeSourceActive,
-  changeSourceColor,
+  changeSourceProperty,
   setAllSources,
-  changeSourceQuery,
 } = sourcesSlice.actions;
 
 export default sourcesSlice.reducer;

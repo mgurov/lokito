@@ -1,11 +1,11 @@
 import { Filter } from "@/data/filters/filter";
 import { Source } from "@/data/source";
-import { TestDetailsAnnotation } from "@playwright/test";
+import { Page, TestDetailsAnnotation } from "@playwright/test";
 import { nextId } from "../util/nextId";
 import { StorageFixture, storageTest } from "./StorageFixture";
 
 export class AppStateFixture {
-  constructor(public storage: StorageFixture) {
+  constructor(public storage: StorageFixture, private page: Page) {
   }
 
   async sourceNames() {
@@ -21,6 +21,13 @@ export class AppStateFixture {
   async givenSource(sourceSpecs: SourceSpec = {}) {
     const [source] = await this.givenSources(...[sourceSpecs]);
     return source;
+  }
+
+  async givenDatasourcesConfig(...specs: DatasourceSpec[]) {
+    await this.page.route("/config/data-sources", async (route) =>
+      route.fulfill({
+        json: specs,
+      }));
   }
 
   private sourcesSet: boolean = false;
@@ -50,6 +57,11 @@ export class AppStateFixture {
   }
 }
 
+type DatasourceSpec = {
+  id: string;
+  name?: string;
+};
+
 type FilterSpec = string | Partial<Filter>;
 
 function specToFilter(spec: FilterSpec): Filter {
@@ -72,17 +84,24 @@ function specToFilter(spec: FilterSpec): Filter {
   return result;
 }
 
-type SourceSpec = { id?: string; name?: string; query?: string; color?: string; active?: boolean };
+type SourceSpec = {
+  id?: string;
+  name?: string;
+  query?: string;
+  color?: string;
+  active?: boolean;
+  datasource?: string | null;
+};
 
 function toSource(spec: SourceSpec) {
   const seed = nextId();
-  return {
+  return Object.assign({
     id: spec.id ?? `source_${seed}`,
     name: spec.name ?? `Source ${seed}`,
     query: spec.query ?? `{job="${seed}"}`,
     color: spec.color ?? "#ff0000",
     active: spec.active ?? true,
-  };
+  }, spec.datasource === null ? {} : { datasource: spec.datasource || "default" });
 }
 
 const suppressDefaultAppStateAnnotation = {
@@ -96,10 +115,10 @@ export const appStateTest = storageTest.extend<{
   appState: AppStateFixture;
 }>({
   appState: [
-    async ({ storage }, use, testInfo) => {
-      const appState = new AppStateFixture(storage);
+    async ({ storage, page }, use, testInfo) => {
+      const appState = new AppStateFixture(storage, page);
       if (!testInfo.annotations.find(it => it.type === suppressDefaultAppStateAnnotation.type)) {
-        await appState.givenSources({ name: "default" });
+        await appState.givenSources({ name: "default", datasource: "default" });
       }
       await use(appState);
     },

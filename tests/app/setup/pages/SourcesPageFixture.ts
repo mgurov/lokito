@@ -55,6 +55,10 @@ export class NewSourceRollover {
     this.locator = page.getByTestId("new-source-sheet");
   }
 
+  get datasourceSelect() {
+    return this.locator.getByLabel("Datasource");
+  }
+
   async fillSourceForm(opts: { name?: string; query?: string } = {}) {
     await this.locator.getByLabel("Name").fill(opts.name ?? "a source");
     await this.locator.getByLabel("Loki query").fill(opts.query ?? "{job=\"test\"}");
