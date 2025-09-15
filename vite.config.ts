@@ -28,22 +28,23 @@ export default defineConfig(async ({ mode }) => {
 
   const proxies: Record<string, string | ProxyOptions> = {};
 
-  for (const dsRaw of datasources) {
-    const ds = dsRaw as { id: string; url: string; xOrgID?: string };
+  for (const ds of datasources) {
     const ourUrl = `/loki-proxy/${ds.id}`;
     proxies[ourUrl] = {
       target: ds.url,
       rewrite: (path: string) => path.slice(ourUrl.length),
     };
-    if (ds.xOrgID) {
+    if (ds.headers) {
       proxies[ourUrl].configure = (proxy) => {
         proxy.on("proxyReq", (proxyReq) => {
-          proxyReq.setHeader("x-grafana-org-id", ds.xOrgID || "");
+          for (const [key, value] of Object.entries(ds.headers || {})) {
+            proxyReq.setHeader(key, value);
+          }
         });
       };
     }
     // eslint-disable-next-line no-console
-    console.info("Proxying", ourUrl, "->", ds.url);
+    console.info("Proxying", ourUrl, "→", ds.url);
   }
 
   return {

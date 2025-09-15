@@ -4,7 +4,7 @@ export const datasourceSchema = z.object({
   id: z.string(),
   alias: z.string().optional(),
   url: z.url(),
-  xOrgID: z.number().min(18).optional(), // TODO: consider full header list
+  headers: z.record(z.string(), z.union([z.string(), z.number(), z.array(z.string())])).optional(),
 });
 
 export function validateDatasources(data: unknown) {
