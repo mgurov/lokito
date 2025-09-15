@@ -1,57 +1,17 @@
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { resolve } from "path";
-import { defineConfig, loadEnv, Plugin, PreviewServer, ProxyOptions, ViteDevServer } from "vite";
-import { Datasource, loadDatasources } from "./src/config/config-schema";
-
-const datasourcesPlugin = ({ datasources }: { datasources: Array<Datasource> }): Plugin => {
-  const datasourcesJson = JSON.stringify(datasources);
-  const configureServer = (server: ViteDevServer | PreviewServer) => {
-    server.middlewares.use("/config/data-sources", (_req, res) => {
-      res.setHeader("Content-Type", "application/json");
-      res.end(datasourcesJson);
-    });
-  };
-  return {
-    name: "vite-plugin-loki-datasources",
-    configureServer,
-    configurePreviewServer: configureServer,
-  };
-};
+import { defineConfig, loadEnv } from "vite";
+import { datasourcesVitePlugin } from "./src/config/DatasourcesVite";
 
 export default defineConfig(async ({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const configFile = resolve(__dirname, env.LOKITO_CONFIG_FILE || "./config/test-config.js");
-  // eslint-disable-next-line no-console
-  console.info("Loading config file", configFile);
-  const datasources = await loadDatasources(configFile);
-
-  const proxies: Record<string, string | ProxyOptions> = {};
-
-  for (const ds of datasources) {
-    const ourUrl = `/loki-proxy/${ds.id}`;
-    proxies[ourUrl] = {
-      target: ds.url,
-      rewrite: (path: string) => path.slice(ourUrl.length),
-    };
-    if (ds.headers) {
-      proxies[ourUrl].configure = (proxy) => {
-        proxy.on("proxyReq", (proxyReq) => {
-          for (const [key, value] of Object.entries(ds.headers || {})) {
-            proxyReq.setHeader(key, value);
-          }
-        });
-      };
-    }
-    // eslint-disable-next-line no-console
-    console.info("Proxying", ourUrl, "→", ds.url);
-  }
 
   return {
-    plugins: [react(), datasourcesPlugin({ datasources })],
+    plugins: [react(), await datasourcesVitePlugin({ datasourcesFileName: configFile })],
     server: {
       port: 5174,
-      proxy: proxies,
     },
     preview: {
       port: 5174,

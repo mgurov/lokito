@@ -12,8 +12,3 @@ export function validateDatasources(data: unknown) {
 }
 
 export type Datasource = z.infer<typeof datasourceSchema>;
-
-export async function loadDatasources(fileName: string): Promise<Array<Datasource>> {
-  const { default: datasources } = await import(fileName);
-  return validateDatasources(datasources);
-}
