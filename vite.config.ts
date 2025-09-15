@@ -2,13 +2,9 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import { resolve } from "path";
 import { defineConfig, loadEnv, Plugin, PreviewServer, ProxyOptions, ViteDevServer } from "vite";
+import { Datasource, loadDatasources } from "./src/config/config-schema";
 
-const datasourcesPlugin = async ({ env }: { env: Record<string, string> }): Promise<Plugin> => {
-  // TODO: zod validation
-  const configFile = resolve(__dirname, env.LOKITO_CONFIG_FILE || "./config/test-config.js");
-  // eslint-disable-next-line no-console
-  console.info("Loading config file", configFile);
-  const { default: datasources } = await import(configFile);
+const datasourcesPlugin = ({ datasources }: { datasources: Array<Datasource> }): Plugin => {
   const datasourcesJson = JSON.stringify(datasources);
   const configureServer = (server: ViteDevServer | PreviewServer) => {
     server.middlewares.use("/config/data-sources", (_req, res) => {
@@ -25,11 +21,10 @@ const datasourcesPlugin = async ({ env }: { env: Record<string, string> }): Prom
 
 export default defineConfig(async ({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  // TODO: zod validation
   const configFile = resolve(__dirname, env.LOKITO_CONFIG_FILE || "./config/test-config.js");
   // eslint-disable-next-line no-console
   console.info("Loading config file", configFile);
-  const { default: datasources } = await import(configFile);
+  const datasources = await loadDatasources(configFile);
 
   const proxies: Record<string, string | ProxyOptions> = {};
 
@@ -47,10 +42,12 @@ export default defineConfig(async ({ mode }) => {
         });
       };
     }
+    // eslint-disable-next-line no-console
+    console.info("Proxying", ourUrl, "->", ds.url);
   }
 
   return {
-    plugins: [react(), await datasourcesPlugin({ env })],
+    plugins: [react(), datasourcesPlugin({ datasources })],
     server: {
       port: 5174,
       proxy: proxies,
