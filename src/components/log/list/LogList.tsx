@@ -75,30 +75,26 @@ const LogEntry = ({ logEntry, hideTraces, hideFilterId, ackNack }: { logEntry: L
 
   return (
     <div className="border-b border-gray-200" data-testid="log-table-row">
+      {/* main line */}
       <div
-        className="cursor-pointer hover:bg-gray-50 whitespace-nowrap select-none"
+        className="flex items-center text-xs font-medium text-gray-900 border-l-2 border-solid cursor-pointer hover:bg-gray-50 whitespace-nowrap select-none"
+        style={{ borderColor: logEntry.sources[0]?.color }}
+        data-testid="log-table-row-header"
         onClick={toggleExpand}
       >
-        {/* main line */}
-        <div
-          className="flex items-center text-xs font-medium text-gray-900 border-l-2 border-solid"
-          style={{ borderColor: logEntry.sources[0]?.color }}
-          data-testid="log-table-row-header"
-        >
-          <RowAck buttonClassName="w-8 h-8" logId={logEntry.id} acked={logEntry.acked} />
+        <RowAck buttonClassName="w-8 h-8 min-w-8" logId={logEntry.id} acked={logEntry.acked} />
 
-          <SourceIndicator row={logEntry} ackNack={ackNack || "nack"} />
+        <SourceIndicator row={logEntry} ackNack={ackNack || "nack"} />
 
-          <FilterIndicators row={logEntry} hideFilterId={hideFilterId} />
+        <FilterIndicators row={logEntry} hideFilterId={hideFilterId} />
 
-          {!hideTraces && <TraceIndicators row={logEntry} />}
+        {!hideTraces && <TraceIndicators row={logEntry} />}
 
-          <div className="w-32 tracking-tight ml-2" title={logEntry.timestamp}>
-            {simpleDateTimeFormat(logEntry.timestamp)}
-          </div>
-          <div className="text-ellipsis overflow-hidden" data-testid="log-message">
-            {stringToShow}
-          </div>
+        <div className="w-32 min-w-32 tracking-tight ml-2" title={logEntry.timestamp}>
+          {simpleDateTimeFormat(logEntry.timestamp)}
+        </div>
+        <div className="text-ellipsis overflow-hidden ml-1" data-testid="log-message">
+          {stringToShow}
         </div>
       </div>
 

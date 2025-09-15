@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 export default function ListTestExamples() {
   return (
     <>
-      <h2>Test examples</h2>
+      <h1 className="text-lg font-semibold">Test examples</h1>
       <ul>
         <li>
           <Link to="./log-list">Log list</Link>
