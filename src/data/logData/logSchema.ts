@@ -26,6 +26,7 @@ export type Log = {
   acked: Acked;
   filters: Record<string, FilterLogNote>;
   sourcesAndMessages: [SourceAndMessage, ...SourceAndMessage[]];
+  fetchCycle: number;
 };
 
 export type LogSource = {

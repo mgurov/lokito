@@ -1,0 +1,14 @@
+.new-entry {
+  background-color: white;
+  animation: 10s ease-out 0s color-degrade-new-entry;
+}
+
+
+@keyframes color-degrade-new-entry {
+  from {
+    background-color: #f0fdf4;
+  }
+  to {
+    background-color: white;
+  }
+}

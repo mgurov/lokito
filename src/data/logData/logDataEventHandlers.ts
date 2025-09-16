@@ -8,6 +8,7 @@ export type JustReceivedBatch = {
   logs: JustReceivedLog[];
   filters: Filter[];
   sourceId: string;
+  fetchCycle: number;
 };
 
 export function handleNewLogsBatch(state: LogDataState, justReceivedBatch: JustReceivedBatch): void {
@@ -43,6 +44,7 @@ export function handleNewLogsBatch(state: LogDataState, justReceivedBatch: JustR
       acked,
       filters: filtersMatched,
       sourcesAndMessages: [{ sourceId: justReceivedBatch.sourceId, message }],
+      fetchCycle: justReceivedBatch.fetchCycle,
     } as Log;
   });
 

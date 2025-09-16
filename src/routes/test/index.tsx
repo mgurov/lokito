@@ -16,6 +16,11 @@ export default function ListTestExamples() {
         <Link to="./test-rule-section">
           <li>Rule section</li>
         </Link>
+
+        <Link to="./animate">
+          <li>Animate</li>
+        </Link>
+
         <Link to="./test-overlap">
           <li>Overlap</li>
         </Link>

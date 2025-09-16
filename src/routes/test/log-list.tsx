@@ -29,6 +29,7 @@ function generateLogData(): LogWithSource[] {
         { sourceId: "s1", message: line },
         { sourceId: "s2", message: "something happened here as well " + i },
       ],
+      fetchCycle: 0,
       sources: [{
         color: "red",
         name: "source 1",

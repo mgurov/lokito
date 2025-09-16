@@ -1,0 +1,14 @@
+.color-degrading {
+  background-color: green;
+  animation: 2s ease-out 0s color-degrade;
+}
+
+
+@keyframes color-degrade {
+  from {
+    background-color: red;
+  }
+  to {
+    background-color: green;
+  }
+}

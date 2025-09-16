@@ -46,6 +46,7 @@ export interface SourceFetchingState {
 
 interface OverallFetchingState {
   status: "idle" | "active";
+  fetchCycle: number;
   from: string | null; // where null means no fetch has yet been performed
 }
 
@@ -57,6 +58,7 @@ export interface FetchingState {
 const initialState: FetchingState = {
   overallState: {
     status: "idle",
+    fetchCycle: 0,
     from: null,
   },
   sourcesState: {},
@@ -70,6 +72,7 @@ export const fetchingSlice = createSlice({
       state.overallState = {
         status: "active",
         from: action.payload.from,
+        fetchCycle: state.overallState.fetchCycle + 1,
       };
     },
     stopFetching: (state) => {
@@ -124,10 +127,13 @@ export const fetchingSlice = createSlice({
       sourceState.pendingRange = null;
       sourceState.err = action.payload.err;
     },
+    incrementFetchCycle: (state) => {
+      state.overallState.fetchCycle += 1;
+    },
   },
 });
 
-export const { startFetching, stopFetching } = fetchingSlice.actions;
+export const { startFetching, stopFetching, incrementFetchCycle } = fetchingSlice.actions;
 export const fetchingActions = fetchingSlice.actions;
 
 export default fetchingSlice.reducer;
@@ -135,3 +141,6 @@ export default fetchingSlice.reducer;
 export const useOverallFetchingState = () => useSelector((state: RootState) => state.fetching.overallState);
 
 export const useSourcesFetchingState = () => useSelector((state: RootState) => state.fetching.sourcesState);
+
+export const useIsLastFetchCycle = (fetchCycle: number) =>
+  useSelector((state: RootState) => state.fetching.overallState.fetchCycle === fetchCycle);

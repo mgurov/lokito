@@ -20,6 +20,23 @@ test("fetching messages", async ({ page, mainPage, logs }) => {
   await mainPage.expectLogMessages("event3", "event2", "event1");
 });
 
+test("new messages should be marked such", async ({ page, mainPage, logs }) => {
+  await page.clock.install();
+
+  logs.givenRecords("event1");
+
+  await mainPage.open({ startFetch: true });
+
+  await expect(mainPage.logRowByMessage("event1").getByTestId("log-table-row-header")).toHaveClass(/new-entry/);
+
+  logs.givenRecords("event2");
+
+  await mainPage.waitNextSyncCycle();
+
+  await expect(mainPage.logRowByMessage("event2").getByTestId("log-table-row-header")).toHaveClass(/new-entry/);
+  await expect(mainPage.logRowByMessage("event1").getByTestId("log-table-row-header")).not.toHaveClass(/new-entry/);
+});
+
 test("should sort fetched messages", AnnotationSuppressDefaultApp, async ({ page, appState, mainPage, logs }) => {
   await page.clock.install();
 

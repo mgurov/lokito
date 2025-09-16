@@ -39,6 +39,8 @@ fetchingMiddleware.startListening({
 
     const task = listenerApi.fork(async (forkApi) => {
       while (true) {
+        listenerApi.dispatch(fetchingActions.incrementFetchCycle());
+
         const fetchingState = (listenerApi.getState() as RootState).fetching;
         if (fetchingState.overallState.status === "idle") {
           break;
@@ -136,6 +138,7 @@ async function processSourceFetching(
       logs,
       filters: Object.values(listenerApi.getState().filters.data),
       sourceId: source.id,
+      fetchCycle: listenerApi.getState().fetching.overallState.fetchCycle,
     }));
     listenerApi.dispatch(fetchingActions.sourceFetchedOk({
       sourceId: sourceState.sourceId,
@@ -152,9 +155,9 @@ async function processSourceFetching(
 }
 
 async function fetchLokiLogs(params: { query: string; from: string; sourceId: string; datasourceId: string }) {
-  const url = buildLokiUrl(params.datasourceId, params.query, params.from); // TODO: structured types.
+  const url = buildLokiUrl(params.datasourceId, params.query, params.from); // TODO: structured types..
 
-  const response = await axios.get<{ data: { result: LokiResponseEntry[] } }>(url /*{timeout: 1000}*/);
+  const response = await axios.get<{ data: { result: LokiResponseEntry[] } }>(url);
 
   return Promise.all(
     response.data.data.result.map(responseEntryToJustReceivedLog),

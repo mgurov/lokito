@@ -1,16 +1,18 @@
 import { Button } from "@/components/ui/shadcn/button";
 import { LogWithSource } from "@/data/logData/logSchema";
-import { simpleDateTimeFormat } from "@/lib/utils";
+import { cn, simpleDateTimeFormat } from "@/lib/utils";
 
 import { AckNack } from "@/components/context/AckNackContext";
 import { useSelectedSourceMessageLine } from "@/components/context/SelectedSourceContext";
 import { RuleEditorContextProvider } from "@/components/rule/ruleEditorContext";
+import { useIsLastFetchCycle } from "@/data/fetching/fetchingSlice";
 import { useState } from "react";
 import { MemoedLogRowPanel } from "../LogPanel";
 import { FilterIndicators } from "./FilterIndicators";
 import { RowAck } from "./RowAck";
 import { SourceIndicator } from "./SourceIndicator";
 import { TraceIndicators } from "./TraceIndicators";
+import "./animate-new-entries.css";
 
 type LogListProps = {
   data: LogWithSource[];
@@ -67,6 +69,7 @@ function LogListBare({ data, ...displayOpts }: LogListProps) {
 
 const LogEntry = ({ logEntry, hideTraces, hideFilterId, ackNack }: { logEntry: LogWithSource } & DisplayOptions) => {
   const stringToShow = useSelectedSourceMessageLine(logEntry);
+  const isRecent = useIsLastFetchCycle(logEntry.fetchCycle);
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleExpand = () => {
@@ -77,7 +80,10 @@ const LogEntry = ({ logEntry, hideTraces, hideFilterId, ackNack }: { logEntry: L
     <div className="border-b border-gray-200" data-testid="log-table-row">
       {/* main line */}
       <div
-        className="flex items-center text-xs font-medium text-gray-900 border-l-2 border-solid cursor-pointer hover:bg-gray-50 whitespace-nowrap select-none"
+        className={cn(
+          "flex items-center text-xs font-medium text-gray-900 border-l-2 border-solid cursor-pointer hover:bg-gray-50 whitespace-nowrap select-none",
+          isRecent && "new-entry",
+        )}
         style={{ borderColor: logEntry.sources[0]?.color }}
         data-testid="log-table-row-header"
         onClick={toggleExpand}
