@@ -15,6 +15,7 @@ import { createNewSource } from "@/data/redux/sourcesSlice";
 import { SourceMutation } from "@/data/source";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
+import { DatasourceSelect } from "./DatasourceSelect";
 
 export function NewSource(
   props: {
@@ -25,6 +26,7 @@ export function NewSource(
   },
 ) {
   const dispatch = useDispatch();
+
   const [open, setOpen] = useState(props.preOpen || false);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -53,9 +55,13 @@ export function NewSource(
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-8 items-center gap-2">
-              <div className="col-span-7">
+              <div className="col-span-4">
                 <Label htmlFor="name">Name</Label>
                 <Input id="name" name="name" required />
+              </div>
+              <div className="col-span-3">
+                <Label htmlFor="datasource">Datasource</Label>
+                <DatasourceSelect id="datasource" name="datasource" />
               </div>
               <div className="col-span-1">
                 <Label htmlFor="color">Color</Label>

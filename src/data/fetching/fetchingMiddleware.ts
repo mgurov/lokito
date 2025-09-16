@@ -121,10 +121,15 @@ async function processSourceFetching(
   }));
 
   try {
+    const { datasource } = source;
+    if (!datasource) {
+      throw new Error("No datasource configured for source " + JSON.stringify(source));
+    }
     const logs = await fetchLokiLogs({
       query: source.query,
       from: newFetchStart,
       sourceId: source.id,
+      datasourceId: datasource,
     });
 
     listenerApi.dispatch(receiveBatch({
@@ -146,8 +151,8 @@ async function processSourceFetching(
   }
 }
 
-async function fetchLokiLogs(params: { query: string; from: string; sourceId: string }) {
-  const url = buildLokiUrl(params.query, params.from);
+async function fetchLokiLogs(params: { query: string; from: string; sourceId: string; datasourceId: string }) {
+  const url = buildLokiUrl(params.datasourceId, params.query, params.from); // TODO: structured types.
 
   const response = await axios.get<{ data: { result: LokiResponseEntry[] } }>(url /*{timeout: 1000}*/);
 

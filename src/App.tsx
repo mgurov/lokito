@@ -3,8 +3,10 @@ import { Link, Outlet, RouterProvider, useLocation } from "react-router-dom";
 import "./App.css";
 import { Toaster } from "@/components/ui/shadcn/sonner";
 import { store } from "@/data/redux/store";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { Provider } from "react-redux";
+import { LoadDatasources } from "./components/datasource/LoadedDatasourceContext";
 import { LokitoLogo } from "./components/ui/lokito-logo";
 import { Button } from "./components/ui/shadcn/button";
 import { TooltipProvider } from "./components/ui/shadcn/tooltip";
@@ -13,14 +15,26 @@ import { createRouter } from "./routing";
 
 function App() {
   const router = createRouter({ layout: <Layout /> });
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        networkMode: "always",
+        retry: false,
+      },
+    },
+  });
 
   return (
     <>
-      <Provider store={store}>
-        <TooltipProvider delayDuration={100}>
-          <RouterProvider router={router} />
-        </TooltipProvider>
-      </Provider>
+      <QueryClientProvider client={queryClient}>
+        <LoadDatasources>
+          <Provider store={store}>
+            <TooltipProvider delayDuration={100}>
+              <RouterProvider router={router} />
+            </TooltipProvider>
+          </Provider>
+        </LoadDatasources>
+      </QueryClientProvider>
     </>
   );
 }

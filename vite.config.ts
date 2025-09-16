@@ -1,20 +1,17 @@
 import react from "@vitejs/plugin-react";
 import path from "path";
+import { resolve } from "path";
 import { defineConfig, loadEnv } from "vite";
+import { datasourcesVitePlugin } from "./src/config/DatasourcesVite";
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(async ({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  const lokiUrl = env.LOKI_URL || "http://localhost:3100/loki/";
+  const configFile = resolve(__dirname, env.LOKITO_CONFIG_FILE || "./config/test-config.js");
+
   return {
-    plugins: [react()],
+    plugins: [react(), await datasourcesVitePlugin({ datasourcesFileName: configFile })],
     server: {
       port: 5174,
-      proxy: {
-        "/loki-proxy": {
-          target: lokiUrl,
-          rewrite: (path) => path.replace(/^\/loki-proxy/, ""),
-        },
-      },
     },
     preview: {
       port: 5174,

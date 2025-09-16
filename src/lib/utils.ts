@@ -6,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function buildLokiUrl(query: string, start: string) {
+export function buildLokiUrl(datasourceId: string, query: string, start: string) {
   const searchParams = new URLSearchParams();
   searchParams.append("start", start);
   // searching up to now for now searchParams.append('end', '2024-05-09T00:00:00.000Z');
@@ -14,7 +14,7 @@ export function buildLokiUrl(query: string, start: string) {
   searchParams.append("limit", "1000");
   searchParams.append("query", query);
 
-  return `/loki-proxy/api/v1/query_range?${searchParams.toString()}`;
+  return `/loki-proxy/${datasourceId}/api/v1/query_range?${searchParams.toString()}`;
 }
 
 export function randomId() {
