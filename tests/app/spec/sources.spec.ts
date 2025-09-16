@@ -62,9 +62,15 @@ test.describe("datasources", () => {
       const newSourceRollover = new NewSourceRollover(page);
 
       await newSourceRollover.fillSourceForm({ query: "{job='secondus'}" });
-      await expect(newSourceRollover.datasourceSelect).toHaveValue("default");
-      // await expect(newSourceRollover.datasourceSelect).toHaveText("Primary");
-      await newSourceRollover.datasourceSelect.selectOption("second");
+
+      // await expect(newSourceRollover.datasourceSelect.locator("select")).toHaveValue("default");
+      // // await expect(newSourceRollover.datasourceSelect).toHaveText("Primary");
+      // await newSourceRollover.datasourceSelect.selectOption("second");
+
+      await expect(newSourceRollover.datasourceSelect.getByTestId("datasource-select-value")).toHaveText("default");
+      await newSourceRollover.datasourceSelect.click();
+      await newSourceRollover.datasourceSelect.getByText("second").click();
+
       await newSourceRollover.saveSource();
 
       await mainPage.startFetchingButton("now").click();

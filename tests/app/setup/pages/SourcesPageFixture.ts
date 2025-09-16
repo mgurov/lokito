@@ -56,7 +56,7 @@ export class NewSourceRollover {
   }
 
   get datasourceSelect() {
-    return this.locator.getByLabel("Datasource");
+    return this.locator.getByTestId("datasource-select");
   }
 
   async fillSourceForm(opts: { name?: string; query?: string } = {}) {

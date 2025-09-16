@@ -1,17 +1,30 @@
+import { SelectProps } from "@radix-ui/react-select";
 import { useContext } from "react";
 import { DatasourcesContext } from "../datasource/LoadedDatasourceContext";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/shadcn/select";
 
-export interface DatasourceSelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
-  showEmptyOptionOnNoDefaultValue?: boolean;
+export interface DatasourceSelectProps extends SelectProps {
+  id?: string;
+  preselectFirst?: boolean;
 }
 
-export function DatasourceSelect({ showEmptyOptionOnNoDefaultValue, ...selectProps }: DatasourceSelectProps) {
+export function DatasourceSelect({ id, preselectFirst, ...selectProps }: DatasourceSelectProps) {
   const datasources = useContext(DatasourcesContext);
 
+  if (!selectProps.defaultValue && preselectFirst && Object.keys(datasources).length > 0) {
+    selectProps.defaultValue = Object.keys(datasources)[0];
+  }
+
   return (
-    <select data-testid="datasource-select" {...selectProps}>
-      {!selectProps.defaultValue && showEmptyOptionOnNoDefaultValue && <option>Select Datasource</option>}
-      {Object.values(datasources).map(ds => <option key={ds.id} value={ds.id}>{ds.alias || ds.id}</option>)}
-    </select>
+    <div data-testid="datasource-select">
+      <Select {...selectProps}>
+        <SelectTrigger id={id}>
+          <SelectValue data-testid="datasource-select-value" placeholder="Select Datasource..." />
+        </SelectTrigger>
+        <SelectContent>
+          {Object.values(datasources).map(ds => <SelectItem key={ds.id} value={ds.id}>{ds.alias || ds.id}</SelectItem>)}
+        </SelectContent>
+      </Select>
+    </div>
   );
 }

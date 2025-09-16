@@ -93,10 +93,9 @@ export function SourceCard({ source }: { source: Source }) {
         />
         <DatasourceSelect
           defaultValue={source.datasource}
-          showEmptyOptionOnNoDefaultValue
-          onChange={(e) =>
+          onValueChange={(newValue: string) =>
             dispatch(
-              changeSourceProperty({ sourceId: source.id, property: "datasource" as const, newValue: e.target.value }),
+              changeSourceProperty({ sourceId: source.id, property: "datasource" as const, newValue }),
             )}
         />
       </CardContent>

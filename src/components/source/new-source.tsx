@@ -61,7 +61,7 @@ export function NewSource(
               </div>
               <div className="col-span-3">
                 <Label htmlFor="datasource">Datasource</Label>
-                <DatasourceSelect id="datasource" name="datasource" />
+                <DatasourceSelect id="datasource" name="datasource" preselectFirst/>
               </div>
               <div className="col-span-1">
                 <Label htmlFor="color">Color</Label>
