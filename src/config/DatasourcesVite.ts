@@ -1,11 +1,11 @@
 import { Plugin, PreviewServer, ProxyOptions, ViteDevServer } from "vite";
-import { Datasource, validateDatasources } from "./config-schema";
+import { datasourcesOverWireSchema, ServerDatasource, validateDatasources } from "./config-schema";
 
 export async function datasourcesVitePlugin({ datasourcesFileName }: { datasourcesFileName: string }): Promise<Plugin> {
   // eslint-disable-next-line no-console
   console.info("Loading lokito config from", datasourcesFileName);
   const datasources = await loadDatasources(datasourcesFileName);
-  const datasourcesJson = JSON.stringify(datasources);
+  const datasourcesJson = JSON.stringify(datasourcesOverWireSchema.parse(datasources));
   const proxy = buildProxies(datasources);
   const configureServerReturnDatasources = (server: ViteDevServer | PreviewServer) => {
     server.middlewares.use("/config/data-sources", (_req, res) => {
@@ -28,12 +28,12 @@ export async function datasourcesVitePlugin({ datasourcesFileName }: { datasourc
   };
 }
 
-async function loadDatasources(fileName: string): Promise<Array<Datasource>> {
+async function loadDatasources(fileName: string): Promise<Array<ServerDatasource>> {
   const { default: datasources } = await import(fileName);
   return validateDatasources(datasources);
 }
 
-function buildProxies(datasources: Array<Datasource>): Record<string, string | ProxyOptions> {
+function buildProxies(datasources: Array<ServerDatasource>): Record<string, string | ProxyOptions> {
   const proxies: Record<string, string | ProxyOptions> = {};
 
   for (const ds of datasources) {

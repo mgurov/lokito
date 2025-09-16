@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const datasourceSchema = z.object({
+const datasourceSchema = z.object({
   id: z.string(),
   alias: z.string().optional(),
   url: z.url(),
@@ -11,4 +11,10 @@ export function validateDatasources(data: unknown) {
   return z.array(datasourceSchema).parse(data);
 }
 
-export type Datasource = z.infer<typeof datasourceSchema>;
+export type ServerDatasource = z.infer<typeof datasourceSchema>;
+
+const datasourceOverWireSchema = datasourceSchema.pick({ id: true, alias: true });
+
+export const datasourcesOverWireSchema = z.array(datasourceOverWireSchema);
+
+export type ClientDatasource = z.infer<typeof datasourceOverWireSchema>;

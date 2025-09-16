@@ -11,7 +11,7 @@ export function DatasourceSelect({ showEmptyOptionOnNoDefaultValue, ...selectPro
   return (
     <select data-testid="datasource-select" {...selectProps}>
       {!selectProps.defaultValue && showEmptyOptionOnNoDefaultValue && <option>Select Datasource</option>}
-      {Object.values(datasources).map(ds => <option key={ds.id} value={ds.id}>{ds.name || ds.id}</option>)}
+      {Object.values(datasources).map(ds => <option key={ds.id} value={ds.id}>{ds.alias || ds.id}</option>)}
     </select>
   );
 }

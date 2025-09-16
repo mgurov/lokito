@@ -1,15 +1,10 @@
+import { ClientDatasource } from "@/config/config-schema";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { createContext } from "react";
 import { Alert } from "../ui/shadcn/alert";
 
-export interface Datasource {
-  id: string;
-  name: string;
-  url: string;
-}
-
-export const DatasourcesContext = createContext<Record<string, Datasource>>({});
+export const DatasourcesContext = createContext<Record<string, ClientDatasource>>({});
 
 export function LoadDatasources({ children }: { children: React.ReactNode }) {
   const { data, error, isPending, status } = useQuery({
@@ -40,7 +35,7 @@ export function LoadDatasources({ children }: { children: React.ReactNode }) {
   );
 }
 
-async function loadDatasources(): Promise<Datasource[]> {
-  const response = await axios.get<Datasource[]>("/config/data-sources");
+async function loadDatasources(): Promise<ClientDatasource[]> {
+  const response = await axios.get<ClientDatasource[]>("/config/data-sources");
   return response.data;
 }
