@@ -28,8 +28,11 @@ echo 'LOKITO_CONFIG_FILE=./config/my-test-config.js'
 [zod schema](src/config/config-schema.ts)
 
 `id` required - how lokito would refer to this loki datasource
+
 `alias` optional - alternative UI name of this datasource
+
 `url` required, server-side only - the loki API endpoint to be proxied. Won't be exposed or used by the UI code.
+
 `headers` optional, server-side only - allows to set additional headers to a proxied request, e.g. `x-grafana-org-id`.
 
 # Start in preview mode
