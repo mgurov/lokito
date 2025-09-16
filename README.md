@@ -13,18 +13,24 @@ Technically, Lokito pulls logs for given loki `source`'s every minute into the b
 ![Schematics](./content/02-schematics.png)
 
 
-# Config
+# Configuration
 
+Copy and adopt [test-config.js](./config/test-config.js). Point lokito to it by setting the `LOKITO_CONFIG_FILE` var in env or `.env`, e.g.: 
 
-## iptiq
+```
+cp ./config/test-config.js ./config/my-test-config.js
+echo 'LOKITO_CONFIG_FILE=./config/my-test-config.js'
+> .env
+```
 
-having the loki logs exposed via http://localhost:9996 (e.g. `iptiq-cli -sproxy grafana.ss:9996` )
+🚫 Typescript not supported . 
 
-`cp .env.iptiq .env` once
+[zod schema](src/config/config-schema.ts)
 
-## general public
-
-Once after checkout copy and adjust : `cp .env.example .env`. By default, it will point to the LGTM stack exposed as explained below.
+`id` required - how lokito would refer to this loki datasource
+`alias` optional - alternative UI name of this datasource
+`url` required, server-side only - the loki API endpoint to be proxied. Won't be exposed or used by the UI code.
+`headers` optional, server-side only - allows to set additional headers to a proxied request, e.g. `x-grafana-org-id`.
 
 # Start in preview mode
 
