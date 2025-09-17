@@ -6,15 +6,20 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function buildLokiUrl(datasourceId: string, query: string, start: string) {
+export type LokiUrlParams = {
+  datasourceId: string;
+  query: string;
+  start: string;
+};
+
+export function buildLokiUrl(opts: LokiUrlParams) {
   const searchParams = new URLSearchParams();
-  searchParams.append("start", start);
-  // searching up to now for now searchParams.append('end', '2024-05-09T00:00:00.000Z');
+  searchParams.append("start", opts.start);
   searchParams.append("direction", "BACKWARD");
   searchParams.append("limit", "1000");
-  searchParams.append("query", query);
+  searchParams.append("query", opts.query);
 
-  return `/loki-proxy/${datasourceId}/api/v1/query_range?${searchParams.toString()}`;
+  return `/loki-proxy/${opts.datasourceId}/api/v1/query_range?${searchParams.toString()}`;
 }
 
 export function randomId() {

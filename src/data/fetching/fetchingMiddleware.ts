@@ -1,4 +1,4 @@
-import { buildLokiUrl } from "@/lib/utils";
+import { buildLokiUrl, LokiUrlParams } from "@/lib/utils";
 import { createListenerMiddleware, ListenerEffectAPI } from "@reduxjs/toolkit";
 import axios from "axios";
 import { receiveBatch } from "../logData/logDataSlice";
@@ -129,8 +129,7 @@ async function processSourceFetching(
     }
     const logs = await fetchLokiLogs({
       query: source.query,
-      from: newFetchStart,
-      sourceId: source.id,
+      start: newFetchStart,
       datasourceId: datasource,
     });
 
@@ -154,8 +153,8 @@ async function processSourceFetching(
   }
 }
 
-async function fetchLokiLogs(params: { query: string; from: string; sourceId: string; datasourceId: string }) {
-  const url = buildLokiUrl(params.datasourceId, params.query, params.from); // TODO: structured types..
+async function fetchLokiLogs(params: LokiUrlParams) {
+  const url = buildLokiUrl(params);
 
   const response = await axios.get<{ data: { result: LokiResponseEntry[] } }>(url);
 
