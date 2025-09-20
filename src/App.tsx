@@ -7,7 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { Provider } from "react-redux";
 import { LoadDatasources } from "./components/datasource/LoadedDatasourceContext";
-import { LokitoLogo } from "./components/ui/lokito-logo";
+import { LokitoLogo } from "./components/ui/icons/lokito-logo";
 import { Button } from "./components/ui/shadcn/button";
 import { TooltipProvider } from "./components/ui/shadcn/tooltip";
 import { useNotAckedDataLength } from "./data/logData/logDataHooks";

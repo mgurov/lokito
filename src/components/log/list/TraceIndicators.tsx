@@ -1,3 +1,4 @@
+import { GoogleIcon } from "@/components/ui/icons/GoogleIcon";
 import { Button } from "@/components/ui/shadcn/button";
 import {
   DropdownMenu,
@@ -39,13 +40,13 @@ function TraceIndicator({ traceId, count }: { traceId: string; count: number }) 
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
           data-testid="trace-button"
           title={`trace: ${traceId}`}
-          className="border"
+          className="[&:not(:hover)]:border-transparent"
         >
-          ✜ {count}
+          <GoogleIcon icon="trace-barefoot" /> {count}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -57,11 +58,11 @@ function TraceIndicator({ traceId, count }: { traceId: string; count: number }) 
           data-testid="trace-ack"
           onClick={() => ackByTraceId()}
         >
-          ACK by this trace
+          <GoogleIcon icon="check-list" /> ACK all
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link to={`/by-trace/${traceId}`} data-testid="trace-show">
-            Show this trace
+            <GoogleIcon icon="inspect" /> Inspect
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

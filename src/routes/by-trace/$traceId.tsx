@@ -1,5 +1,6 @@
 import { LogList } from "@/components/log/list/LogList";
 import { AckAllButton } from "@/components/StatsLine";
+import { GoogleIcon } from "@/components/ui/icons/GoogleIcon";
 import { useTraceIdLogs } from "@/data/logData/logDataHooks";
 import { logDataSliceActions } from "@/data/logData/logDataSlice";
 import { LogWithSource } from "@/data/logData/logSchema";
@@ -11,7 +12,9 @@ export default function LogsByTraceId() {
   const traceIdLogs = useTraceIdLogs(traceId || "");
   return (
     <>
-      <h1 className="font-bold" data-testid="trace-id-header">Trace ID: {traceId}</h1>
+      <h1 className="font-bold" data-testid="trace-id-header">
+        <GoogleIcon icon="trace-barefoot" className="inline" /> Trace ID: {traceId}
+      </h1>
       <AckAllOnTraceViewButton data={traceIdLogs} />
       <SourcesData data={traceIdLogs} />
     </>
