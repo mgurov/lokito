@@ -19,6 +19,11 @@ type SourcePropertyChange =
   | { property: "query"; newValue: string }
   | { property: "active"; newValue: boolean };
 
+export type SwapSources = {
+  positionA: number;
+  positionB: number;
+};
+
 export interface SourcesState {
   data: { [id: string]: Source };
 }
@@ -69,6 +74,15 @@ export const sourcesSlice = createSlice({
       state.data = _.keyBy(action.payload, "id");
       SourceLocalStorage.sources.save(Object.values(state.data));
     },
+    swapSources: (state, action: PayloadAction<SwapSources>) => {
+      const { positionA, positionB } = action.payload;
+      const entries = Object.entries(state.data);
+      const temp = entries[positionA];
+      entries[positionA] = entries[positionB];
+      entries[positionB] = temp;
+      state.data = Object.fromEntries(entries);
+      SourceLocalStorage.sources.save(Object.values(state.data));
+    },
   },
 });
 
@@ -77,6 +91,7 @@ export const {
   deleteSource,
   changeSourceProperty,
   setAllSources,
+  swapSources,
 } = sourcesSlice.actions;
 
 export default sourcesSlice.reducer;
