@@ -7,8 +7,10 @@ export default class SourcePageFixture {
     await this.page.goto("/sources");
   }
 
-  sourceCard(_sourceName: string) {
-    return new SourceCardFixture(this.page); // NB: need to isolate from other sources eventually
+  sourceCard(sourceId: string) {
+    return new SourceCardFixture(
+      this.page.getByTestId("source-card").and(this.page.locator(`[data-sourceid="${sourceId}"]`)),
+    );
   }
 
   async clickNewSourceButton() {
@@ -32,19 +34,19 @@ export const sourcePageTest = test.extend<{ sourcePage: SourcePageFixture }>({
 });
 
 export class SourceCardFixture {
-  constructor(public page: Page) {}
+  constructor(public locator: Locator) {}
 
   getByTestId(testId: string | RegExp): Locator {
-    return this.page.getByTestId(testId);
+    return this.locator.getByTestId(testId);
   }
 
   get filterTextarea() {
-    return this.page.getByTestId("source-card-filter-textarea");
+    return this.locator.getByTestId("source-card-filter-textarea");
   }
 
   async changeQuery(queryText: string) {
     await this.filterTextarea.fill(queryText);
-    await this.page.getByTestId("save-query-changes").click();
+    await this.locator.getByTestId("save-query-changes").click();
   }
 }
 

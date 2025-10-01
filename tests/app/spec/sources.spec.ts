@@ -1,6 +1,7 @@
 import { expect, test } from "@tests/app/setup/testExtended";
 import { AnnotationSuppressDefaultApp } from "../setup/AppStateFixture";
 import { NewSourceRollover } from "../setup/pages/SourcesPageFixture";
+import { expectTexts } from "../util/visualAssertions";
 
 test("add source", AnnotationSuppressDefaultApp, async ({ mainPage, page, appState }) => {
   await mainPage.open({ startFetch: false });
@@ -86,11 +87,15 @@ test.describe("datasources", () => {
         { id: "second" },
       );
 
-      await appState.givenSource({ name: "existing", query: "{job=\"initial query\"}", datasource: null });
+      const existing = await appState.givenSource({
+        name: "existing",
+        query: "{job=\"initial query\"}",
+        datasource: null,
+      });
 
       await sourcePage.open();
 
-      const sourceCard = sourcePage.sourceCard("existing");
+      const sourceCard = sourcePage.sourceCard(existing.id);
 
       await expect(sourceCard.getByTestId("datasource-select")).toHaveValue("Select Datasource");
       await sourceCard.getByTestId("datasource-select").selectOption("default");
@@ -106,11 +111,15 @@ test.describe("datasources", () => {
       { id: "second" },
     );
 
-    await appState.givenSources({ name: "existing", query: "{job=\"initial query\"}", datasource: "second" });
+    const [existing] = await appState.givenSources({
+      name: "existing",
+      query: "{job=\"initial query\"}",
+      datasource: "second",
+    });
 
     await sourcePage.open();
 
-    const sourceCard = sourcePage.sourceCard("existing");
+    const sourceCard = sourcePage.sourceCard(existing.id);
 
     await expect(sourceCard.getByTestId("datasource-select")).toHaveValue("second");
     await expect(sourceCard.getByTestId("save-query-changes")).not.toBeAttached();
@@ -341,6 +350,42 @@ test("deactivate and then activate", AnnotationSuppressDefaultApp, async ({ main
   await expect(mainPage.page.getByText(toBeDeactivated.name)).not.toHaveClass("opacity-50");
 });
 
+test("move filters around", AnnotationSuppressDefaultApp, async ({ mainPage, appState }) => {
+  // TODO: typesript magic about the length of the sources?
+  const [_first, _second, third] = await appState.givenSources({ name: "first" }, { name: "second" }, {
+    name: "third",
+  });
+  await mainPage.open();
+
+  await expectTexts(mainPage.sourceTabHeaders, "first", "second", "third");
+  expect(await appState.sourceNames()).toEqual(["first", "second", "third"]);
+
+  const sourcesPage = await mainPage.clickToSources();
+
+  const thirdSource = sourcesPage.sourceCard(third.id);
+
+  await expect(thirdSource.getByTestId("move-back")).toBeDisabled();
+  await thirdSource.getByTestId("move-ahead").click();
+  expect(await appState.sourceNames()).toEqual(["first", "third", "second"]);
+
+  await thirdSource.getByTestId("move-ahead").click();
+  expect(await appState.sourceNames()).toEqual(["third", "first", "second"]);
+  await expect(thirdSource.getByTestId("move-ahead")).toBeDisabled();
+
+  await test.step("check the tabs are rearranged main page", async () => {
+    await mainPage.homeLogo.click();
+    await expectTexts(mainPage.sourceTabHeaders, "third", "first", "second");
+    await mainPage.clickToSources();
+  });
+
+  await thirdSource.getByTestId("move-back").click();
+  expect(await appState.sourceNames()).toEqual(["first", "third", "second"]);
+
+  await thirdSource.getByTestId("move-back").click();
+  expect(await appState.sourceNames()).toEqual(["first", "second", "third"]);
+  await expect(thirdSource.getByTestId("move-back")).toBeDisabled();
+});
+
 test(
   "add a source to an existing list from sources page",
   AnnotationSuppressDefaultApp,
@@ -359,11 +404,11 @@ test(
 );
 
 test("edit a source query", AnnotationSuppressDefaultApp, async ({ appState, sourcePage }) => {
-  await appState.givenSources({ name: "existing", query: "{job=\"initial query\"}" });
+  const [existing] = await appState.givenSources({ name: "existing", query: "{job=\"initial query\"}" });
 
   await sourcePage.open();
 
-  const sourceCard = sourcePage.sourceCard("existing");
+  const sourceCard = sourcePage.sourceCard(existing.id);
 
   await expect(sourceCard.getByTestId("source-name-title")).toHaveText("existing");
   await expect(sourceCard.filterTextarea).toHaveText("{job=\"initial query\"}");
@@ -391,11 +436,11 @@ test(
   "should be able to cancel editing a source query",
   AnnotationSuppressDefaultApp,
   async ({ appState, sourcePage }) => {
-    await appState.givenSources({ name: "existing", query: "{job=\"initial query\"}" });
+    const [existing] = await appState.givenSources({ name: "existing", query: "{job=\"initial query\"}" });
 
     await sourcePage.open();
 
-    const sourceCard = sourcePage.sourceCard("existing");
+    const sourceCard = sourcePage.sourceCard(existing.id);
 
     await expect(sourceCard.filterTextarea).toHaveText("{job=\"initial query\"}");
 

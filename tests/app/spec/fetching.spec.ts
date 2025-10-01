@@ -56,7 +56,7 @@ test(
   async ({ page, appState, mainPage, logs }) => {
     await page.clock.install();
 
-    await appState.givenSources({ name: "existing", query: "{job='test'}" });
+    const [existing] = await appState.givenSources({ name: "existing", query: "{job='test'}" });
 
     await mainPage.open({ startFetch: true });
 
@@ -64,7 +64,7 @@ test(
       return logs.requests.map(u => u.searchParams.get("query"));
     }).toStrictEqual(["{job='test'}"]);
 
-    const sourceCard = (await mainPage.clickToSources()).sourceCard("existing");
+    const sourceCard = (await mainPage.clickToSources()).sourceCard(existing.id);
 
     await sourceCard.changeQuery("{job=\"updated query\"}");
 

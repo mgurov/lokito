@@ -166,6 +166,10 @@ export default class MainPageFixture {
     return this.page.getByTestId(`source-tab-${source.id}`);
   }
 
+  get sourceTabHeaders() {
+    return this.page.getByTestId(/source-tab-/);
+  }
+
   async selectSourceTab(source: { id: string }) {
     await this.sourceTabHeader(source).click();
   }
@@ -203,7 +207,7 @@ export default class MainPageFixture {
 
   async showSource() {
     await this.showSourceButton.click();
-    return new SourceCardFixture(this.page);
+    return new SourceCardFixture(this.page.getByTestId("source-card"));
   }
 
   async waitNextSyncCycle() {

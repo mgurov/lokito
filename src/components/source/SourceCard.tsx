@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/shadcn/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/shadcn/card";
-import { TrashIcon } from "@radix-ui/react-icons";
+import { ArrowBottomRightIcon, ArrowTopLeftIcon, TrashIcon } from "@radix-ui/react-icons";
 import { useDispatch } from "react-redux";
 
 import { Switch } from "@/components/ui/shadcn/switch";
 import { Textarea } from "@/components/ui/shadcn/textarea";
-import { changeSourceProperty, deleteSource } from "@/data/redux/sourcesSlice";
+import { changeSourceProperty, deleteSource, swapSources, useSources } from "@/data/redux/sourcesSlice";
 import { Source } from "@/data/source";
 import { useCallback, useState } from "react";
 import { DatasourceSelect } from "./DatasourceSelect";
@@ -20,7 +20,7 @@ export function SourceCard({ source }: { source: Source }) {
   }, [dispatch, source.id, changedValue]);
 
   return (
-    <Card data-testid="source-card">
+    <Card data-testid="source-card" data-sourceid={source.id}>
       <CardHeader>
         <CardTitle className="flex items-center justify-between text-lg">
           <span data-testid="source-name-title">{source.name}</span>
@@ -99,7 +99,40 @@ export function SourceCard({ source }: { source: Source }) {
               changeSourceProperty({ sourceId: source.id, property: "datasource" as const, newValue: e.target.value }),
             )}
         />
+        <MoveAheadBack source={source} />
       </CardContent>
     </Card>
+  );
+}
+
+function MoveAheadBack({ source }: { source: Source }) {
+  const dispatch = useDispatch();
+  const sources = useSources();
+  const sourcesArray = Object.values(sources);
+  const ourIndex = sourcesArray.indexOf(source);
+  const priorIndex = ourIndex - 1;
+  const nextIndex = ourIndex + 1;
+
+  return (
+    <>
+      <Button
+        data-testid="move-ahead"
+        disabled={ourIndex == -1 || priorIndex <= -1}
+        size="sm"
+        variant="ghost"
+        onClick={() => dispatch(swapSources({ positionA: priorIndex, positionB: ourIndex }))}
+      >
+        <ArrowTopLeftIcon />
+      </Button>
+      <Button
+        data-testid="move-back"
+        disabled={ourIndex == -1 || nextIndex >= sourcesArray.length}
+        size="sm"
+        variant="ghost"
+        onClick={() => dispatch(swapSources({ positionA: ourIndex, positionB: nextIndex }))}
+      >
+        <ArrowBottomRightIcon />
+      </Button>
+    </>
   );
 }
