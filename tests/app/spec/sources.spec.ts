@@ -351,7 +351,6 @@ test("deactivate and then activate", AnnotationSuppressDefaultApp, async ({ main
 });
 
 test("move filters around", AnnotationSuppressDefaultApp, async ({ mainPage, appState }) => {
-  // TODO: typesript magic about the length of the sources?
   const [_first, _second, third] = await appState.givenSources({ name: "first" }, { name: "second" }, {
     name: "third",
   });
