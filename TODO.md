@@ -20,6 +20,8 @@
 
 [ ] link to Tempo
 
+[ ] ? staging area ? don't show the logs fetched in a cycle until all done and cross-referenced. Resilience might suffer though. 
+
 [ ] persist in the session storage / db of the browser w. GC
 
 [ ] visual examples
@@ -35,7 +37,7 @@
 [ ] configuraiton 
     [v] url
     [ ] trace fields 
-[ ] multiple loki URLs 
+[v] multiple loki URLs 
 [ ] warn on log saturation (>1K)
 
 ## points
