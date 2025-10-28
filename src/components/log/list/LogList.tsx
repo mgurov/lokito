@@ -13,6 +13,7 @@ import { RowAck } from "./RowAck";
 import { SourceIndicator } from "./SourceIndicator";
 import { TraceIndicators } from "./TraceIndicators";
 import "./animate-new-entries.css";
+import {Fragment} from "react";
 
 type LogListProps = {
   data: LogWithSource[];
@@ -50,6 +51,7 @@ function LogListBare({ data, ...displayOpts }: LogListProps) {
               ? `Show ${DATA_WINDOW_INCREMENT} more of ${remainingCount} remaining...`
               : `Show remaining ${remainingCount}...`;
             return (
+              <Fragment key="show_button">
               <Button
                 key="show_more"
                 data-testid="show-more-button"
@@ -58,6 +60,13 @@ function LogListBare({ data, ...displayOpts }: LogListProps) {
               >
                 {message}
               </Button>
+              <Button
+                key="show_all"
+                data-testid="show-all-button"
+                variant={"outline"}
+                onClick={()=> setDataWindow(data.length)}
+              >{`Show all ${remainingCount} remaining...`}</Button>
+              </Fragment>
             );
           }
           return <LogEntry key={logEntry.id} logEntry={logEntry} {...displayOpts} />;
@@ -81,7 +90,7 @@ const LogEntry = ({ logEntry, hideTraces, hideFilterId, ackNack }: { logEntry: L
       {/* main line */}
       <div
         className={cn(
-          "flex items-center text-xs font-medium text-gray-900 border-l-2 border-solid cursor-pointer hover:bg-gray-50 whitespace-nowrap select-none",
+          "flex items-center text-xs font-medium text-gray-900 border-l-8 border-solid cursor-pointer hover:bg-gray-50 whitespace-nowrap select-none",
           isRecent && "new-entry",
         )}
         style={{ borderColor: logEntry.sources[0]?.color }}
