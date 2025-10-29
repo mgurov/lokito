@@ -95,14 +95,17 @@ const LogEntry = ({ logEntry, hideTraces, hideFilterId, ackNack }: { logEntry: L
       {/* main line */}
       <div
         className={cn(
-          "flex items-center text-xs font-medium text-gray-900 border-l-4 border-solid cursor-pointer hover:bg-gray-50 whitespace-nowrap select-none",
+          "flex items-center text-xs font-medium text-gray-900 cursor-pointer hover:bg-gray-50 whitespace-nowrap select-none",
           isRecent && "new-entry",
         )}
-        style={{ borderColor: logEntry.sources[0]?.color }}
         data-testid="log-table-row-header"
         onClick={toggleExpand}
       >
         <RowAck buttonClassName="w-8 h-8 min-w-8" logId={logEntry.id} acked={logEntry.acked} />
+
+        <div className="w-32 min-w-32 tracking-tight ml-2" title={logEntry.timestamp}>
+          {simpleDateTimeFormat(logEntry.timestamp)}
+        </div>
 
         <SourceIndicator row={logEntry} ackNack={ackNack || "nack"} />
 
@@ -110,9 +113,6 @@ const LogEntry = ({ logEntry, hideTraces, hideFilterId, ackNack }: { logEntry: L
 
         {!hideTraces && <TraceIndicators row={logEntry} />}
 
-        <div className="w-32 min-w-32 tracking-tight ml-2" title={logEntry.timestamp}>
-          {simpleDateTimeFormat(logEntry.timestamp)}
-        </div>
         <div className="text-ellipsis overflow-hidden ml-1" data-testid="log-message">
           {stringToShow}
         </div>
