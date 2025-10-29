@@ -40,10 +40,7 @@ function LogListBare({ data, ...displayOpts }: LogListProps) {
     <div className="bg-white shadow sm:rounded-md transition-colors">
       <div className="flex flex-col">
         {data.length === 0 && <div className="h-12 text-center">Clean ✅</div>}
-        {data.slice(0, dataWindow).map((logEntry, index) => {
-          if (index > dataWindow) {
-            return null;
-          }
+        {data.slice(0, dataWindow).map(logEntry => {
           return <LogEntry key={logEntry.id} logEntry={logEntry} {...displayOpts} />;
         })}
         <ShowMoreControl fullLength={data.length} windowLength={dataWindow} setWindowLength={setDataWindow} />
