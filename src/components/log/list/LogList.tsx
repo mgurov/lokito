@@ -6,7 +6,7 @@ import { AckNack } from "@/components/context/AckNackContext";
 import { useSelectedSourceMessageLine } from "@/components/context/SelectedSourceContext";
 import { RuleEditorContextProvider } from "@/components/rule/ruleEditorContext";
 import { useIsLastFetchCycle } from "@/data/fetching/fetchingSlice";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { MemoedLogRowPanel } from "../LogPanel";
 import { FilterIndicators } from "./FilterIndicators";
 import { RowAck } from "./RowAck";
@@ -40,30 +40,36 @@ function LogListBare({ data, ...displayOpts }: LogListProps) {
     <div className="bg-white shadow sm:rounded-md transition-colors">
       <div className="flex flex-col">
         {data.length === 0 && <div className="h-12 text-center">Clean ✅</div>}
-        {data.map((logEntry, index) => {
+        {data.slice(0, dataWindow).map((logEntry, index) => {
           if (index > dataWindow) {
             return null;
           }
-          if (index === dataWindow) {
-            const remainingCount = data.length - dataWindow;
-            const message = remainingCount > DATA_WINDOW_INCREMENT
-              ? `Show ${DATA_WINDOW_INCREMENT} more of ${remainingCount} remaining...`
-              : `Show remaining ${remainingCount}...`;
-            return (
-              <Button
-                key="show_more"
-                data-testid="show-more-button"
-                variant={"outline"}
-                onClick={() => setDataWindow(w => w + DATA_WINDOW_INCREMENT)}
-              >
-                {message}
-              </Button>
-            );
-          }
           return <LogEntry key={logEntry.id} logEntry={logEntry} {...displayOpts} />;
         })}
+        <ShowMoreControl fullLength={data.length} windowLength={dataWindow} setWindowLength={setDataWindow} />
       </div>
     </div>
+  );
+}
+
+function ShowMoreControl(
+  props: { fullLength: number; windowLength: number; setWindowLength: Dispatch<SetStateAction<number>> },
+) {
+  const remainingCount = props.fullLength - props.windowLength;
+  if (remainingCount <= 0) {
+    return null;
+  }
+  const message = remainingCount > DATA_WINDOW_INCREMENT
+    ? `Show ${DATA_WINDOW_INCREMENT} more of ${remainingCount} remaining...`
+    : `Show remaining ${remainingCount}...`;
+  return (
+    <Button
+      data-testid="show-more-button"
+      variant={"outline"}
+      onClick={() => props.setWindowLength(w => w + DATA_WINDOW_INCREMENT)}
+    >
+      {message}
+    </Button>
   );
 }
 
