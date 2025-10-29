@@ -95,7 +95,7 @@ const LogEntry = ({ logEntry, hideTraces, hideFilterId, ackNack }: { logEntry: L
       {/* main line */}
       <div
         className={cn(
-          "flex items-center text-xs font-medium text-gray-900 border-l-2 border-solid cursor-pointer hover:bg-gray-50 whitespace-nowrap select-none",
+          "flex items-center text-xs font-medium text-gray-900 border-l-4 border-solid cursor-pointer hover:bg-gray-50 whitespace-nowrap select-none",
           isRecent && "new-entry",
         )}
         style={{ borderColor: logEntry.sources[0]?.color }}
