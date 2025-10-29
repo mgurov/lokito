@@ -59,17 +59,28 @@ function ShowMoreControl(
   if (remainingCount <= 0) {
     return null;
   }
-  const message = remainingCount > DATA_WINDOW_INCREMENT
-    ? `Show ${DATA_WINDOW_INCREMENT} more of ${remainingCount} remaining...`
-    : `Show remaining ${remainingCount}...`;
+  const showWindowIncrement = remainingCount > DATA_WINDOW_INCREMENT;
   return (
-    <Button
-      data-testid="show-more-button"
-      variant={"outline"}
-      onClick={() => props.setWindowLength(w => w + DATA_WINDOW_INCREMENT)}
-    >
-      {message}
-    </Button>
+    <div className="flex items-center gap-1">
+      <span>Show</span>
+      <Button
+        data-testid="show-all-button"
+        variant="outline"
+        onClick={() => props.setWindowLength(props.fullLength)}
+      >
+        all
+      </Button>
+      {showWindowIncrement && (
+        <Button
+          data-testid="show-more-button"
+          variant="outline"
+          onClick={() => props.setWindowLength(w => w + DATA_WINDOW_INCREMENT)}
+        >
+          {DATA_WINDOW_INCREMENT} more
+        </Button>
+      )}
+      <span>of {remainingCount} remaining...</span>
+    </div>
   );
 }
 
