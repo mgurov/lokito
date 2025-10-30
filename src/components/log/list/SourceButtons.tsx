@@ -27,10 +27,6 @@ export function SourceButtons({ row, ackNack }: { row: LogWithSource } & AckNack
   ));
 }
 
-export function SourcesColorLine({ row }: { row: LogWithSource }) {
-  return <div className="h-8 w-2 shrink-0" style={sourcesLineStyle(row.sources)}></div>;
-}
-
 export function sourcesLineStyle(colors: Array<{ color: string }>) {
   if (colors.length === 1) {
     return { background: colors[0].color };

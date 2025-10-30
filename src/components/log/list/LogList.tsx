@@ -10,7 +10,7 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { MemoedLogRowPanel } from "../LogPanel";
 import { FilterIndicators } from "./FilterIndicators";
 import { RowAck } from "./RowAck";
-import { SourceButtons, SourcesColorLine } from "./SourceButtons";
+import { SourceButtons, sourcesLineStyle } from "./SourceButtons";
 import { TraceIndicators } from "./TraceIndicators";
 import "./animate-new-entries.css";
 
@@ -101,7 +101,7 @@ const LogEntry = ({ logEntry, hideTraces, hideFilterId, ackNack }: { logEntry: L
         data-testid="log-table-row-header"
         onClick={toggleExpand}
       >
-        <SourcesColorLine row={logEntry} />
+        <div className="h-8 w-2 shrink-0" style={sourcesLineStyle(logEntry.sources)}></div>
 
         <RowAck buttonClassName="w-8 h-8 min-w-8" logId={logEntry.id} acked={logEntry.acked} />
 
