@@ -6,7 +6,7 @@ import { useContext } from "react";
 import React from "react";
 import { Link } from "react-router-dom";
 
-export function SourceIndicator({ row, ackNack }: { row: LogWithSource } & AckNackProp) {
+export function SourceButtons({ row, ackNack }: { row: LogWithSource } & AckNackProp) {
   const selectedSource = useContext(SelectedSourceContext);
   const sourcesToShow = row.sources.filter(s => s.id !== selectedSource?.sourceId);
   const logUrlPrefix = `/logs${ackNack === "ack" ? "/acked" : ""}`;
@@ -25,4 +25,16 @@ export function SourceIndicator({ row, ackNack }: { row: LogWithSource } & AckNa
       {" "}
     </React.Fragment>
   ));
+}
+
+export function SourcesColorLine({ row }: { row: LogWithSource }) {
+  return <div className="h-8 w-2 shrink-0" style={sourcesLineStyle(row.sources)}></div>;
+}
+
+export function sourcesLineStyle(colors: Array<{ color: string }>) {
+  if (colors.length === 1) {
+    return { background: colors[0].color };
+  }
+  const gradient = colors.map(({ color }, index) => `${color} ${100 / (colors.length - 1) * index}%`).join(",");
+  return { background: `linear-gradient(0deg,${gradient})` };
 }
