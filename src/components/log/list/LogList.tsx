@@ -105,15 +105,16 @@ const LogEntry = ({ logEntry, hideTraces, hideFilterId, ackNack }: { logEntry: L
 
         <RowAck buttonClassName="w-8 h-8 min-w-8" logId={logEntry.id} acked={logEntry.acked} />
 
+        <div className="w-32 min-w-32 tracking-tight ml-2" title={logEntry.timestamp}>
+          {simpleDateTimeFormat(logEntry.timestamp)}
+        </div>
+
         <SourceButtons row={logEntry} ackNack={ackNack || "nack"} />
 
         <FilterIndicators row={logEntry} hideFilterId={hideFilterId} />
 
         {!hideTraces && <TraceIndicators row={logEntry} />}
 
-        <div className="w-32 min-w-32 tracking-tight ml-2" title={logEntry.timestamp}>
-          {simpleDateTimeFormat(logEntry.timestamp)}
-        </div>
         <div className="text-ellipsis overflow-hidden ml-1" data-testid="log-message">
           {stringToShow}
         </div>
