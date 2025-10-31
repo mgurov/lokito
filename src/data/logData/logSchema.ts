@@ -1,4 +1,4 @@
-type SourceAndMessage = {
+export type SourceAndMessage = {
   sourceId: string;
   message: string;
 };

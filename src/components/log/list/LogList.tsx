@@ -10,7 +10,7 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { MemoedLogRowPanel } from "../LogPanel";
 import { FilterIndicators } from "./FilterIndicators";
 import { RowAck } from "./RowAck";
-import { SourceIndicator } from "./SourceIndicator";
+import { SourceButtons, sourcesLineStyle } from "./SourceButtons";
 import { TraceIndicators } from "./TraceIndicators";
 import "./animate-new-entries.css";
 
@@ -95,16 +95,17 @@ const LogEntry = ({ logEntry, hideTraces, hideFilterId, ackNack }: { logEntry: L
       {/* main line */}
       <div
         className={cn(
-          "flex items-center text-xs font-medium text-gray-900 border-l-4 border-solid cursor-pointer hover:bg-gray-50 whitespace-nowrap select-none",
+          "flex items-center text-xs font-medium text-gray-900 cursor-pointer hover:bg-gray-50 whitespace-nowrap select-none",
           isRecent && "new-entry",
         )}
-        style={{ borderColor: logEntry.sources[0]?.color }}
         data-testid="log-table-row-header"
         onClick={toggleExpand}
       >
+        <div className="h-8 w-2 shrink-0" style={sourcesLineStyle(logEntry.sources)}></div>
+
         <RowAck buttonClassName="w-8 h-8 min-w-8" logId={logEntry.id} acked={logEntry.acked} />
 
-        <SourceIndicator row={logEntry} ackNack={ackNack || "nack"} />
+        <SourceButtons row={logEntry} ackNack={ackNack || "nack"} />
 
         <FilterIndicators row={logEntry} hideFilterId={hideFilterId} />
 
