@@ -66,7 +66,7 @@ test("non-acking filter possible to see all matched", async ({ mainPage, logs, a
 });
 
 test("non-acking filter page should show acked filters as well", async ({ mainPage, logs, appState }) => {
-  const [f1, _f2] = await appState.givenFilters({
+  await appState.givenFilters({
     messageRegex: "stem",
     autoAck: false,
   }, {
@@ -84,7 +84,7 @@ test("non-acking filter page should show acked filters as well", async ({ mainPa
 
   await mainPage.expectLogMessages("unrelated", "stem 2");
 
-  const stemFilterButton = mainPage.matchingFilterButtons.getByText(f1.id);
+  const stemFilterButton = mainPage.logRowByMessage("stem 2").getByTestId("matching-filter");
   await stemFilterButton.click();
   await mainPage.matchingFilterShowSuchDropdownOption.click();
 

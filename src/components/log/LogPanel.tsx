@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/shadcn/button";
 import { CheckIcon, CopyIcon } from "@radix-ui/react-icons";
 import { ReactNode, useContext, useState } from "react";
 
+import { GoogleIcon } from "@/components/ui/icons/GoogleIcon";
 import { useFilters } from "@/data/filters/filtersSlice";
 import { logDataSliceActions } from "@/data/logData/logDataSlice";
 import { Log } from "@/data/logData/logSchema";
@@ -11,7 +12,7 @@ import { useDispatch } from "react-redux";
 import { SelectedSourceContext, useSelectedSourceMessageLine } from "../context/SelectedSourceContext";
 import FilterCard from "../rule/FilterCard";
 import { RuleEditorDispatchContext } from "../rule/ruleEditorContext";
-import SimpleTooltip from "../SimpleTooltip";
+import SimpleTooltip from "../ui/custom/SimpleTooltip";
 
 export function MemoedLogRowPanel({ log, excludeFilterId }: { log: Log; excludeFilterId?: string }) {
   const { stream, ...lessMutable } = log;
@@ -153,7 +154,7 @@ function FilterLikeThisButton({ log }: { log: Log }) {
         });
       }}
     >
-      Filter like this...
+      <GoogleIcon icon="filter-alt" /> Filter like this...
     </Button>
   );
 }
