@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { AckNackProp } from "./context/AckNackContext";
 import { SelectedSourceContext } from "./context/SelectedSourceContext";
-import SimpleTooltip from "./SimpleTooltip";
+import SimpleTooltip from "./ui/custom/SimpleTooltip";
 import { Button } from "./ui/shadcn/button";
 import { Toggle } from "./ui/shadcn/toggle";
 
