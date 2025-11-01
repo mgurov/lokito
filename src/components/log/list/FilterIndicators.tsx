@@ -1,3 +1,6 @@
+import { FilterCardById } from "@/components/rule/FilterCard";
+import SimpleTooltip from "@/components/ui/custom/SimpleTooltip";
+import { GoogleIcon } from "@/components/ui/icons/GoogleIcon";
 import { Button } from "@/components/ui/shadcn/button";
 import {
   DropdownMenu,
@@ -16,13 +19,12 @@ import { Link } from "react-router-dom";
 export function FilterIndicators({ row, hideFilterId }: { row: LogWithSource; hideFilterId: string | undefined }) {
   return Object.entries(row.filters).filter(([id]) => id !== hideFilterId).map(([id]) => (
     <React.Fragment key={id}>
-      <FilterIndicator id={id} name={id} />
-      {" "}
+      <FilterIndicator id={id} />
     </React.Fragment>
   ));
 }
 
-function FilterIndicator({ id, name }: { id: string; name: string }) {
+function FilterIndicator({ id }: { id: string }) {
   const dispatch = useDispatch();
   const { ackAll } = logDataSliceActions;
   return (
@@ -34,7 +36,9 @@ function FilterIndicator({ id, name }: { id: string; name: string }) {
           data-testid="matching-filter"
           className="border"
         >
-          {name}
+          <SimpleTooltip content={<FilterCardById filterId={id} />}>
+            <GoogleIcon icon="filter-alt" />
+          </SimpleTooltip>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -57,7 +61,7 @@ function FilterIndicator({ id, name }: { id: string; name: string }) {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuLabel className="text-gray-500 text-center">
-          Rule actions
+          <FilterCardById filterId={id} />
         </DropdownMenuLabel>
       </DropdownMenuContent>
     </DropdownMenu>

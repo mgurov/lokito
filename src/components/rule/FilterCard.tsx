@@ -2,11 +2,16 @@ import { Button } from "@/components/ui/shadcn/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/shadcn/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/shadcn/tooltip";
 import { Filter } from "@/data/filters/filter";
-import { deleteFilter } from "@/data/filters/filtersSlice";
+import { deleteFilter, useFilter } from "@/data/filters/filtersSlice";
 import { useFilterHitCount, useFilterTotalCount } from "@/data/logData/logDataHooks";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
+
+export function FilterCardById(props: { filterId: string }) {
+  const filter = useFilter(props.filterId);
+  return <FilterCard filter={filter} />;
+}
 
 export default function FilterCard({ filter, hideId }: { filter: Filter; hideId?: boolean }) {
   const dispatch = useDispatch();

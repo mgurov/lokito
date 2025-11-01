@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/shadcn/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../shadcn/tooltip";
 
 export default function SimpleTooltip(props: {
   children: ReactNode;

@@ -8,8 +8,6 @@
 [ ] filter by a field
 [ ] notes on a message w/o filter
 
-[ ] rename filter to rule
-
 [ ] create filter from user selection 
 
 [ ] preview filter appliance

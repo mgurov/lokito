@@ -15,6 +15,7 @@ import { escapeRegExp } from "./regex-utils";
 import { RuleEditorContext, RuleEditorDispatchContext } from "./ruleEditorContext";
 import { TTLDatePicker } from "./TTLDatePicker";
 
+import { GoogleIcon } from "../ui/icons/GoogleIcon";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/shadcn/card";
 import { Switch } from "../ui/shadcn/switch";
 import { Textarea } from "../ui/shadcn/textarea";
@@ -61,10 +62,15 @@ export function RuleEditorSheet() {
       >
         <SheetContent side="bottom" className="min-h-full">
           <SheetHeader>
-            <SheetTitle>New Rule</SheetTitle>
+            <SheetTitle>
+              <div className="flex">
+                <GoogleIcon icon="filter-alt" />
+                <span>Filter</span>
+              </div>
+            </SheetTitle>
             <SheetDescription>
-              Make the regex match the desigred lines and either apply once to the current logs or save for applying to
-              all the future logs.
+              Make the regex to match the desigred lines and either apply once to the current logs or save for applying
+              to all the future logs.
             </SheetDescription>
           </SheetHeader>
           <RuleEditSection
@@ -216,7 +222,7 @@ function RuleFilterStep(
             htmlFor="ack-trace"
             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           >
-            Ack by trace
+            Capture the whole trace
           </label>
           <Checkbox
             id="ack-trace"
@@ -237,14 +243,14 @@ function RuleFilterStep(
           onClick={() => onSubmit({ save: false })}
           variant="secondary"
         >
-          Apply on current
+          Ack matched now
         </Button>
         <Button
           data-testid="persist-rule-button"
           disabled={logLineMatchesRegex != "yes"}
           onClick={() => onSubmit({ save: true })}
         >
-          Save for the future
+          Match from now on and for ever...
         </Button>
         <Button
           data-testid="close-rule-button"
@@ -306,13 +312,14 @@ function RulePersistenceStep(
                 Autoack
               </label>
             </CardTitle>
-            <CardDescription>Remove matched messages from the "need attention" list</CardDescription>
+            <CardDescription>Remove matched messages from the "needs attention" list</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center space-x-2">
               <TTLDatePicker date={date} setDate={setDate} enabled={autoAck} />
               <p className="text-sm text-muted-foreground">
-                stop auto-ack'ing after this date (inclusive, UTC)
+                stop auto-ack'ing after this date (inclusive, UTC). E.g. if expected to be fixed, or more time to
+                address this non-critical case.
               </p>
             </div>
           </CardContent>
@@ -331,7 +338,7 @@ function RulePersistenceStep(
             onClick={backToFilterStep}
             variant="secondary"
           >
-            Back to filter
+            Back to regex...
           </Button>
           <Button
             data-testid="save-rule-button"
