@@ -16,6 +16,35 @@ test("find a line create a filter on it", async ({ page, mainPage, logs }) => {
   await expect(mainPage.cleanBacklogMessage).toBeVisible();
 });
 
+test("should show a match count for unacked when doing the regex", async ({ mainPage, logs, appState }) => {
+  await appState.givenFilters("message 0");
+
+  logs.givenRecords(
+    { message: "message 0" }, // preacked
+    { message: "message 1" },
+    { message: "message 2" },
+    { message: "something 3" }, // won't match
+  );
+
+  await mainPage.open();
+
+  await mainPage.expectLogMessages("something 3", "message 2", "message 1");
+
+  await mainPage.createFilter({
+    logLineText: "message 1",
+    filterRegex: "unmatched",
+    onFirstScreenShown: async (filterEditor: FilterEditorPageFixture) => {
+      await expect(filterEditor.applyButton).toBeDisabled();
+      await filterEditor.filterRegex.fill("message 1");
+      await expect(filterEditor.applyButton).toBeEnabled();
+      await expect(filterEditor.applyButton).toContainText("Ack 1 matched now");
+      await filterEditor.filterRegex.fill("message");
+      await expect(filterEditor.applyButton).toContainText("Ack 2 matched now (of 3)");
+    },
+  });
+  await mainPage.expectLogMessages("something 3");
+});
+
 test("a saved filter should be applied to existing and following messages ", async ({ page, mainPage, logs }) => {
   await page.clock.install();
   logs.givenRecords("this_message", "unrelated 1");

@@ -6,7 +6,7 @@ import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
 import { Dispatch, SetStateAction, useContext, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "../ui/shadcn/alert";
-import { Button } from "../ui/shadcn/button";
+import { Button, ButtonProps } from "../ui/shadcn/button";
 import { Checkbox } from "../ui/shadcn/checkbox";
 import { Input } from "../ui/shadcn/input";
 import { ScrollArea, ScrollBar } from "../ui/shadcn/scroll-area";
@@ -15,6 +15,7 @@ import { escapeRegExp } from "./regex-utils";
 import { RuleEditorContext, RuleEditorDispatchContext } from "./ruleEditorContext";
 import { TTLDatePicker } from "./TTLDatePicker";
 
+import { useMatchedAckedUnackedCount } from "@/data/logData/logDataHooks";
 import { GoogleIcon } from "../ui/icons/GoogleIcon";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/shadcn/card";
 import { Switch } from "../ui/shadcn/switch";
@@ -237,14 +238,12 @@ function RuleFilterStep(
       </div>
 
       <div className="flex flex-col-reverse sm:flex-row sm:space-x-2">
-        <Button
+        <MatchNowButton
+          filterRegex={step1Props.messageRegex}
           data-testid="apply-rule-button"
-          disabled={logLineMatchesRegex != "yes"}
           onClick={() => onSubmit({ save: false })}
           variant="secondary"
-        >
-          Ack matched now
-        </Button>
+        />
         <Button
           data-testid="persist-rule-button"
           disabled={logLineMatchesRegex != "yes"}
@@ -261,6 +260,29 @@ function RuleFilterStep(
         </Button>
       </div>
     </>
+  );
+}
+
+function MatchNowButton({ filterRegex, ...theRest }: ButtonProps & { filterRegex: string }) {
+  const [matchedUnackedCount, _matchedAckedCount, totalCount] = useMatchedAckedUnackedCount(filterRegex).split("|").map(
+    s => parseInt(s, 10),
+  );
+
+  let buttonText = "Nothing matched";
+  if (totalCount > 0) {
+    buttonText = `Ack ${matchedUnackedCount} matched now`;
+    if (matchedUnackedCount > 0) {
+      buttonText += ` (of ${totalCount})`;
+    }
+  }
+
+  return (
+    <Button
+      disabled={totalCount === 0}
+      {...theRest}
+    >
+      {buttonText}
+    </Button>
   );
 }
 
