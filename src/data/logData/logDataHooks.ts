@@ -137,7 +137,15 @@ function countMatched(filter: string, logs: Log[]): MatchedCountsString {
   try {
     const matchingRegex = RegExp(filter);
     for (const l of logs) {
-      if (null === matchingRegex.exec(l.line)) {
+      // TODO: try and unite with the other matching
+      let matched = false;
+      for (const sourceMessage of l.sourcesAndMessages) {
+        if (null != matchingRegex.exec(sourceMessage.message)) {
+          matched = true;
+          break;
+        }
+      }
+      if (!matched) {
         continue;
       }
       total += 1;

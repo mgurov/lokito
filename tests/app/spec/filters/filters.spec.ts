@@ -45,6 +45,40 @@ test("should show a match count for unacked when doing the regex", async ({ main
   await mainPage.expectLogMessages("something 3");
 });
 
+test(
+  "the match count for unacked should include match on other source",
+  AnnotationSuppressDefaultApp,
+  async ({ mainPage, logs, appState }) => {
+    const [s1, s2] = await appState.givenSources({ name: "s1" }, { name: "s2" });
+
+    const sameTimestamp = "2025-02-04T20:00:00.000Z";
+    const sameData = { "event": "event1" };
+
+    logs.givenSourceRecords(s1, { message: "s1 event1", timestamp: sameTimestamp, data: sameData });
+    // message can be formatted differently different sources
+    logs.givenSourceRecords(
+      s2,
+      { message: "s2 event1", timestamp: sameTimestamp, data: sameData }, // same event appeared from other datasource
+      { message: "s2 event2" },
+    );
+
+    await appState.givenFilters("s1 event");
+
+    await mainPage.open();
+
+    await mainPage.expectLogMessages("s2 event2");
+
+    await mainPage.createFilter({
+      logLineText: "s2 event2",
+      filterRegex: "s2 event",
+      saveAction: "apply",
+      onFirstScreenShown: async (filterEditor: FilterEditorPageFixture) => {
+        await expect(filterEditor.applyButton).toContainText("Ack 1 matched now (of 2)");
+      },
+    });
+  },
+);
+
 test("a saved filter should be applied to existing and following messages ", async ({ page, mainPage, logs }) => {
   await page.clock.install();
   logs.givenRecords("this_message", "unrelated 1");
@@ -83,7 +117,7 @@ test("should be able to see messages acked by a filter", async ({ appState, main
   await mainPage.expectLogMessages("m 1");
 });
 
-test("a non-saved filter should be applied to existing but not following messages ", async ({ page, mainPage, logs }) => {
+test("a non-saved transient filter should be applied to existing but not following messages ", async ({ page, mainPage, logs }) => {
   await page.clock.install();
 
   logs.givenRecords("this_message", "unrelated 1");

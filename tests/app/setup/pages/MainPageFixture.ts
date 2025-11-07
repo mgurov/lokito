@@ -156,6 +156,10 @@ export default class MainPageFixture {
     return this.page.getByTestId("show-all-button");
   }
 
+  async expectNoLogMessages() {
+    await this.expectLogMessages();
+  }
+
   async expectLogMessages(...expected: string[]) {
     await test.step("expectLogMessages", () => expectTexts(this.logMessage, ...expected), { box: true });
   }
