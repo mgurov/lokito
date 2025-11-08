@@ -21,7 +21,7 @@ export type FilterLogNote = {
 export type Log = {
   stream: { [key: string]: string };
   id: string;
-  line: string;
+  line: string; // TODO: consider dropping in favour of the sourcesAndMessages. or at least rename :firstSourcesMessage
   timestamp: string; // iso string
   acked: Acked;
   filters: Record<string, FilterLogNote>;

@@ -117,6 +117,50 @@ export const useTraceIdLogs = (traceId: string): LogWithSource[] =>
     ),
   );
 
+// counts string "<unacked>|<acked>|<total>" (each is a number)
+export type MatchedCountsString = `${number}|${number}|${number}`;
+
+export const useMatchedAckedUnackedCount = (filter: string): MatchedCountsString =>
+  useSelector(
+    createSelector(
+      [
+        (state: RootState) => state.logData.logs,
+      ],
+      (logs) => countMatched(filter, logs),
+    ),
+  );
+
+function countMatched(filter: string, logs: Log[]): MatchedCountsString {
+  let unacked: number = 0;
+  let acked: number = 0;
+  let total: number = 0;
+  try {
+    const matchingRegex = RegExp(filter);
+    for (const l of logs) {
+      // TODO: try and unite with the other matching
+      let matched = false;
+      for (const sourceMessage of l.sourcesAndMessages) {
+        if (null != matchingRegex.exec(sourceMessage.message)) {
+          matched = true;
+          break;
+        }
+      }
+      if (!matched) {
+        continue;
+      }
+      total += 1;
+      if (l.acked === null) {
+        unacked += 1;
+      } else {
+        acked += 1;
+      }
+    }
+  } catch {
+    // failure to build regex perhaps
+  }
+  return `${unacked}|${acked}|${total}`;
+}
+
 function enrichLogWithSourcesFun(sources: { [id: string]: Source }): (log: Log) => LogWithSource {
   return (log: Log): LogWithSource => {
     return {
