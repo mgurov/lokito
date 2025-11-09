@@ -15,7 +15,7 @@ import { escapeRegExp } from "./regex-utils";
 import { OpenRuleEditorPayload, RuleEditorActionContext, RuleEditorContext } from "./ruleEditorContext";
 import { TTLDatePicker } from "./TTLDatePicker";
 
-import { useMatchedAckedUnackedCount } from "@/data/logData/logDataHooks";
+import { FilterOnField, useMatchedAckedUnackedCount } from "@/data/logData/logDataHooks";
 import { GoogleIcon } from "../ui/icons/GoogleIcon";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/shadcn/card";
 import { Switch } from "../ui/shadcn/switch";
@@ -30,11 +30,12 @@ export function RuleEditorSheet() {
 
   function handleSubmit(p: SaveRuleProps) {
     if (p !== "cancel") {
-      const { save, messageRegex, extra, captureWholeTrace } = p;
+      const { save, messageRegex, extra, captureWholeTrace, field } = p;
       const newFilter: Filter = {
         id: randomId(),
         transient: !save,
         messageRegex,
+        field,
         captureWholeTrace,
         ...(extra || {}),
       };
@@ -259,7 +260,8 @@ function RuleFilterStep(
 
       <div className="flex flex-col-reverse sm:flex-row sm:space-x-2">
         <MatchNowButton
-          filterRegex={step1Props.messageRegex}
+          regex={step1Props.messageRegex}
+          field={step1Props.field}
           data-testid="apply-rule-button"
           onClick={() => onSubmit({ save: false })}
           variant="secondary"
@@ -283,10 +285,11 @@ function RuleFilterStep(
   );
 }
 
-function MatchNowButton({ filterRegex, ...theRest }: ButtonProps & { filterRegex: string }) {
-  const [matchedUnackedCount, matchedAckedCount, totalCount] = useMatchedAckedUnackedCount(filterRegex).split("|").map(
-    s => parseInt(s, 10),
-  );
+function MatchNowButton({ regex, field, ...theRest }: ButtonProps & FilterOnField) {
+  const [matchedUnackedCount, matchedAckedCount, totalCount] = useMatchedAckedUnackedCount({ regex, field }).split("|")
+    .map(
+      s => parseInt(s, 10),
+    );
 
   let buttonText = "Nothing matched";
   if (totalCount > 0) {

@@ -8,6 +8,7 @@ export type Filter = {
   autoAckTillDate?: string;
   description?: string;
   captureWholeTrace: boolean;
+  field: string | undefined;
 };
 
 export type FilterMatched = {
@@ -17,7 +18,11 @@ export type FilterMatched = {
 
 export type FilterMatchResult = FilterMatched | undefined;
 
-export type LineToFilterMatch = { messages: { message: string }[]; timestamp: string };
+export type LineToFilterMatch = {
+  sourcesLines: { message: string }[];
+  fieldValues: Record<string, string>;
+  timestamp: string;
+};
 
 export type FilterMatcher = {
   match: (line: LineToFilterMatch) => FilterMatchResult;
@@ -32,6 +37,7 @@ export type FilterForMatching = Pick<
   | "captureWholeTrace"
   | "autoAck"
   | "autoAckTillDate"
+  | "field"
 >;
 
 export function createFilterMatcher(filter: FilterForMatching): FilterMatcher {
@@ -54,19 +60,32 @@ export function createFilterMatcher(filter: FilterForMatching): FilterMatcher {
 
   return {
     match: (line: LineToFilterMatch): FilterMatched | undefined => {
-      for (const msg of line.messages) {
-        const matches = regex.test(msg.message);
-        if (matches) {
-          return {
-            filterNote: {
-              filterId: filter.id,
-              captureWholeTrace,
-              autoAck: filter.autoAck ?? true, // TODO: solve the problem of spreading defaults.
-            },
-            acked: acker(line),
-          };
+      let matches = false;
+      if (filter.field) {
+        const thisFieldValue = line.fieldValues[filter.field];
+        if (thisFieldValue) {
+          matches = regex.test(thisFieldValue);
+        }
+      } else {
+        for (const msg of line.sourcesLines) {
+          const thisSourceLineMatched = regex.test(msg.message);
+          if (thisSourceLineMatched) {
+            matches = true;
+            break;
+          }
         }
       }
+      if (matches) {
+        return {
+          filterNote: {
+            filterId: filter.id,
+            captureWholeTrace,
+            autoAck: filter.autoAck ?? true, // TODO: solve the problem of spreading defaults.
+          },
+          acked: acker(line),
+        };
+      }
+
       return undefined;
     },
   };

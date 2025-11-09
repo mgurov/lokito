@@ -6,7 +6,7 @@ export type SourceAndMessage = {
 export type Acked = null | { type: "manual" } | { type: "filter"; filterId: string };
 
 export type JustReceivedLog = {
-  stream: { [key: string]: unknown };
+  stream: { [key: string]: string };
   id: string;
   timestamp: string; // iso string
   message: string;
@@ -19,7 +19,7 @@ export type FilterLogNote = {
 };
 
 export type Log = {
-  stream: { [key: string]: string };
+  stream: { [key: string]: string }; // TODO: rename to key values
   id: string;
   timestamp: string; // iso string
   acked: Acked;

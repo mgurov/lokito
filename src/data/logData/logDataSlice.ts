@@ -129,8 +129,9 @@ export const logDataSlice = createSlice({
       const linesToSpreadByTraceId = {} as Record<string, FilterLogNote>;
       for (const line of state.logs) {
         const lineMatched = matcher.match({
-          messages: line.sourcesAndMessages,
+          sourcesLines: line.sourcesAndMessages,
           timestamp: line.timestamp,
+          fieldValues: line.stream,
         });
 
         if (!lineMatched) {
