@@ -27,7 +27,7 @@ export function handleNewLogsBatch(state: LogDataState, justReceivedBatch: JustR
     let acked: Acked = null;
 
     for (const matcher of matchers) {
-      const thisMatch = matcher.match({ messages: [message], timestamp });
+      const thisMatch = matcher.match({ messages: [{ message }], timestamp });
       if (thisMatch) {
         filtersMatched[thisMatch.filterNote.filterId] = thisMatch.filterNote;
         if (acked === null) {
@@ -39,7 +39,6 @@ export function handleNewLogsBatch(state: LogDataState, justReceivedBatch: JustR
     return {
       stream,
       id,
-      line: message,
       timestamp,
       acked,
       filters: filtersMatched,

@@ -153,8 +153,8 @@ function countMatched(filter: string, logs: Log[]): MatchedCountsString {
 
   for (const l of logs) {
     const matched = filterMatcher.match({
-      messages: l.sourcesAndMessages.map(sm => sm.message),
-      timestamp: "doesnt matter",
+      messages: l.sourcesAndMessages,
+      timestamp: l.timestamp,
     });
     if (!matched) {
       continue;

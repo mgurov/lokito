@@ -17,8 +17,10 @@ export type FilterMatched = {
 
 export type FilterMatchResult = FilterMatched | undefined;
 
+export type LineToFilterMatch = { messages: { message: string }[]; timestamp: string };
+
 export type FilterMatcher = {
-  match: (line: { messages: string[]; timestamp: string }) => FilterMatchResult;
+  match: (line: LineToFilterMatch) => FilterMatchResult;
 };
 
 export type FilterStats = Record<string, number>;
@@ -51,9 +53,9 @@ export function createFilterMatcher(filter: FilterForMatching): FilterMatcher {
   })();
 
   return {
-    match: (line: { messages: string[]; timestamp: string }): FilterMatched | undefined => {
+    match: (line: LineToFilterMatch): FilterMatched | undefined => {
       for (const msg of line.messages) {
-        const matches = regex.test(msg);
+        const matches = regex.test(msg.message);
         if (matches) {
           return {
             filterNote: {

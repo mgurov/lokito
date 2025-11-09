@@ -49,7 +49,6 @@ function generateLogData(): LogWithSource[] {
         key2: "value2",
       },
       id: i + "_abracadabra",
-      line,
       timestamp: new Date().toISOString(),
       acked: null,
       filters: {},

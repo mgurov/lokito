@@ -6,9 +6,7 @@ export const SelectedSourceContext = createContext<{ sourceId: string } | undefi
 export function useSelectedSourceMessageLine(logEntry: Log): string {
   const selectedSource = useContext(SelectedSourceContext);
 
-  if (selectedSource === undefined) {
-    return logEntry.line;
-  }
+  const selectedSourceRecord = logEntry.sourcesAndMessages.find(s => s.sourceId === selectedSource?.sourceId);
 
-  return logEntry.sourcesAndMessages.find(s => s.sourceId === selectedSource.sourceId)?.message || logEntry.line;
+  return selectedSourceRecord?.message ?? logEntry.sourcesAndMessages[0].message;
 }
