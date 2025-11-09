@@ -310,6 +310,9 @@ export class FilterEditorPageFixture {
     return this.locator.getByTestId("filter-description-input");
   }
 
+  async selectField(fieldName: string) {
+  }
+
   calendarDateButton(date: string) {
     return this.locator.locator(`td[data-day="${date}"] button`);
   }
