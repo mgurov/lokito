@@ -311,6 +311,8 @@ export class FilterEditorPageFixture {
   }
 
   async selectField(fieldName: string) {
+    await this.locator.getByTestId("select-field-to-match-trigger").click();
+    await this.locator.page().locator(`[data-value="${fieldName}"][role="option"]`).click();
   }
 
   calendarDateButton(date: string) {

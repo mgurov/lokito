@@ -1,30 +1,38 @@
 import { createContext, useReducer } from "react";
 import { RuleEditorSheet } from "./rule-editor";
 
-type RuleEditorState = { open: boolean; logline?: string };
+type RuleEditorState = { logRecord: undefined | OpenRuleEditorPayload };
 
-const initialState = { open: false };
+const initialState = { logRecord: undefined };
 
 export const RuleEditorContext = createContext<RuleEditorState>(initialState);
 
 type RuleEditorActions = {
-  open: (logLine: string) => void;
+  open: (payload: OpenRuleEditorPayload) => void;
   close: () => void;
 };
 
 export const RuleEditorActionContext = createContext<RuleEditorActions | undefined>(undefined);
 
+export type OpenRuleEditorPayload = {
+  sourceLine: string;
+  fieldsData: Record<string, string>;
+};
+
 type RuleEditorAction =
-  | { type: "open"; logLine: string }
+  | {
+    type: "open";
+    payload: OpenRuleEditorPayload;
+  }
   | { type: "close" };
 
 function ruleEditorReducer(_current: RuleEditorState, action: RuleEditorAction): RuleEditorState {
   switch (action.type) {
     case "open": {
-      return { open: true, logline: action.logLine };
+      return { logRecord: action.payload };
     }
     case "close": {
-      return { open: false };
+      return { logRecord: undefined };
     }
   }
 }
@@ -36,7 +44,7 @@ export function RuleEditorContextProvider({ children }: { children: React.ReactN
   );
 
   const actions: RuleEditorActions = {
-    open: (logLine: string) => dispatch({ type: "open", logLine }),
+    open: (payload: OpenRuleEditorPayload) => dispatch({ type: "open", payload }),
     close: () => dispatch({ type: "close" }),
   };
 

@@ -148,7 +148,7 @@ function FilterLikeThisButton({ log }: { log: Log }) {
         if (!actions) {
           return;
         }
-        actions.open(logLine);
+        actions.open({ sourceLine: logLine, fieldsData: log.stream });
       }}
     >
       <GoogleIcon icon="filter-alt" /> Filter like this...
