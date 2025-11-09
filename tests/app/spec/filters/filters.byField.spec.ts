@@ -4,6 +4,7 @@ import { FilterEditorPageFixture } from "../../setup/pages/MainPageFixture";
 
 /**
  * TODO: pre-acked & count
+ * TODO: different messages different sources?
  */
 
 test("should match a message by a field", async ({ mainPage, logs }) => {

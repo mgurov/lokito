@@ -178,6 +178,16 @@ function RuleFilterStep(
   return (
     <>
       <div className="flex flex-col gap-4 py-4">
+        <div className="flex items-center space-x-2">
+          <label
+            htmlFor="field"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Field:
+          </label>
+          
+        </div>
+
         <ScrollArea className="rounded">
           <div
             id="line"
