@@ -23,7 +23,16 @@ export type FilterMatcher = {
 
 export type FilterStats = Record<string, number>;
 
-export function createFilterMatcher(filter: Filter): FilterMatcher {
+export type FilterForMatching = Pick<
+  Filter,
+  | "id"
+  | "messageRegex"
+  | "captureWholeTrace"
+  | "autoAck"
+  | "autoAckTillDate"
+>;
+
+export function createFilterMatcher(filter: FilterForMatching): FilterMatcher {
   const regex = new RegExp(filter.messageRegex);
   const captureWholeTrace = filter.captureWholeTrace;
 

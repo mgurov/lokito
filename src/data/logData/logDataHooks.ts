@@ -3,6 +3,7 @@ import { traceIdFields } from "@/lib/traceIds";
 import { createSelector } from "@reduxjs/toolkit";
 import _ from "lodash";
 import { useSelector } from "react-redux";
+import { createFilterMatcher } from "../filters/filter";
 import { RootState } from "../redux/store";
 import { Source } from "../source";
 
@@ -134,29 +135,36 @@ function countMatched(filter: string, logs: Log[]): MatchedCountsString {
   let unacked: number = 0;
   let acked: number = 0;
   let total: number = 0;
+  let filterMatcher;
+
   try {
-    const matchingRegex = RegExp(filter);
-    for (const l of logs) {
-      // TODO: try and unite with the other matching
-      let matched = false;
-      for (const sourceMessage of l.sourcesAndMessages) {
-        if (null != matchingRegex.exec(sourceMessage.message)) {
-          matched = true;
-          break;
-        }
-      }
-      if (!matched) {
-        continue;
-      }
-      total += 1;
-      if (l.acked === null) {
-        unacked += 1;
-      } else {
-        acked += 1;
-      }
+    filterMatcher = createFilterMatcher({
+      id: "never mind",
+      messageRegex: filter,
+      captureWholeTrace: false,
+    });
+  } catch (e: unknown) {
+    if (e instanceof SyntaxError) {
+      // failure to build regex - user problem
+      return `${0}|${0}|${0}`;
     }
-  } catch {
-    // failure to build regex perhaps
+    throw e;
+  }
+
+  for (const l of logs) {
+    const matched = filterMatcher.match({
+      messages: l.sourcesAndMessages.map(sm => sm.message),
+      timestamp: "doesnt matter",
+    });
+    if (!matched) {
+      continue;
+    }
+    total += 1;
+    if (l.acked === null) {
+      unacked += 1;
+    } else {
+      acked += 1;
+    }
   }
   return `${unacked}|${acked}|${total}`;
 }

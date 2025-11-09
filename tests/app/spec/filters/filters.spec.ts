@@ -35,11 +35,23 @@ test("should show a match count for unacked when doing the regex", async ({ main
     filterRegex: "unmatched",
     onFirstScreenShown: async (filterEditor: FilterEditorPageFixture) => {
       await expect(filterEditor.applyButton).toBeDisabled();
-      await filterEditor.filterRegex.fill("message 1");
-      await expect(filterEditor.applyButton).toBeEnabled();
-      await expect(filterEditor.applyButton).toContainText("Ack 1 matched now");
-      await filterEditor.filterRegex.fill("message");
-      await expect(filterEditor.applyButton).toContainText("Ack 2 matched now (of 3)");
+
+      await test.step("narrow regex", async () => {
+        await filterEditor.filterRegex.fill("message 1");
+        await expect(filterEditor.applyButton).toBeEnabled();
+        await expect(filterEditor.applyButton).toContainText("Ack 1 matched now");
+      });
+
+      await test.step("invalid regex", async () => {
+        await filterEditor.filterRegex.fill("message(");
+        await expect(filterEditor.applyButton).toBeDisabled();
+        await expect(filterEditor.applyButton).toContainText("Nothing matched");
+      });
+
+      await test.step("broader regex", async () => {
+        await filterEditor.filterRegex.fill("message");
+        await expect(filterEditor.applyButton).toContainText("Ack 2 matched now (of 3)");
+      });
     },
   });
   await mainPage.expectLogMessages("something 3");
