@@ -46,6 +46,7 @@ export default function FilterCard({ filter, hideId }: { filter: Filter; hideId?
         </div>
       </CardHeader>
       <CardContent>
+        {filter.field && <p>Field: {filter.field}</p>}
         <p data-testid="filter-message-regex">{filter.messageRegex}</p>
         {filter.description && <p data-testid="filter-message-description">{filter.description}</p>}
       </CardContent>

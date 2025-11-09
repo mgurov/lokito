@@ -178,7 +178,7 @@ async function responseEntryToJustReceivedLog(l: LokiResponseEntry): Promise<Jus
 
 type LokiResponseEntry = {
   values: [[timestamp: string, messageLine: string]];
-  stream: Record<string, unknown>;
+  stream: Record<string, string>;
 };
 
 export async function computeSHA256(input: string): Promise<string> {

@@ -5,12 +5,14 @@
 
 [ ] don't show clean when error or pending
 
-[ ] filter by a field
+[x] filter by a field
 [ ] notes on a message w/o filter
+[ ] filter name
+[ ] change filter
 
 [ ] create filter from user selection 
 
-[ ] preview filter appliance
+[. ] preview filter appliance
 
 [ ] continue fetch after first non-acked
 

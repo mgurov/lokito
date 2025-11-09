@@ -6,7 +6,7 @@ export function traceIdFields(log: Log): Array<{ traceIdField: string; traceIdVa
   const deduplicationIndex: Record<string, string> = {};
   const result = [];
   for (const traceIdField of TRACE_ID_FIELDS) {
-    const traceIdValue = log.stream[traceIdField];
+    const traceIdValue = log.fields[traceIdField];
     if (!traceIdValue) {
       continue;
     }

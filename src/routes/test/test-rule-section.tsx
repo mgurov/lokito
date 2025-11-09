@@ -5,7 +5,13 @@ export default function TestRuleEditor() {
   return (
     <>
       <div>
-        <RuleEditSection logLine={highMessage} onSubmit={() => {}} />
+        <RuleEditSection
+          logRecord={{
+            sourceLine: highMessage,
+            fieldsData: { highMessage, otherField: "short value" },
+          }}
+          onSubmit={() => {}}
+        />
       </div>
     </>
   );

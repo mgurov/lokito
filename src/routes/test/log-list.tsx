@@ -44,7 +44,7 @@ function generateLogData(): LogWithSource[] {
       ? "something very long decimal happened" + (Array.from({ length: 100 }).map((_, j) => `element ${j}`).join("."))
       : "something happened " + i;
     return {
-      stream: {
+      fields: {
         key1: "value1",
         key2: "value2",
       },

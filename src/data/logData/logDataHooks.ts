@@ -121,7 +121,12 @@ export const useTraceIdLogs = (traceId: string): LogWithSource[] =>
 // counts string "<unacked>|<acked>|<total>" (each is a number)
 export type MatchedCountsString = `${number}|${number}|${number}`;
 
-export const useMatchedAckedUnackedCount = (filter: string): MatchedCountsString =>
+export type FilterOnField = {
+  regex: string;
+  field: string | undefined;
+};
+
+export const useMatchedAckedUnackedCount = (filter: FilterOnField): MatchedCountsString =>
   useSelector(
     createSelector(
       [
@@ -131,7 +136,7 @@ export const useMatchedAckedUnackedCount = (filter: string): MatchedCountsString
     ),
   );
 
-function countMatched(filter: string, logs: Log[]): MatchedCountsString {
+function countMatched(filter: FilterOnField, logs: Log[]): MatchedCountsString {
   let unacked: number = 0;
   let acked: number = 0;
   let total: number = 0;
@@ -140,8 +145,9 @@ function countMatched(filter: string, logs: Log[]): MatchedCountsString {
   try {
     filterMatcher = createFilterMatcher({
       id: "never mind",
-      messageRegex: filter,
+      messageRegex: filter.regex,
       captureWholeTrace: false,
+      field: filter.field,
     });
   } catch (e: unknown) {
     if (e instanceof SyntaxError) {
@@ -153,8 +159,9 @@ function countMatched(filter: string, logs: Log[]): MatchedCountsString {
 
   for (const l of logs) {
     const matched = filterMatcher.match({
-      messages: l.sourcesAndMessages,
+      sourcesLines: l.sourcesAndMessages,
       timestamp: l.timestamp,
+      fieldValues: l.fields,
     });
     if (!matched) {
       continue;

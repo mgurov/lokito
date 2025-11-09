@@ -160,6 +160,13 @@ export default class MainPageFixture {
     await this.expectLogMessages();
   }
 
+  /**
+   * the messages appear in the reverse order of declaration, convenient to re-reverse the expectation for the readability
+   */
+  async expectLogMessagesRev(...expected: string[]) {
+    await this.expectLogMessages(...[...expected].reverse());
+  }
+
   async expectLogMessages(...expected: string[]) {
     await test.step("expectLogMessages", () => expectTexts(this.logMessage, ...expected), { box: true });
   }
@@ -235,7 +242,7 @@ export default class MainPageFixture {
 
     await test.step(props.stepName ?? "createFilter", async () => {
       if (props.logLineText) {
-        await this.page.getByText(props.logLineText).click();
+        await this.logRowByMessage(props.logLineText).click();
       }
       await this.page.getByTestId("new-rule-button").click();
 
@@ -310,6 +317,28 @@ export class FilterEditorPageFixture {
     return this.locator.getByTestId("filter-description-input");
   }
 
+  get fieldSelectorTrigger() {
+    return this.locator.getByTestId("select-field-to-match-trigger");
+  }
+
+  get fieldSelectorContent() {
+    return this.locator.page().getByTestId("field-selector-popup");
+  }
+
+  fieldOption(fieldName: string) {
+    return this.fieldSelectorContent.getByTestId("field_selector_option_" + fieldName);
+  }
+
+  async selectField(fieldName: string) {
+    await this.fieldSelectorTrigger.click();
+    await this.fieldOption(fieldName).click();
+  }
+
+  async selectMessageField() {
+    await this.fieldSelectorTrigger.click();
+    await this.fieldSelectorContent.locator(`[data-value="message"][role="option"]`).click();
+  }
+
   calendarDateButton(date: string) {
     return this.locator.locator(`td[data-day="${date}"] button`);
   }
@@ -317,6 +346,11 @@ export class FilterEditorPageFixture {
   async pickTTLDate(date: string) {
     await this.autoAckTtlTriggerButton.click();
     await this.calendarDateButton(date).click();
+  }
+
+  async expectMatchIndicators({ toAck, ofTotal }: { toAck: number; ofTotal?: number }) {
+    const total = ofTotal ? ` (of 3)` : "";
+    await expect(this.applyButton).toHaveText(`Ack ${toAck} matched now${total}`);
   }
 }
 

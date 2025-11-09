@@ -4,7 +4,7 @@ import { useAppDispatch } from "@/data/redux/reduxhooks";
 import { cn, randomId } from "@/lib/utils";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
-import { Dispatch, SetStateAction, useContext, useState } from "react";
+import React, { Dispatch, SetStateAction, useContext, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "../ui/shadcn/alert";
 import { Button, ButtonProps } from "../ui/shadcn/button";
 import { Checkbox } from "../ui/shadcn/checkbox";
@@ -12,28 +12,30 @@ import { Input } from "../ui/shadcn/input";
 import { ScrollArea, ScrollBar } from "../ui/shadcn/scroll-area";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "../ui/shadcn/sheet";
 import { escapeRegExp } from "./regex-utils";
-import { RuleEditorActionContext, RuleEditorContext } from "./ruleEditorContext";
+import { OpenRuleEditorPayload, RuleEditorActionContext, RuleEditorContext } from "./ruleEditorContext";
 import { TTLDatePicker } from "./TTLDatePicker";
 
-import { useMatchedAckedUnackedCount } from "@/data/logData/logDataHooks";
+import { FilterOnField, useMatchedAckedUnackedCount } from "@/data/logData/logDataHooks";
 import { GoogleIcon } from "../ui/icons/GoogleIcon";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/shadcn/card";
 import { Switch } from "../ui/shadcn/switch";
 import { Textarea } from "../ui/shadcn/textarea";
+import FieldSelectorCombobox from "./FieldSelectorCombobox";
 
 export function RuleEditorSheet() {
   const ruleEditorDispatch = useContext(RuleEditorActionContext);
-  const { open, logline } = useContext(RuleEditorContext);
+  const { logRecord } = useContext(RuleEditorContext);
 
   const appDispatch = useAppDispatch();
 
   function handleSubmit(p: SaveRuleProps) {
     if (p !== "cancel") {
-      const { save, messageRegex, extra, captureWholeTrace } = p;
+      const { save, messageRegex, extra, captureWholeTrace, field } = p;
       const newFilter: Filter = {
         id: randomId(),
         transient: !save,
         messageRegex,
+        field,
         captureWholeTrace,
         ...(extra || {}),
       };
@@ -52,7 +54,7 @@ export function RuleEditorSheet() {
   return (
     <>
       <Sheet
-        open={open}
+        open={!!logRecord}
         onOpenChange={(open) => {
           if (!open) {
             ruleEditorDispatch.close();
@@ -72,10 +74,13 @@ export function RuleEditorSheet() {
               to all the future logs.
             </SheetDescription>
           </SheetHeader>
-          <RuleEditSection
-            logLine={logline || "Should not happpen"}
-            onSubmit={handleSubmit}
-          />
+          {logRecord
+            && (
+              <RuleEditSection
+                logRecord={logRecord}
+                onSubmit={handleSubmit}
+              />
+            )}
         </SheetContent>
       </Sheet>
     </>
@@ -95,6 +100,7 @@ export type Step1PersistAction = {
 export type Step1FilterProps = {
   messageRegex: string;
   captureWholeTrace: boolean;
+  field: string | undefined; // undefined for the current source line message
 };
 
 export type Step2FilterProps = {
@@ -104,12 +110,13 @@ export type Step2FilterProps = {
 };
 
 export function RuleEditSection(
-  { logLine, onSubmit }: { logLine: string; onSubmit: (p: SaveRuleProps) => void },
+  { logRecord, onSubmit }: { logRecord: OpenRuleEditorPayload; onSubmit: (p: SaveRuleProps) => void },
 ) {
   const [step, setStep] = useState<"filter" | "persistence">("filter");
   const step1State = useState<Step1FilterProps>({
-    messageRegex: escapeRegExp(logLine),
+    messageRegex: escapeRegExp(logRecord.sourceLine),
     captureWholeTrace: true,
+    field: undefined,
   });
 
   const onStep1Submit = (
@@ -140,7 +147,7 @@ export function RuleEditSection(
     <div data-testid="rule-edit-section">
       {step === "filter" && (
         <RuleFilterStep
-          logLine={logLine}
+          logRecord={logRecord}
           step1State={step1State}
           onSubmit={onStep1Submit}
         />
@@ -157,17 +164,27 @@ export function RuleEditSection(
 }
 
 function RuleFilterStep(
-  { step1State, logLine, onSubmit }: {
+  { step1State, logRecord, onSubmit }: {
     step1State: [Step1FilterProps, Dispatch<SetStateAction<Step1FilterProps>>];
-    logLine: string;
+    logRecord: OpenRuleEditorPayload;
     onSubmit: (p: Step1PersistAction | "cancel") => void;
   },
 ) {
   const [step1Props, setStep1Props] = step1State;
+  const valueToMatch = step1Props.field ? logRecord.fieldsData[step1Props.field] : logRecord.sourceLine;
+
+  const onFieldChange = React.useEffectEvent(() => {
+    if (valueToMatch != step1Props.messageRegex) {
+      setStep1Props({ ...step1Props, messageRegex: escapeRegExp(valueToMatch) });
+    }
+  });
+
+  React.useEffect(() => onFieldChange(), [step1Props.field]);
+
   let logLineMatchesRegex: "yes" | "no" | "err" = "no";
   let errorMessage: string | null = null;
   try {
-    if (RegExp(step1Props.messageRegex).test(logLine)) {
+    if (RegExp(step1Props.messageRegex).test(valueToMatch)) {
       logLineMatchesRegex = "yes";
     }
   } catch (e: unknown) {
@@ -178,13 +195,29 @@ function RuleFilterStep(
   return (
     <>
       <div className="flex flex-col gap-4 py-4">
+        <div className="flex items-center space-x-2">
+          <label
+            htmlFor="field"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Field:
+          </label>
+
+          <FieldSelectorCombobox
+            messageLine={logRecord.sourceLine}
+            fieldData={logRecord.fieldsData}
+            field={step1Props.field}
+            setField={(newValue) => setStep1Props(current => ({ ...current, field: newValue }))}
+          />
+        </div>
+
         <ScrollArea className="rounded">
           <div
             id="line"
             className="relative px-[0.3rem] py-[0.2rem] font-mono text-sm max-h-80"
           >
             <pre>
-              {logLine}
+              {valueToMatch}
             </pre>
           </div>
           <ScrollBar orientation="horizontal" />
@@ -237,7 +270,8 @@ function RuleFilterStep(
 
       <div className="flex flex-col-reverse sm:flex-row sm:space-x-2">
         <MatchNowButton
-          filterRegex={step1Props.messageRegex}
+          regex={step1Props.messageRegex}
+          field={step1Props.field}
           data-testid="apply-rule-button"
           onClick={() => onSubmit({ save: false })}
           variant="secondary"
@@ -261,10 +295,11 @@ function RuleFilterStep(
   );
 }
 
-function MatchNowButton({ filterRegex, ...theRest }: ButtonProps & { filterRegex: string }) {
-  const [matchedUnackedCount, matchedAckedCount, totalCount] = useMatchedAckedUnackedCount(filterRegex).split("|").map(
-    s => parseInt(s, 10),
-  );
+function MatchNowButton({ regex, field, ...theRest }: ButtonProps & FilterOnField) {
+  const [matchedUnackedCount, matchedAckedCount, totalCount] = useMatchedAckedUnackedCount({ regex, field }).split("|")
+    .map(
+      s => parseInt(s, 10),
+    );
 
   let buttonText = "Nothing matched";
   if (totalCount > 0) {

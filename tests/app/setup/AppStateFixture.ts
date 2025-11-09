@@ -70,6 +70,7 @@ function specToFilter(spec: FilterSpec): Filter {
       id: nextId(),
       messageRegex: spec,
       captureWholeTrace: true,
+      field: undefined,
     };
   }
   const result = {
