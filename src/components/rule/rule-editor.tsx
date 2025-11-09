@@ -12,7 +12,7 @@ import { Input } from "../ui/shadcn/input";
 import { ScrollArea, ScrollBar } from "../ui/shadcn/scroll-area";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "../ui/shadcn/sheet";
 import { escapeRegExp } from "./regex-utils";
-import { RuleEditorContext, RuleEditorDispatchContext } from "./ruleEditorContext";
+import { RuleEditorActionContext, RuleEditorContext } from "./ruleEditorContext";
 import { TTLDatePicker } from "./TTLDatePicker";
 
 import { useMatchedAckedUnackedCount } from "@/data/logData/logDataHooks";
@@ -22,7 +22,7 @@ import { Switch } from "../ui/shadcn/switch";
 import { Textarea } from "../ui/shadcn/textarea";
 
 export function RuleEditorSheet() {
-  const ruleEditorDispatch = useContext(RuleEditorDispatchContext);
+  const ruleEditorDispatch = useContext(RuleEditorActionContext);
   const { open, logline } = useContext(RuleEditorContext);
 
   const appDispatch = useAppDispatch();
@@ -40,7 +40,7 @@ export function RuleEditorSheet() {
       appDispatch(createFilter(newFilter));
     }
     if (ruleEditorDispatch) {
-      ruleEditorDispatch({ type: "close" });
+      ruleEditorDispatch.close();
     }
   }
 
@@ -55,9 +55,7 @@ export function RuleEditorSheet() {
         open={open}
         onOpenChange={(open) => {
           if (!open) {
-            ruleEditorDispatch({
-              type: "close",
-            });
+            ruleEditorDispatch.close();
           }
         }}
       >

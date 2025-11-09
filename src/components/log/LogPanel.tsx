@@ -11,7 +11,7 @@ import React from "react";
 import { useDispatch } from "react-redux";
 import { SelectedSourceContext, useSelectedSourceMessageLine } from "../context/SelectedSourceContext";
 import FilterCard from "../rule/FilterCard";
-import { RuleEditorDispatchContext } from "../rule/ruleEditorContext";
+import { RuleEditorActionContext as RuleEditorActionsContext } from "../rule/ruleEditorContext";
 import SimpleTooltip from "../ui/custom/SimpleTooltip";
 
 export function MemoedLogRowPanel({ log, excludeFilterId }: { log: Log; excludeFilterId?: string }) {
@@ -135,7 +135,7 @@ function AckTillThisButton({ messageId }: { messageId: string }) {
 }
 
 function FilterLikeThisButton({ log }: { log: Log }) {
-  const dispatch = useContext(RuleEditorDispatchContext);
+  const actions = useContext(RuleEditorActionsContext);
   const logLine = useSelectedSourceMessageLine(log);
   return (
     <Button
@@ -143,15 +143,12 @@ function FilterLikeThisButton({ log }: { log: Log }) {
       size="sm"
       variant="outline"
       data-testid="new-rule-button"
-      disabled={!dispatch}
+      disabled={!actions}
       onClick={() => {
-        if (!dispatch) {
+        if (!actions) {
           return;
         }
-        dispatch({
-          type: "open",
-          logLine,
-        });
+        actions.open(logLine);
       }}
     >
       <GoogleIcon icon="filter-alt" /> Filter like this...
