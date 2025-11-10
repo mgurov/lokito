@@ -294,3 +294,128 @@ test("should show again the entries after the filter removal", async ({ mainPage
     "pre-trace",
   );
 });
+
+test("ack by saved filter for non-acking should also ack by trace when configured", async ({ mainPage, logs, appState }) => {
+  await appState.givenFilters({
+    messageRegex: "yes-trace-match",
+    autoAck: false,
+    captureWholeTrace: true,
+  });
+
+  logs.givenRecords(
+    {
+      message: "pre-trace", // not matched but the trace of the filter1
+      traceId: "trace-1",
+    },
+    {
+      message: "yes-trace-match", // matched by the filter1
+      traceId: "trace-1",
+    },
+    {
+      message: "after-trace", // not matched but the trace of the filter1
+      traceId: "trace-1",
+    },
+  );
+
+  await mainPage.open();
+
+  await mainPage.expectLogMessages(
+    "after-trace",
+    "yes-trace-match",
+    "pre-trace",
+  );
+
+  // when
+
+  await expect(mainPage.matchingFilterButtons).toHaveCount(3);
+  await mainPage.matchingFilterButtons.first().click();
+  await mainPage.matchingFilterAckSuchDropdownOption.click();
+
+  await mainPage.expectNoLogMessages();
+});
+
+test("ack by just created filter for non-acking should also ack by trace when configured", async ({ mainPage, logs }) => {
+  logs.givenRecords(
+    {
+      message: "pre-trace", // not matched but the trace of the filter1
+      traceId: "trace-1",
+    },
+    {
+      message: "yes-trace-match", // matched by the filter1
+      traceId: "trace-1",
+    },
+    {
+      message: "after-trace", // not matched but the trace of the filter1
+      traceId: "trace-1",
+    },
+  );
+
+  await mainPage.open();
+
+  await mainPage.expectLogMessages(
+    "after-trace",
+    "yes-trace-match",
+    "pre-trace",
+  );
+
+  await mainPage.createFilter({
+    logLineText: "yes-trace-match",
+    onFirstScreenShown: async (d) => {
+      await expect(d.ackWholeTraceCheckbox).toBeChecked();
+    },
+    onSecondScreenShown: async (d) => {
+      await d.autoAckCheckbox.click();
+      await expect(d.autoAckCheckbox).not.toBeChecked();
+    },
+  });
+
+  // when
+
+  await expect(mainPage.matchingFilterButtons).toHaveCount(3);
+  await mainPage.matchingFilterButtons.first().click();
+  await mainPage.matchingFilterAckSuchDropdownOption.click();
+
+  await mainPage.expectNoLogMessages();
+});
+
+test("ack by filter for non-acking should not ack by trace when not configured", async ({ mainPage, logs, appState }) => {
+  await appState.givenFilters(
+    {
+      messageRegex: "no-trace-match",
+      autoAck: false,
+      captureWholeTrace: false,
+    },
+  );
+
+  logs.givenRecords(
+    {
+      message: "pre-trace", // not matched but the trace of the filter1
+      traceId: "trace-1",
+    },
+    {
+      message: "no-trace-match", // matched by the filter1
+      traceId: "trace-1",
+    },
+    {
+      message: "after-trace", // not matched but the trace of the filter1
+      traceId: "trace-1",
+    },
+  );
+
+  await mainPage.open();
+
+  await mainPage.expectLogMessages(
+    "after-trace",
+    "no-trace-match",
+    "pre-trace",
+  );
+
+  await expect(mainPage.matchingFilterButtons).toHaveCount(1);
+  await mainPage.matchingFilterButtons.click();
+  await mainPage.matchingFilterAckSuchDropdownOption.click();
+
+  await mainPage.expectLogMessages(
+    "after-trace",
+    "pre-trace",
+  );
+});
