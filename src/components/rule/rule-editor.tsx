@@ -262,14 +262,14 @@ function RuleFilterStep(
 }
 
 function MatchNowButton({ filterRegex, ...theRest }: ButtonProps & { filterRegex: string }) {
-  const [matchedUnackedCount, _matchedAckedCount, totalCount] = useMatchedAckedUnackedCount(filterRegex).split("|").map(
+  const [matchedUnackedCount, matchedAckedCount, totalCount] = useMatchedAckedUnackedCount(filterRegex).split("|").map(
     s => parseInt(s, 10),
   );
 
   let buttonText = "Nothing matched";
   if (totalCount > 0) {
     buttonText = `Ack ${matchedUnackedCount} matched now`;
-    if (matchedUnackedCount > 0) {
+    if (matchedAckedCount > 0) {
       buttonText += ` (of ${totalCount})`;
     }
   }

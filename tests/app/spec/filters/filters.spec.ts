@@ -39,18 +39,18 @@ test("should show a match count for unacked when doing the regex", async ({ main
       await test.step("narrow regex", async () => {
         await filterEditor.filterRegex.fill("message 1");
         await expect(filterEditor.applyButton).toBeEnabled();
-        await expect(filterEditor.applyButton).toContainText("Ack 1 matched now");
+        await expect(filterEditor.applyButton).toHaveText("Ack 1 matched now");
       });
 
       await test.step("invalid regex", async () => {
         await filterEditor.filterRegex.fill("message(");
         await expect(filterEditor.applyButton).toBeDisabled();
-        await expect(filterEditor.applyButton).toContainText("Nothing matched");
+        await expect(filterEditor.applyButton).toHaveText("Nothing matched");
       });
 
       await test.step("broader regex", async () => {
         await filterEditor.filterRegex.fill("message");
-        await expect(filterEditor.applyButton).toContainText("Ack 2 matched now (of 3)");
+        await expect(filterEditor.applyButton).toHaveText("Ack 2 matched now (of 3)");
       });
     },
   });
@@ -85,7 +85,7 @@ test(
       filterRegex: "s2 event",
       saveAction: "apply",
       onFirstScreenShown: async (filterEditor: FilterEditorPageFixture) => {
-        await expect(filterEditor.applyButton).toContainText("Ack 1 matched now (of 2)");
+        await expect(filterEditor.applyButton).toHaveText("Ack 1 matched now (of 2)");
       },
     });
   },
