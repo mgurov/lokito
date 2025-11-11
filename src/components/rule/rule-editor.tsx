@@ -4,7 +4,7 @@ import { useAppDispatch } from "@/data/redux/reduxhooks";
 import { cn, randomId } from "@/lib/utils";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
-import { Dispatch, SetStateAction, useContext, useState } from "react";
+import React, { Dispatch, SetStateAction, useContext, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "../ui/shadcn/alert";
 import { Button, ButtonProps } from "../ui/shadcn/button";
 import { Checkbox } from "../ui/shadcn/checkbox";
@@ -172,6 +172,15 @@ function RuleFilterStep(
 ) {
   const [step1Props, setStep1Props] = step1State;
   const valueToMatch = step1Props.field ? logRecord.fieldsData[step1Props.field] : logRecord.sourceLine;
+
+  const onFieldChange = React.useEffectEvent(() => {
+    if (valueToMatch != step1Props.messageRegex) {
+      setStep1Props({ ...step1Props, messageRegex: escapeRegExp(valueToMatch) });
+    }
+  });
+
+  React.useEffect(() => onFieldChange(), [step1Props.field]);
+
   let logLineMatchesRegex: "yes" | "no" | "err" = "no";
   let errorMessage: string | null = null;
   try {
