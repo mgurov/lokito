@@ -11,16 +11,14 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/shadcn/
 import { ChevronsUpDown } from "lucide-react";
 import React from "react";
 
-export default function FieldSelectorCombobox({ data, field, setField }: {
-  data: Record<string, string>;
+export default function FieldSelectorCombobox({ messageLine, fieldData, field, setField }: {
+  messageLine: string;
+  fieldData: Record<string, string>;
   field: string | undefined;
   setField: (newValue: string | undefined) => void;
 }) {
   const [open, setOpen] = React.useState(false);
 
-  // TODO: stretch all the screen
-  // TODO: long values collapse
-  // TODO: select back the line.
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -29,26 +27,38 @@ export default function FieldSelectorCombobox({ data, field, setField }: {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between"
+          className="justify-between"
         >
           {field
             ? field
-            : "Line"}
+            : "Message Line"}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-full p-0" data-testid="field-selector-popup">
         <Command>
-          <CommandInput placeholder="Line" className="h-9" />
+          <CommandInput placeholder="Line" className="h-9" data-testid="field-selector-search-input" />
           <CommandList>
             <CommandEmpty>No field found</CommandEmpty>
-            <CommandGroup>
-              {Object.entries(data).map(([fieldName, fieldValue]) => (
+            <CommandGroup heading="Message Line">
+              <CommandItem
+                key="message"
+                value="message"
+                onSelect={() => {
+                  setField(undefined);
+                  setOpen(false);
+                }}
+              >
+                {messageLine}
+              </CommandItem>
+            </CommandGroup>
+            <CommandGroup heading="Field">
+              {Object.entries(fieldData).map(([fieldName, fieldValue]) => (
                 <CommandItem
-                  key={fieldName}
-                  value={fieldName}
-                  onSelect={(currentValue) => {
-                    setField(currentValue);
+                  data-testid={"field_selector_option_" + fieldName}
+                  key={"field_" + fieldName}
+                  onSelect={() => {
+                    setField(fieldName);
                     setOpen(false);
                   }}
                 >

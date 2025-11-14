@@ -204,7 +204,8 @@ function RuleFilterStep(
           </label>
 
           <FieldSelectorCombobox
-            data={logRecord.fieldsData}
+            messageLine={logRecord.sourceLine}
+            fieldData={logRecord.fieldsData}
             field={step1Props.field}
             setField={(newValue) => setStep1Props(current => ({ ...current, field: newValue }))}
           />
