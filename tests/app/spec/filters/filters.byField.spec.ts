@@ -1,9 +1,6 @@
 import { expect, test } from "@tests/app/setup/testExtended";
 import { FilterEditorPageFixture } from "../../setup/pages/MainPageFixture";
 
-/**
- * TODO: show on the card
- */
 test("should match a message by a field", async ({ mainPage, logs }) => {
   logs.givenRecords(
     { message: "m1 root", data: { "field1": "foo", "field2": "other field" } }, // match
@@ -27,6 +24,9 @@ test("should match a message by a field", async ({ mainPage, logs }) => {
     },
   });
   await mainPage.expectLogMessagesRev("m3 other", "m4 missing");
+  const filtersPage = await mainPage.openFiltersPage();
+  const card = filtersPage.getFilterCard({ regex: "foo" });
+  await expect(card.locator).toContainText("field1");
 });
 
 test("should include matched show match count on creation", async ({ mainPage, logs, appState }) => {
