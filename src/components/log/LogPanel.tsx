@@ -15,7 +15,7 @@ import { RuleEditorActionContext as RuleEditorActionsContext } from "../rule/rul
 import SimpleTooltip from "../ui/custom/SimpleTooltip";
 
 export function MemoedLogRowPanel({ log, excludeFilterId }: { log: Log; excludeFilterId?: string }) {
-  const { stream, ...lessMutable } = log;
+  const { fields: stream, ...lessMutable } = log;
   const memoKey = JSON.stringify(lessMutable);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   return React.useMemo(() => <LogPanel log={log} excludeFilterId={excludeFilterId} />, [memoKey, excludeFilterId]);
@@ -79,7 +79,7 @@ function RenderFields(props: { log: Log }) {
       })
       .catch(console.error);
   }
-  const fields = Object.keys(props.log.stream);
+  const fields = Object.keys(props.log.fields);
 
   return (
     <>
@@ -92,11 +92,11 @@ function RenderFields(props: { log: Log }) {
             {field}
           </div>
           <div className="group flex">
-            {props.log.stream?.[field] !== undefined && (
+            {props.log.fields?.[field] !== undefined && (
               <Button
                 size="icon"
                 variant="outline"
-                onClick={() => handleCopyToClipboard(props.log.stream?.[field], field)}
+                onClick={() => handleCopyToClipboard(props.log.fields?.[field], field)}
                 className="h-4 w-0 border-none bg-transparent text-gray-600 opacity-0 transition-opacity group-hover:opacity-100 group-hover:w-4"
                 title={copiedField === field ? "Copied!" : "Copy"}
               >
@@ -104,7 +104,7 @@ function RenderFields(props: { log: Log }) {
                 <span className="sr-only">Copy Order ID</span>
               </Button>
             )}
-            <span>{props.log.stream?.[field] as ReactNode}</span>
+            <span>{props.log.fields?.[field] as ReactNode}</span>
           </div>
         </React.Fragment>
       ))}
@@ -148,7 +148,7 @@ function FilterLikeThisButton({ log }: { log: Log }) {
         if (!actions) {
           return;
         }
-        actions.open({ sourceLine: logLine, fieldsData: log.stream });
+        actions.open({ sourceLine: logLine, fieldsData: log.fields });
       }}
     >
       <GoogleIcon icon="filter-alt" /> Filter like this...

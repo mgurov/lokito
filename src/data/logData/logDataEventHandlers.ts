@@ -37,7 +37,7 @@ export function handleNewLogsBatch(state: LogDataState, justReceivedBatch: JustR
     }
 
     return {
-      stream,
+      fields: stream,
       id,
       timestamp,
       acked,
@@ -162,7 +162,7 @@ function recordWhetherDuplicate(state: LogDataState, newRecord: JustReceivedLog,
     if (!sameDataRecord.sourceIds.includes(sourceId)) {
       sameDataRecord.sourceIds.push(sourceId);
       // full scan on id and then narrow down on stream equality
-      const logsEntries = state.logs.filter(l => l.id === newRecord.id && _.isEqual(l.stream, newRecord.stream));
+      const logsEntries = state.logs.filter(l => l.id === newRecord.id && _.isEqual(l.fields, newRecord.stream));
       logsEntries.forEach(l => {
         l.sourcesAndMessages.push({ message: newRecord.message, sourceId });
       });

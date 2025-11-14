@@ -19,7 +19,7 @@ export type FilterLogNote = {
 };
 
 export type Log = {
-  stream: { [key: string]: string }; // TODO: rename to key values
+  fields: { [key: string]: string };
   id: string;
   timestamp: string; // iso string
   acked: Acked;

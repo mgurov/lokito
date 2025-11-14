@@ -131,7 +131,7 @@ export const logDataSlice = createSlice({
         const lineMatched = matcher.match({
           sourcesLines: line.sourcesAndMessages,
           timestamp: line.timestamp,
-          fieldValues: line.stream,
+          fieldValues: line.fields,
         });
 
         if (!lineMatched) {

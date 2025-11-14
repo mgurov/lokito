@@ -161,7 +161,7 @@ function countMatched(filter: FilterOnField, logs: Log[]): MatchedCountsString {
     const matched = filterMatcher.match({
       sourcesLines: l.sourcesAndMessages,
       timestamp: l.timestamp,
-      fieldValues: l.stream,
+      fieldValues: l.fields,
     });
     if (!matched) {
       continue;
