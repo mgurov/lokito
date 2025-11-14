@@ -4,6 +4,7 @@ import { RootState } from "../redux/store";
 import { Source, SourceLocalStorage } from "../source";
 
 export const START_WHERE_STOPPED = "START_WHERE_STOPPED";
+export const NORMAL_DELAY_BEFORE_REFRESH_SEC = 60;
 
 export interface StartFetching {
   from: string;
@@ -47,6 +48,7 @@ export interface SourceFetchingState {
 interface OverallFetchingState {
   status: "idle" | "active";
   fetchCycle: number;
+  nextFetchInSecs: number;
   from: string | null; // where null means no fetch has yet been performed
 }
 
@@ -59,6 +61,7 @@ const initialState: FetchingState = {
   overallState: {
     status: "idle",
     fetchCycle: 0,
+    nextFetchInSecs: 0,
     from: null,
   },
   sourcesState: {},
@@ -73,6 +76,7 @@ export const fetchingSlice = createSlice({
         status: "active",
         from: action.payload.from,
         fetchCycle: state.overallState.fetchCycle + 1,
+        nextFetchInSecs: 0,
       };
     },
     stopFetching: (state) => {
@@ -130,6 +134,12 @@ export const fetchingSlice = createSlice({
     incrementFetchCycle: (state) => {
       state.overallState.fetchCycle += 1;
     },
+    fetchNow: (state) => {
+      state.overallState.nextFetchInSecs = 0;
+    },
+    scheduleFetch: (state, action: PayloadAction<{ seconds: number }>) => {
+      state.overallState.nextFetchInSecs = action.payload.seconds;
+    },
   },
 });
 
@@ -139,6 +149,12 @@ export const fetchingActions = fetchingSlice.actions;
 export default fetchingSlice.reducer;
 
 export const useOverallFetchingState = () => useSelector((state: RootState) => state.fetching.overallState);
+
+export const useSecondsTillRefresh = () =>
+  useSelector((state: RootState) => state.fetching.overallState.nextFetchInSecs);
+
+export const useOverallFetchingStateStatus = () =>
+  useSelector((state: RootState) => state.fetching.overallState.status);
 
 export const useSourcesFetchingState = () => useSelector((state: RootState) => state.fetching.sourcesState);
 

@@ -6,9 +6,12 @@ import { JustReceivedLog } from "../logData/logSchema";
 import { createNewSource, deleteSource } from "../redux/sourcesSlice";
 import { AppDispatch, RootState } from "../redux/store";
 import { SourceLocalStorage } from "../source";
-import { fetchingActions, SourceFetchingState, START_WHERE_STOPPED } from "./fetchingSlice";
-
-const REFETCH_DELAY = 60000;
+import {
+  fetchingActions,
+  NORMAL_DELAY_BEFORE_REFRESH_SEC,
+  SourceFetchingState,
+  START_WHERE_STOPPED,
+} from "./fetchingSlice";
 
 const fetchingMiddleware = createListenerMiddleware();
 export default fetchingMiddleware;
@@ -58,7 +61,18 @@ fetchingMiddleware.startListening({
             }));
           }
         }
-        await forkApi.delay(REFETCH_DELAY); // polling every minute after the last fetch
+
+        listenerApi.dispatch(fetchingActions.scheduleFetch({ seconds: NORMAL_DELAY_BEFORE_REFRESH_SEC }));
+
+        while (true) {
+          await forkApi.delay(1000);
+          const { nextFetchInSecs } = (listenerApi.getState() as RootState).fetching.overallState;
+          const oneSecondLess = nextFetchInSecs - 1;
+          listenerApi.dispatch(fetchingActions.scheduleFetch({ seconds: oneSecondLess }));
+          if (oneSecondLess <= 0) {
+            break;
+          }
+        }
       }
     });
     await task.result;

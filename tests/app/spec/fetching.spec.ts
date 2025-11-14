@@ -20,6 +20,50 @@ test("fetching messages", async ({ page, mainPage, logs }) => {
   await mainPage.expectLogMessages("event3", "event2", "event1");
 });
 
+test("should support force fetch new messages", async ({ page, mainPage, logs }) => {
+  await page.clock.install();
+
+  logs.givenRecords({ message: "event1" });
+
+  await mainPage.open({ startFetch: true });
+
+  await mainPage.expectLogMessages("event1");
+
+  logs.givenRecords({ message: "event2" });
+
+  await mainPage.forceFetchButton.click();
+
+  await page.clock.runFor("00:01");
+
+  await mainPage.expectLogMessagesRev("event1", "event2");
+});
+
+test("force cycle button should not be visible before start and disabled while cycling", async ({ page, mainPage }) => {
+  await page.clock.install();
+
+  // logs.givenRecords({ message: "event1" });
+
+  await mainPage.open({ startFetch: false });
+
+  await expect(mainPage.forceFetchButton).not.toBeAttached();
+
+  await mainPage.startFetchingButton().click();
+
+  await expect(mainPage.forceFetchButton).toBeEnabled();
+
+  const holdLokiResponse = new Deferred();
+
+  await page.route(routes.loki, async (request) => {
+    await holdLokiResponse.promise;
+    await request.fallback();
+  });
+
+  await page.clock.runFor("01:00");
+  await expect(mainPage.forceFetchButton).toBeDisabled();
+  holdLokiResponse.resolve();
+  await expect(mainPage.forceFetchButton).toBeEnabled();
+});
+
 test("new messages should be marked such", async ({ page, mainPage, logs }) => {
   await page.clock.install();
 

@@ -156,6 +156,10 @@ export default class MainPageFixture {
     return this.page.getByTestId("show-all-button");
   }
 
+  get forceFetchButton() {
+    return this.page.getByTestId("force-fetch");
+  }
+
   async expectNoLogMessages() {
     await this.expectLogMessages();
   }

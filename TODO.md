@@ -16,7 +16,7 @@
 
 [ ] continue fetch after first non-acked
 
-[ ] force fetch cycle
+[x] force fetch cycle
 
 [ ] link to Tempo
 
