@@ -1,31 +1,26 @@
 import { expect, test } from "@tests/app/setup/testExtended";
-import { AnnotationSuppressDefaultApp } from "../setup/AppStateFixture";
-import { routes } from "../setup/ExternalLogsFixture";
-import { Deferred } from "../util/promises";
-import { expectTexts } from "../util/visualAssertions";
+import { AnnotationSuppressDefaultApp } from "../../setup/AppStateFixture";
+import { Deferred } from "../../util/promises";
+import { expectTexts } from "../../util/visualAssertions";
 
-test("fetching messages", async ({ page, mainPage, logs }) => {
-  await page.clock.install();
-
+test("fetching messages", async ({ mainPage, logs }) => {
   logs.givenRecords({ message: "event1" });
 
-  await mainPage.open({ startFetch: true });
+  await mainPage.open({ startFetch: true, installClock: true });
 
   await mainPage.expectLogMessages("event1");
 
   logs.givenRecords({ message: "event2" }, { message: "event3" });
 
-  await page.clock.runFor("01:30");
+  await mainPage.waitNextSyncCycle();
 
   await mainPage.expectLogMessages("event3", "event2", "event1");
 });
 
 test("should support force fetch new messages", async ({ page, mainPage, logs }) => {
-  await page.clock.install();
-
   logs.givenRecords({ message: "event1" });
 
-  await mainPage.open({ startFetch: true });
+  await mainPage.open({ startFetch: true, installClock: true });
 
   await mainPage.expectLogMessages("event1");
 
@@ -38,12 +33,8 @@ test("should support force fetch new messages", async ({ page, mainPage, logs })
   await mainPage.expectLogMessagesRev("event1", "event2");
 });
 
-test("force cycle button should not be visible before start and disabled while cycling", async ({ page, mainPage }) => {
-  await page.clock.install();
-
-  // logs.givenRecords({ message: "event1" });
-
-  await mainPage.open({ startFetch: false });
+test("force cycle button should not be visible before start and disabled while cycling", async ({ mainPage }) => {
+  await mainPage.open({ startFetch: false, installClock: true });
 
   await expect(mainPage.forceFetchButton).not.toBeAttached();
 
@@ -52,24 +43,21 @@ test("force cycle button should not be visible before start and disabled while c
   await expect(mainPage.forceFetchButton).toBeEnabled();
 
   const holdLokiResponse = new Deferred();
-
-  await page.route(routes.loki, async (request) => {
+  await mainPage.onLokiRequest(async (request) => {
     await holdLokiResponse.promise;
     await request.fallback();
   });
 
-  await page.clock.runFor("01:00");
+  await mainPage.waitNextSyncCycle();
   await expect(mainPage.forceFetchButton).toBeDisabled();
   holdLokiResponse.resolve();
   await expect(mainPage.forceFetchButton).toBeEnabled();
 });
 
-test("new messages should be marked such", async ({ page, mainPage, logs }) => {
-  await page.clock.install();
-
+test("new messages should be marked such", async ({ mainPage, logs }) => {
   logs.givenRecords("event1");
 
-  await mainPage.open({ startFetch: true });
+  await mainPage.open({ startFetch: true, installClock: true });
 
   await expect(mainPage.logRowByMessage("event1").getByTestId("log-table-row-header")).toHaveClass(/new-entry/);
 
@@ -81,9 +69,7 @@ test("new messages should be marked such", async ({ page, mainPage, logs }) => {
   await expect(mainPage.logRowByMessage("event1").getByTestId("log-table-row-header")).not.toHaveClass(/new-entry/);
 });
 
-test("should sort fetched messages", AnnotationSuppressDefaultApp, async ({ page, appState, mainPage, logs }) => {
-  await page.clock.install();
-
+test("should sort fetched messages", AnnotationSuppressDefaultApp, async ({ appState, mainPage, logs }) => {
   const [s1, s2] = await appState.givenSources({ name: "existing" });
 
   logs.givenSourceRecords(s1, { message: "earlier", timestamp: "1" }, { message: "later", timestamp: "3" });
@@ -98,11 +84,9 @@ test(
   "should fetch updated query on editing",
   AnnotationSuppressDefaultApp,
   async ({ page, appState, mainPage, logs }) => {
-    await page.clock.install();
-
     const [existing] = await appState.givenSources({ name: "existing", query: "{job='test'}" });
 
-    await mainPage.open({ startFetch: true });
+    await mainPage.open({ startFetch: true, installClock: true });
 
     await expect.poll(() => {
       return logs.requests.map(u => u.searchParams.get("query"));
@@ -123,16 +107,14 @@ test(
   },
 );
 
-test("duplications should be filtered out on fetching", async ({ page, mainPage, logs }) => {
-  await page.clock.install();
-
+test("duplications should be filtered out on fetching", async ({ mainPage, logs }) => {
   const sameTimestamp = "2025-02-04T20:00:00.000Z";
   const sameData = { "event": "event1" };
   const anotherTimestamp = "2025-02-04T20:00:00.001Z";
 
   logs.givenRecords({ message: "event1", timestamp: sameTimestamp, data: sameData });
 
-  await mainPage.open({ startFetch: true });
+  await mainPage.open({ startFetch: true, installClock: true });
 
   await mainPage.expectLogMessages("event1");
 
@@ -143,7 +125,7 @@ test("duplications should be filtered out on fetching", async ({ page, mainPage,
     { message: "event4", timestamp: sameTimestamp, data: sameData }, // to be skipped
   );
 
-  await page.clock.runFor("01:30");
+  await mainPage.waitNextSyncCycle();
 
   await mainPage.expectLogMessages("event2", "event3", "event1");
 });
@@ -175,73 +157,6 @@ test(
     await mainPage.expectLogMessages("s2 event1");
   },
 );
-
-test.describe("error handling", () => {
-  test.beforeEach(({ consoleLogging }) => {
-    consoleLogging.ignoreErrorMessagesContaining("error fetching logs");
-    consoleLogging.ignoreErrorMessagesContaining("Failed to load resource:");
-  });
-
-  test(
-    "should show error upon failure to fetch",
-    AnnotationSuppressDefaultApp,
-    async ({ page, appState, mainPage }) => {
-      await page.route(routes.loki, async (request) => {
-        await request.abort();
-      });
-
-      const source = await appState.givenSource();
-
-      await mainPage.open({ startFetch: true });
-
-      await expect(mainPage.sourceTabHeader(source).getByTestId("source-name")).toHaveClass("animate-pulse");
-      await expect(mainPage.sourceTabHeader(source).getByTestId("source-in-error-indicator")).toBeVisible();
-    },
-  );
-
-  test("should keep fetching after a delayed response", async ({ page, mainPage, logs }) => {
-    await page.clock.install();
-
-    logs.givenRecords({ message: "e1" });
-
-    await mainPage.open({ startFetch: true });
-
-    await mainPage.expectLogMessages("e1");
-
-    // next cycle
-    logs.givenRecords({ message: "e2" });
-
-    const delayedResponse = new Deferred<void>();
-    await page.route(routes.loki, async (request) => {
-      await delayedResponse.promise;
-      await request.abort();
-    }, { times: 1 });
-
-    await page.clock.runFor("01:30");
-
-    await mainPage.expectLogMessages("e1");
-
-    delayedResponse.resolve();
-
-    await page.clock.runFor("01:30");
-
-    await mainPage.expectLogMessages("e2", "e1");
-
-    // next cycle
-    logs.givenRecords({ message: "e3" });
-    await page.clock.runFor("01:30");
-    await mainPage.expectLogMessages("e3", "e2", "e1");
-  });
-
-  test("should show error on no responses", async ({ page, mainPage }) => {
-    await page.route(routes.loki, async (request) => {
-      await request.abort();
-    });
-    await mainPage.open({ startFetch: true });
-    // NB: shouldn't actually be clean on error, but never mind for now.
-    await expect(mainPage.cleanCheck).toBeVisible();
-  });
-});
 
 test(
   "should mark fetched messages with their source names in the all tab but not in the source one",

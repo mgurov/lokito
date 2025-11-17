@@ -1,5 +1,6 @@
 import { expect, Locator, Page, test } from "@playwright/test";
 import { expectTexts } from "@tests/app/util/visualAssertions";
+import { RouteHandler, routes } from "../ExternalLogsFixture";
 import FiltersPageFixture from "./FiltersPageFixture";
 import SourcePageFixture, { NewSourceRollover, SourceCardFixture } from "./SourcesPageFixture";
 
@@ -15,11 +16,16 @@ export default class MainPageFixture {
   async open({
     executeBefore,
     startFetch = true,
+    installClock = false,
   }: {
     executeBefore?: () => Promise<void>;
     startFetch?: boolean | string;
+    installClock?: boolean;
   } = {}) {
     await test.step("open main page", async () => {
+      if (installClock) {
+        await this.page.clock.install();
+      }
       if (executeBefore) {
         await executeBefore();
       }
@@ -33,6 +39,10 @@ export default class MainPageFixture {
 
   startFetchingButton(from: string = "now") {
     return this.page.getByTestId("fetch-option").getByText(from);
+  }
+
+  async onLokiRequest(handler: RouteHandler, options?: Parameters<Page["route"]>[2]) {
+    await this.page.route(routes.loki, handler, options);
   }
 
   get ackedMessagesCount() {
@@ -229,8 +239,8 @@ export default class MainPageFixture {
     return new SourceCardFixture(this.page.getByTestId("source-card"));
   }
 
-  async waitNextSyncCycle() {
-    await this.page.clock.runFor("01:00"); // a minute to sync
+  async waitNextSyncCycle({ timeToWait = "01:00" }: { timeToWait?: string } = {}) {
+    await this.page.clock.runFor(timeToWait); // a minute to sync
   }
 
   async createFilter(props: {

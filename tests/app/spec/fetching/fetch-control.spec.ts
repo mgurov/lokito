@@ -1,6 +1,6 @@
 import { SourceLocalStorage } from "@/data/source";
 import { expect, test } from "@tests/app/setup/testExtended";
-import { AnnotationSuppressDefaultApp } from "../setup/AppStateFixture";
+import { AnnotationSuppressDefaultApp } from "../../setup/AppStateFixture";
 
 test("should start with given delay at the moment of click", async ({ mainPage, logs }) => {
   await mainPage.clock.install({ time: "2025-02-04T20:30:00.000Z" });

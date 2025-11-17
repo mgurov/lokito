@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { AxiosError, isAxiosError } from "axios";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { Source, SourceLocalStorage } from "../source";
@@ -27,7 +28,7 @@ export interface SourceFetchOk {
 
 export interface SourceFetchErr {
   sourceId: string;
-  err: string;
+  error: Error;
 }
 
 interface PendingRange {
@@ -41,7 +42,8 @@ export interface SourceFetchingState {
   state: "idle" | "fetching" | "ok" | "error";
   from: string;
   lastSuccess: string | null;
-  err: string | null;
+  error: Error | null;
+  successiveErrorCount: number;
   pendingRange: PendingRange | null;
 }
 
@@ -50,6 +52,7 @@ interface OverallFetchingState {
   fetchCycle: number;
   nextFetchInSecs: number;
   from: string | null; // where null means no fetch has yet been performed
+  errorFetchToMuch: string | null;
 }
 
 export interface FetchingState {
@@ -63,6 +66,7 @@ const initialState: FetchingState = {
     fetchCycle: 0,
     nextFetchInSecs: 0,
     from: null,
+    errorFetchToMuch: null,
   },
   sourcesState: {},
 };
@@ -77,6 +81,7 @@ export const fetchingSlice = createSlice({
         from: action.payload.from,
         fetchCycle: state.overallState.fetchCycle + 1,
         nextFetchInSecs: 0,
+        errorFetchToMuch: null,
       };
     },
     stopFetching: (state) => {
@@ -91,7 +96,8 @@ export const fetchingSlice = createSlice({
         from: action.payload.from,
         lastSuccess: null,
         pendingRange: null,
-        err: null,
+        error: null,
+        successiveErrorCount: 0,
       };
       state.sourcesState[source.id] = newFetchingState;
     },
@@ -118,7 +124,8 @@ export const fetchingSlice = createSlice({
       const lastSuccess = sourceState.pendingRange?.at ?? null;
       sourceState.lastSuccess = lastSuccess;
       sourceState.pendingRange = null;
-      sourceState.err = null;
+      sourceState.successiveErrorCount = 0;
+      sourceState.error = null;
       SourceLocalStorage.lastSuccessFrom.save(sourceId, from);
     },
     sourceFetchErr: (state, action: PayloadAction<SourceFetchErr>) => {
@@ -129,7 +136,14 @@ export const fetchingSlice = createSlice({
       }
       sourceState.state = "error";
       sourceState.pendingRange = null;
-      sourceState.err = action.payload.err;
+      sourceState.successiveErrorCount += 1;
+      sourceState.error = action.payload.error;
+      if (isAxiosError(action.payload.error)) {
+        const errorText = (action.payload.error as AxiosError).response?.data as string;
+        if (errorText?.indexOf("the query time range exceeds the limit") != -1) {
+          state.overallState.errorFetchToMuch = errorText;
+        }
+      }
     },
     incrementFetchCycle: (state) => {
       state.overallState.fetchCycle += 1;
@@ -160,3 +174,11 @@ export const useSourcesFetchingState = () => useSelector((state: RootState) => s
 
 export const useIsLastFetchCycle = (fetchCycle: number) =>
   useSelector((state: RootState) => state.fetching.overallState.fetchCycle === fetchCycle);
+
+export const useShouldWarnFetchingFailures = () =>
+  useSelector(
+    (state: RootState) => {
+      return undefined != Object.values(state.fetching.sourcesState)
+        .find(s => (s.lastSuccess === null && s.successiveErrorCount == 1) || s.successiveErrorCount > 1);
+    },
+  );

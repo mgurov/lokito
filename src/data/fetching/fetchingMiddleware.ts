@@ -1,6 +1,6 @@
 import { buildLokiUrl, LokiUrlParams } from "@/lib/utils";
 import { createListenerMiddleware, ListenerEffectAPI } from "@reduxjs/toolkit";
-import axios from "axios";
+import axios, { isAxiosError } from "axios";
 import { receiveBatch } from "../logData/logDataSlice";
 import { JustReceivedLog } from "../logData/logSchema";
 import { createNewSource, deleteSource } from "../redux/sourcesSlice";
@@ -53,11 +53,11 @@ fetchingMiddleware.startListening({
           try {
             await processSourceFetching(sourceState, listenerApi as ListenerEffectAPI<RootState, AppDispatch>);
           } catch (e: unknown) {
-            const errMessage = e instanceof Error ? e.message : JSON.stringify(e);
+            const error = e instanceof Error ? e : new Error(JSON.stringify(e));
             console.error("unexpected middleware error fetching source", e);
             listenerApi.dispatch(fetchingActions.sourceFetchErr({
               sourceId: sourceState.sourceId,
-              err: errMessage,
+              error,
             }));
           }
         }
@@ -158,11 +158,13 @@ async function processSourceFetching(
       from: newFetchStart,
     }));
   } catch (e: unknown) {
-    console.error("error fetching logs", e);
-    const errMessage = e instanceof Error ? e.message : JSON.stringify(e);
+    const error = e instanceof Error ? e : new Error(JSON.stringify(e));
+    if (!isAxiosError(error)) {
+      console.error("error fetching logs", e);
+    }
     listenerApi.dispatch(fetchingActions.sourceFetchErr({
       sourceId: sourceState.sourceId,
-      err: errMessage,
+      error,
     }));
   }
 }

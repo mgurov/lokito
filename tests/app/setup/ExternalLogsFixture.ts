@@ -25,12 +25,20 @@ export type LogRecord = { stream: Record<string, string>; values: string[][]; qu
 export async function routeLogResponses(page: Page, ...logRecords: LogRecordSpec[]): Promise<LogSource> {
   const source = new LogSource();
   source.givenRecords(...logRecords);
-  await page.route(routes.loki, (route, request) => {
+
+  await page.route(routes.loki, async (route, request) => {
     const url = new URL(request.url());
     source.requests.push(url);
     const query = url.searchParams.get("query");
     if (!query) {
       return route.fulfill({ status: 400, body: "no query" });
+    }
+
+    const specialHandler = source.specialHandlers[query];
+
+    if (specialHandler) {
+      await specialHandler(route, request);
+      return;
     }
 
     const json = {
@@ -45,6 +53,8 @@ export async function routeLogResponses(page: Page, ...logRecords: LogRecordSpec
   });
   return source;
 }
+
+export type RouteHandler = Parameters<Page["route"]>[1];
 
 class LogSource {
   private nowCounterMillisecs = new Date().getTime();
@@ -91,7 +101,7 @@ class LogSource {
         this.nowCounterMillisecs += 1;
         timestampDate = new Date(this.nowCounterMillisecs);
       }
-      // tODO: do the timestamp into the message
+      // TODO: do the timestamp into the message
       return {
         stream: {
           ...data,
@@ -109,5 +119,15 @@ class LogSource {
         () => this.requests.map(r => r.searchParams.get("query")),
       ).toStrictEqual(sources.map(s => s.query));
     }, { box: true });
+  }
+
+  public specialHandlers: Record<string, RouteHandler> = {};
+
+  givenSpecialQueryHandler(query: string, handler: RouteHandler) {
+    this.specialHandlers[query] = handler;
+  }
+
+  resetSpecialQueryHandler(query: string) {
+    delete this.specialHandlers[query];
   }
 }

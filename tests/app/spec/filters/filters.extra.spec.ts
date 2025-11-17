@@ -138,6 +138,26 @@ test("multiple non-acking filters should both match and display", async ({ mainP
   // TODO: give filters names
 });
 
+test("multiple existing non-acking filters should both match and display", async ({ mainPage, logs, appState }) => {
+  await mainPage.clock.install();
+
+  await appState.givenFilters({
+    messageRegex: "baz",
+    autoAck: false,
+  }, {
+    messageRegex: "fooe",
+    autoAck: false,
+  });
+
+  logs.givenRecords("baz fooe");
+
+  await mainPage.open();
+
+  await mainPage.expectLogMessages("baz fooe");
+
+  await expect(mainPage.matchingFilterButtons).toHaveCount(2);
+});
+
 test("when multiple rules match if theres an acking one it should not be saturated nonacking", async ({ mainPage, logs }) => {
   await mainPage.clock.install();
   logs.givenRecords("baz fooe");

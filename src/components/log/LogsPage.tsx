@@ -1,10 +1,16 @@
-import { SourceFetchingState, useOverallFetchingState, useSourcesFetchingState } from "@/data/fetching/fetchingSlice";
+import {
+  SourceFetchingState,
+  useOverallFetchingState,
+  useShouldWarnFetchingFailures,
+  useSourcesFetchingState,
+} from "@/data/fetching/fetchingSlice";
 import { useData } from "@/data/logData/logDataHooks";
 import { LogWithSource } from "@/data/logData/logSchema";
 import { useSources } from "@/data/redux/sourcesSlice";
 import { Source } from "@/data/source";
 import { simpleDateTimeFormat } from "@/lib/utils";
 import { ExclamationTriangleIcon, UpdateIcon } from "@radix-ui/react-icons";
+import { AxiosError, isAxiosError } from "axios";
 import { ReactNode, useState } from "react";
 import { AckNackProp } from "../context/AckNackContext";
 import { SelectedSourceContext } from "../context/SelectedSourceContext";
@@ -58,7 +64,7 @@ function ShowData({ ackNack, sourceId }: LogsPageProps) {
     </>
   );
 }
-// TODO: expose counts as slice function
+
 function SourceTabButtonsAndContent({ dataFromSources, data, sources, selectedSourceId, ackNack }: {
   dataFromSources: { [sourceId: string]: SourceFetchingState };
   data: LogWithSource[];
@@ -110,7 +116,7 @@ function SourceTabButtonsAndContent({ dataFromSources, data, sources, selectedSo
         <div key={"content" + source.id}>
           <SelectedSourceContext.Provider value={{ sourceId: source.id }}>
             <div className="mt-2 space-y-4">
-              {sourceFetchingState?.err && <Alert variant="destructive">{sourceFetchingState?.err}</Alert>}
+              <FetchError error={sourceFetchingState?.error} />
               {!sourceFetchingState?.lastSuccess && <Alert variant="destructive">No fetch has ever succeeded</Alert>}
               {sourceFetchingState?.lastSuccess && (
                 <Alert className="text-size-min">
@@ -136,6 +142,17 @@ function SourceTabButtonsAndContent({ dataFromSources, data, sources, selectedSo
   return { buttons, selectedSourceContent };
 }
 
+function FetchError({ error }: { error: Error | null }) {
+  if (!error) {
+    return null;
+  }
+  if (isAxiosError(error)) {
+    const axiosError = error as AxiosError;
+    return <Alert variant="destructive" title={axiosError.message}>{axiosError.response?.data as string}</Alert>;
+  }
+  return <Alert variant="destructive">{error.message}</Alert>;
+}
+
 function ShowSourceButton({ source }: { source: Source }) {
   const [visible, setVisible] = useState(false);
   if (!visible) {
@@ -152,12 +169,26 @@ function ShowSourceButton({ source }: { source: Source }) {
 
 function ShowAllSourcesData({ data, ...rest }: { data: LogWithSource[] } & AckNackProp) {
   const overallFetchingState = useOverallFetchingState();
+  const shouldWarnFetchingFailures = useShouldWarnFetchingFailures();
   if (overallFetchingState.from === null) {
     return <StartFetchingPanel />;
   }
+
   return (
     <div className="mt-2 space-y-4">
       <StatsLine {...rest} />
+
+      {overallFetchingState.errorFetchToMuch && (
+        <>
+          <Alert variant="destructive">{overallFetchingState.errorFetchToMuch}</Alert>
+        </>
+      )}
+
+      {shouldWarnFetchingFailures && (
+        <>
+          <Alert variant="warn">Some sources failed to fetch logs</Alert>
+        </>
+      )}
 
       <LogList data={data} ackNack={rest.ackNack} />
     </div>

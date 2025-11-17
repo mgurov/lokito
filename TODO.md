@@ -1,11 +1,7 @@
 [ ] imporant: alert of handle exceeding the limit of 1000...
-[ ] bug: doesn't catch the second non-acking filter when getting new records
 
-[ ] handle error on too long of a range
+[ ] feat: swipe right for favourites
 
-[ ] don't show clean when error or pending
-
-[x] filter by a field
 [ ] notes on a message w/o filter
 [ ] filter name
 [ ] change filter

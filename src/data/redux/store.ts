@@ -12,7 +12,8 @@ export const store = configureStore({
     fetching: fetchingReducer,
     filters: filtersMiddleware,
   },
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().prepend(fetchingMiddleware.middleware),
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({ serializableCheck: false }).prepend(fetchingMiddleware.middleware),
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
