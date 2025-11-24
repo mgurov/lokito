@@ -61,6 +61,8 @@ class LogSource {
 
   public records: LogRecord[] = [];
 
+  private servedRecords: LogRecord[] = [];
+
   public requests: URL[] = [];
 
   popRecords(query: string) {
@@ -75,6 +77,8 @@ class LogSource {
     }, [[], []]);
 
     this.records = nonMatchingRecords;
+
+    this.servedRecords.push(...matchingRecords)
 
     return matchingRecords;
   }
@@ -111,6 +115,13 @@ class LogSource {
       };
     });
     this.records.push(...newRecords);
+  }
+
+  /*
+  will put the served records back into the queue; NB: might mess the order when multiple sources are involved.
+  */
+  resetServedRecords() {
+    this.records = [...this.servedRecords, ...this.records]
   }
 
   async expectQueries(...sources: { query: string }[]) {

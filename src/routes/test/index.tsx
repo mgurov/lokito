@@ -24,6 +24,9 @@ export default function ListTestExamples() {
         <Link to="./test-overlap">
           <li>Overlap</li>
         </Link>
+        <Link to="./test-indexeddb">
+          <li>Indexed DB</li>
+        </Link>
       </ul>
     </>
   );
