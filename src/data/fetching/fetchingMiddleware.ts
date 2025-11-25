@@ -1,6 +1,7 @@
 import { buildLokiUrl, LokiUrlParams } from "@/lib/utils";
 import { createListenerMiddleware, ListenerEffectAPI } from "@reduxjs/toolkit";
 import axios, { isAxiosError } from "axios";
+import ackPersistence from "../logData/ackPersistence";
 import { receiveBatch } from "../logData/logDataSlice";
 import { JustReceivedLog } from "../logData/logSchema";
 import { createNewSource, deleteSource } from "../redux/sourcesSlice";
@@ -183,11 +184,13 @@ async function responseEntryToJustReceivedLog(l: LokiResponseEntry): Promise<Jus
   const [[ts, line]] = l.values;
   const streamHash = await computeSHA256(JSON.stringify(l.stream));
   const id = ts.toString() + "_" + streamHash;
+  const persistentlyPreacked = await ackPersistence.isAcked(id);
   const result = {
     id,
     stream: { ...l.stream },
     timestamp: new Date(parseInt(ts.slice(0, -6))).toISOString(),
     message: line,
+    persistentlyPreacked,
   };
   return result;
 }

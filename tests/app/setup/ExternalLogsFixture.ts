@@ -56,7 +56,7 @@ export async function routeLogResponses(page: Page, ...logRecords: LogRecordSpec
 
 export type RouteHandler = Parameters<Page["route"]>[1];
 
-class LogSource {
+export class LogSource {
   private nowCounterMillisecs = new Date().getTime();
 
   public records: LogRecord[] = [];
@@ -78,7 +78,7 @@ class LogSource {
 
     this.records = nonMatchingRecords;
 
-    this.servedRecords.push(...matchingRecords)
+    this.servedRecords.push(...matchingRecords);
 
     return matchingRecords;
   }
@@ -121,7 +121,7 @@ class LogSource {
   will put the served records back into the queue; NB: might mess the order when multiple sources are involved.
   */
   resetServedRecords() {
-    this.records = [...this.servedRecords, ...this.records]
+    this.records = [...this.servedRecords, ...this.records];
   }
 
   async expectQueries(...sources: { query: string }[]) {

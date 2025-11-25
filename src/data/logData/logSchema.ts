@@ -10,6 +10,7 @@ export type JustReceivedLog = {
   id: string;
   timestamp: string; // iso string
   message: string;
+  persistentlyPreacked: boolean;
 };
 
 export type FilterLogNote = {

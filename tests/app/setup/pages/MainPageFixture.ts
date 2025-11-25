@@ -1,6 +1,6 @@
 import { expect, Locator, Page, test } from "@playwright/test";
 import { expectTexts } from "@tests/app/util/visualAssertions";
-import { RouteHandler, routes } from "../ExternalLogsFixture";
+import { LogSource, RouteHandler, routes } from "../ExternalLogsFixture";
 import FiltersPageFixture from "./FiltersPageFixture";
 import SourcePageFixture, { NewSourceRollover, SourceCardFixture } from "./SourcesPageFixture";
 
@@ -17,14 +17,19 @@ export default class MainPageFixture {
     executeBefore,
     startFetch = true,
     installClock = false,
+    resetLogsFetchState,
   }: {
     executeBefore?: () => Promise<void>;
     startFetch?: boolean | string;
     installClock?: boolean;
+    resetLogsFetchState?: LogSource;
   } = {}) {
     await test.step("open main page", async () => {
       if (installClock) {
         await this.page.clock.install();
+      }
+      if (resetLogsFetchState) {
+        resetLogsFetchState.resetServedRecords();
       }
       if (executeBefore) {
         await executeBefore();
@@ -183,6 +188,19 @@ export default class MainPageFixture {
 
   async expectLogMessages(...expected: string[]) {
     await test.step("expectLogMessages", () => expectTexts(this.logMessage, ...expected), { box: true });
+  }
+
+  async awaitAckBacklogEmpty() {
+    await this.page.evaluate(() => {
+      const link = document.querySelector("[data-testid=\"tech-details\"]");
+      if (link) {
+        link.classList.remove("invisible");
+      }
+    });
+
+    await this.getByTestId("tech-details").click();
+    await expect(this.getByTestId("acked-backlog")).toHaveText("0");
+    await expect(this.getByTestId("unacked-backlog")).toHaveText("0");
   }
 
   async expandRow(message: string): Promise<RowLine> {

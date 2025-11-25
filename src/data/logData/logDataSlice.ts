@@ -19,6 +19,8 @@ export interface LogDataState {
   deduplicationIndex: Record<string, LogIndexNode[]>;
   traceIdIndex: Record<string, TraceRecord>;
   filterStats: FilterStats;
+  justAcked: string[];
+  justUnacked: string[];
 }
 
 export type TraceRecord = {
@@ -31,6 +33,8 @@ const initialState: LogDataState = {
   deduplicationIndex: {},
   traceIdIndex: {},
   filterStats: FiltersLocalStorage.filterStats.load(),
+  justAcked: [],
+  justUnacked: [],
 };
 
 export const logDataSlice = createSlice({
@@ -40,10 +44,21 @@ export const logDataSlice = createSlice({
     receiveBatch: (state, action: PayloadAction<JustReceivedBatch>) => {
       handleNewLogsBatch(state, action.payload);
     },
+    cleanAcked: (state, action: PayloadAction<string[]>) => {
+      const confirmed: string[] = action.payload;
+      const remaining = state.justAcked.filter(id => !confirmed.includes(id));
+      state.justAcked = remaining;
+    },
+    cleanUnacked: (state, action: PayloadAction<string[]>) => {
+      const confirmed: string[] = action.payload;
+      const remaining = state.justUnacked.filter(id => !confirmed.includes(id));
+      state.justUnacked = remaining;
+    },
     unack: (state, action: PayloadAction<string>) => {
       const line = state.logs.find((l) => l.id === action.payload);
       if (line) {
         line.acked = null; // hard unack even if were matched by a filter we don't care anymore. TODO: check what happens in that case.
+        state.justUnacked.push(action.payload);
       } else {
         console.error("Couldn't find log by id to ack; action: ", action);
       }
@@ -120,6 +135,7 @@ export const logDataSlice = createSlice({
       state.logs.forEach((l, index) => {
         if (ackingPredicate(l, index)) {
           l.acked = { type: "manual" };
+          state.justAcked.push(l.id);
         }
       });
     },

@@ -34,6 +34,10 @@ export default function TopNavigation() {
         </Link>
       </Button>
 
+      <Link data-testid="tech-details" to="/tech-details" className="invisible">
+        tech-details
+      </Link>
+
       <FetchNowButton />
     </div>
   );

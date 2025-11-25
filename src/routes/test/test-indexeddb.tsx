@@ -7,15 +7,19 @@ export default function TestIndexedDb() {
 
   const { err: readErr, mutate: readMutate, value, inProgress: getInProgress } = useGetCurrentTime();
 
+  const del = useDeleteCurrentTime();
+
   return (
     <>
       <div>Value {value}</div>
       <div>
         <Button variant="secondary" onClick={mutate} disabled={setInProgress}>write</Button>{" "}
         <Button variant="secondary" onClick={readMutate} disabled={getInProgress}>read</Button>
+        <Button variant="secondary" onClick={del.mutate} disabled={del.inProgress}>delete</Button>
       </div>
       {err && <div>Write error: {JSON.stringify(err, null, 2)}</div>}
       {readErr && <div>Read error: {JSON.stringify(readErr, null, 2)}</div>}
+      {del.err && <div>Delete error: {JSON.stringify(del.err, null, 2)}</div>}
     </>
   );
 }
@@ -69,6 +73,28 @@ function useGetCurrentTime() {
   return { err, mutate, value, inProgress };
 }
 
+function useDeleteCurrentTime() {
+  const [err, setErr] = React.useState<unknown>(null);
+  const [attempt, setAttempt] = React.useState(0);
+  const [inProgress, setInProgress] = React.useState(false);
+  const mutate = () => setAttempt(a => a + 1);
+  React.useEffect(() => {
+    async function doGet() {
+      setInProgress(true);
+      try {
+        await deleteCurrentTime();
+      } catch (e) {
+        setErr(e);
+      } finally {
+        setInProgress(false);
+      }
+    }
+    void doGet();
+  }, [attempt, setErr]);
+
+  return { err, mutate, inProgress };
+}
+
 const key = "this_is_a_key";
 const objectstore = "testobjectstore";
 
@@ -95,4 +121,9 @@ async function writeCurrentTime(): Promise<void> {
 async function readCurrentTime(): Promise<string | undefined> {
   const db = await openDb();
   return db.get("testobjectstore", key);
+}
+
+async function deleteCurrentTime(): Promise<void> {
+  const db = await openDb();
+  await db.delete("testobjectstore", key);
 }

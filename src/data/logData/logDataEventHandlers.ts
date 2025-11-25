@@ -22,7 +22,7 @@ export function handleNewLogsBatch(state: LogDataState, justReceivedBatch: JustR
 
   const matchers = justReceivedBatch.filters.map(createFilterMatcher);
 
-  const newRecordsAdapted = newRecords.map(({ stream, id, message, timestamp }) => {
+  const newRecordsAdapted = newRecords.map(({ stream, id, message, timestamp, persistentlyPreacked }) => {
     const filtersMatched: Record<string, FilterLogNote> = {};
     let acked: Acked = null;
 
@@ -34,6 +34,10 @@ export function handleNewLogsBatch(state: LogDataState, justReceivedBatch: JustR
           acked = thisMatch.acked;
         }
       }
+    }
+
+    if (acked === null && persistentlyPreacked) {
+      acked = { type: "manual" };
     }
 
     return {

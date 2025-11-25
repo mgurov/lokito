@@ -187,3 +187,19 @@ function enrichLogWithSourcesFun(sources: { [id: string]: Source }): (log: Log) 
     } as LogWithSource;
   };
 }
+
+export const useJustAckedBacklogLength = () =>
+  useSelector(
+    createSelector(
+      [(state: RootState) => state.logData.justAcked],
+      (justAcked) => justAcked.length,
+    ),
+  );
+
+export const useJustUnackedBacklogLength = () =>
+  useSelector(
+    createSelector(
+      [(state: RootState) => state.logData.justUnacked],
+      (justUnacked) => justUnacked.length,
+    ),
+  );
