@@ -1,20 +1,23 @@
 import { Plugin, PreviewServer, ProxyOptions, ViteDevServer } from "vite";
-import { datasourcesOverWireSchema, ServerDatasource, validateConfig } from "./config-schema";
+import { Config, datasourcesOverWireSchema, ServerDatasource, validateConfig } from "./config-schema";
 
-export async function datasourcesVitePlugin({ datasourcesFileName }: { datasourcesFileName: string }): Promise<Plugin> {
+export async function lokiConfigVitePlugin({ configFileName }: { configFileName: string }): Promise<Plugin> {
   // eslint-disable-next-line no-console
-  console.info("Loading lokito config from", datasourcesFileName);
-  const datasources = await loadDatasources(datasourcesFileName);
-  const datasourcesJson = JSON.stringify(datasourcesOverWireSchema.parse(datasources));
-  const proxy = buildProxies(datasources);
+  console.info("Loading lokito config from", configFileName);
+  const config = await loadConfig(configFileName);
+  const configJson = JSON.stringify({
+    datasources: datasourcesOverWireSchema.parse(config.datasources),
+    features: config.features,
+  });
+  const proxy = buildDatasourceProxies(config.datasources);
   const configureServerReturnDatasources = (server: ViteDevServer | PreviewServer) => {
-    server.middlewares.use("/config/data-sources", (_req, res) => {
+    server.middlewares.use("/config", (_req, res) => {
       res.setHeader("Content-Type", "application/json");
-      res.end(datasourcesJson);
+      res.end(configJson);
     });
   };
   return {
-    name: "vite-plugin-loki-datasources",
+    name: "vite-plugin-loki-config",
     configureServer: configureServerReturnDatasources,
     configurePreviewServer: configureServerReturnDatasources,
     config: () => ({
@@ -28,12 +31,12 @@ export async function datasourcesVitePlugin({ datasourcesFileName }: { datasourc
   };
 }
 
-async function loadDatasources(fileName: string): Promise<Array<ServerDatasource>> {
-  const { default: datasources } = await import(fileName);
-  return validateConfig(datasources);
+async function loadConfig(fileName: string): Promise<Config> {
+  const { default: config } = await import(fileName);
+  return validateConfig(config);
 }
 
-function buildProxies(datasources: Array<ServerDatasource>): Record<string, string | ProxyOptions> {
+function buildDatasourceProxies(datasources: Array<ServerDatasource>): Record<string, string | ProxyOptions> {
   const proxies: Record<string, string | ProxyOptions> = {};
 
   for (const ds of datasources) {

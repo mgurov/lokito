@@ -1,7 +1,7 @@
 import { Outlet, RouterProvider, useLocation } from "react-router-dom";
 
 import "./App.css";
-import { LoadDatasources } from "@/components/datasource/LoadedDatasourceContext";
+import { LoadConfiguration } from "@/components/config/LoadedConfigurationContext";
 import TopNavigation from "@/components/TopNavigation";
 import { Toaster } from "@/components/ui/shadcn/sonner";
 import { TooltipProvider } from "@/components/ui/shadcn/tooltip";
@@ -26,13 +26,13 @@ function App() {
   return (
     <>
       <QueryClientProvider client={queryClient}>
-        <LoadDatasources>
+        <LoadConfiguration>
           <Provider store={store}>
             <TooltipProvider delayDuration={100}>
               <RouterProvider router={router} />
             </TooltipProvider>
           </Provider>
-        </LoadDatasources>
+        </LoadConfiguration>
       </QueryClientProvider>
     </>
   );

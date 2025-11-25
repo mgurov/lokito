@@ -7,17 +7,25 @@ const datasourceSchema = z.object({
   headers: z.record(z.string(), z.union([z.string(), z.number(), z.array(z.string())])).optional(),
 });
 
+const configSchema = z.object({
+  datasources: z.array(datasourceSchema),
+  features: z.record(z.string(), z.boolean()),
+});
+
 export function validateConfig(data: unknown) {
-  const parsedConfig = z.object({
-    datasources: z.array(datasourceSchema),
-  }).parse(data);
-  return parsedConfig.datasources;
+  const parsedConfig = configSchema.parse(data);
+  return parsedConfig;
 }
 
 export type ServerDatasource = z.infer<typeof datasourceSchema>;
+export type Config = z.infer<typeof configSchema>;
 
 const datasourceOverWireSchema = datasourceSchema.pick({ id: true, alias: true });
 
 export const datasourcesOverWireSchema = z.array(datasourceOverWireSchema);
 
 export type ClientDatasource = z.infer<typeof datasourceOverWireSchema>;
+
+export type ClientConfig = Pick<Config, "features"> & { datasources: ClientDatasource[] };
+
+export const configUrl = "/config";

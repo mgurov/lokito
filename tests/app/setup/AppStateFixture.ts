@@ -1,3 +1,4 @@
+import { configUrl } from "@/config/config-schema";
 import { Filter } from "@/data/filters/filter";
 import { Source } from "@/data/source";
 import { Page, TestDetailsAnnotation } from "@playwright/test";
@@ -32,9 +33,11 @@ export class AppStateFixture {
   }
 
   async setupConfigRouting(page: Page) {
-    await page.route("/config/data-sources", async (route) =>
+    await page.route(configUrl, async (route) =>
       route.fulfill({
-        json: this.config.datasources,
+        json: {
+          datasources: this.config.datasources,
+        },
       }));
   }
 
