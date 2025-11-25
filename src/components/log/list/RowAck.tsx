@@ -22,8 +22,11 @@ export function RowAck(
       variant="ghost"
       className={cn("hover:bg-gray-200", buttonClassName)}
       onClick={(e) => {
-        const action = acked ? unack : ack;
-        dispatch(action(logId));
+        if (acked) {
+          dispatch(unack(logId));
+        } else {
+          dispatch(ack({ type: "ids", ids: [logId] }));
+        }
         e.stopPropagation();
       }}
     >

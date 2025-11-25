@@ -28,9 +28,9 @@ export function TraceIndicators({ row }: { row: LogWithSource }) {
 
 function useAckByTraceId(traceId: string) {
   const dispatch = useDispatch();
-  const { ackAll } = logDataSliceActions;
+  const { ack } = logDataSliceActions;
 
-  return useCallback(() => dispatch(ackAll({ type: "traceId", traceId })), [traceId, dispatch, ackAll]);
+  return useCallback(() => dispatch(ack({ type: "traceId", traceId })), [traceId, dispatch, ack]);
 }
 
 function TraceIndicator({ traceId, count }: { traceId: string; count: number }) {

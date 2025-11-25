@@ -40,14 +40,6 @@ export const logDataSlice = createSlice({
     receiveBatch: (state, action: PayloadAction<JustReceivedBatch>) => {
       handleNewLogsBatch(state, action.payload);
     },
-    ack: (state, action: PayloadAction<string>) => {
-      const line = state.logs.find((l) => l.id === action.payload);
-      if (line) {
-        line.acked = { type: "manual" };
-      } else {
-        console.error("Couldn't find log by id to ack; action: ", action);
-      }
-    },
     unack: (state, action: PayloadAction<string>) => {
       const line = state.logs.find((l) => l.id === action.payload);
       if (line) {
@@ -56,20 +48,7 @@ export const logDataSlice = createSlice({
         console.error("Couldn't find log by id to ack; action: ", action);
       }
     },
-    ackTillThis: (state, action: PayloadAction<{ messageId: string; sourceId?: string }>) => {
-      const { sourceId, messageId } = action.payload;
-      const lineIndex = state.logs.findIndex((l) => l.id === messageId);
-      if (lineIndex === -1) {
-        console.error("Couldn't find log by id to ack; action: ", action);
-        return;
-      }
-      state.logs.forEach((l, index) => {
-        if (index >= lineIndex && (sourceId === undefined || l.sourcesAndMessages.find(s => s.sourceId === sourceId))) {
-          l.acked = { type: "manual" };
-        }
-      });
-    },
-    ackAll: (state, { payload }: PayloadAction<
+    ack: (state, { payload }: PayloadAction<
       {
         type: "sourceId";
         sourceId: string | undefined;
@@ -82,9 +61,13 @@ export const logDataSlice = createSlice({
       } | {
         type: "traceId";
         traceId: string;
+      } | {
+        type: "ackTillThis";
+        messageId: string;
+        sourceId?: string;
       }
     >) => {
-      let ackingPredicate: (l: Log) => boolean;
+      let ackingPredicate: (l: Log, index: number) => boolean;
 
       switch (payload.type) {
         case "sourceId":
@@ -109,13 +92,33 @@ export const logDataSlice = createSlice({
             ackingPredicate = (l: Log) => traceIdLogIds.logIds.includes(l.id);
           }
           break;
+        case "ackTillThis":
+          {
+            const { sourceId, messageId } = payload;
+            const lineIndex = state.logs.findIndex((l) => l.id === messageId);
+            if (lineIndex === -1) {
+              console.error("Couldn't find log by id to ack; action: ", payload);
+              return;
+            }
+            ackingPredicate = (l: Log, index: number) => {
+              if (index < lineIndex) {
+                return false;
+              }
+              if (sourceId === undefined) {
+                return true;
+              }
+              return l.sourcesAndMessages.find(s => s.sourceId === sourceId) !== undefined;
+            };
+          }
+          break;
+
         default:
           console.error("Unknown acking payload type", payload);
           return;
       }
 
-      state.logs.forEach(l => {
-        if (ackingPredicate(l)) {
+      state.logs.forEach((l, index) => {
+        if (ackingPredicate(l, index)) {
           l.acked = { type: "manual" };
         }
       });
@@ -218,7 +221,7 @@ export const logDataSlice = createSlice({
   },
 });
 
-export const { receiveBatch, ack, unack } = logDataSlice.actions;
+export const { receiveBatch, unack, ack } = logDataSlice.actions;
 
 export const logDataSliceActions = logDataSlice.actions;
 

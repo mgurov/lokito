@@ -31,14 +31,14 @@ export default function LogsByFilterId() {
 
 function AckAllOnFilterViewButton({ data, filterId }: { data: LogWithSource[]; filterId: string }) {
   const dispatch = useDispatch();
-  const { ackAll } = logDataSliceActions;
+  const { ack } = logDataSliceActions;
 
   const notAckedCount = data.filter(p => p.acked === null).length;
 
   return (
     <AckAllButton
       notAckedCount={notAckedCount}
-      onClick={() => dispatch(ackAll({ type: "filterId", filterId }))}
+      onClick={() => dispatch(ack({ type: "filterId", filterId }))}
       ackNack="nack"
     />
   );

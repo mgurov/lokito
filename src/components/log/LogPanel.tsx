@@ -115,7 +115,7 @@ function RenderFields(props: { log: Log }) {
 function AckTillThisButton({ messageId }: { messageId: string }) {
   const selectedSource = useContext(SelectedSourceContext);
   const dispatch = useDispatch();
-  const { ackTillThis } = logDataSliceActions;
+  const { ack } = logDataSliceActions;
 
   return (
     <SimpleTooltip content={<p>All messages up to this event will be ACK'ed.</p>}>
@@ -125,7 +125,7 @@ function AckTillThisButton({ messageId }: { messageId: string }) {
         data-testid="ack-till-this"
         className="ml-1 mt-1"
         onClick={() => {
-          dispatch(ackTillThis({ messageId, sourceId: selectedSource?.sourceId }));
+          dispatch(ack({ type: "ackTillThis", messageId, sourceId: selectedSource?.sourceId }));
         }}
       >
         ACK till here

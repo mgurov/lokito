@@ -26,7 +26,7 @@ export function FilterIndicators({ row, hideFilterId }: { row: LogWithSource; hi
 
 function FilterIndicator({ id }: { id: string }) {
   const dispatch = useDispatch();
-  const { ackAll } = logDataSliceActions;
+  const { ack } = logDataSliceActions;
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -49,7 +49,7 @@ function FilterIndicator({ id }: { id: string }) {
         <DropdownMenuItem
           data-testid="matching-filter-ack-such"
           onClick={_e => {
-            dispatch(ackAll({ type: "filterId", filterId: id }));
+            dispatch(ack({ type: "filterId", filterId: id }));
           }}
         >
           ACK all matched

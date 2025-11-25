@@ -35,13 +35,13 @@ function CountOfAckMessages({ ackNack }: AckNackProp) {
 export function AckAllOnSourceButton({ notAckedCount, ...prop }: { notAckedCount: number } & AckNackProp) {
   const dispatch = useDispatch();
   const selectedSource = useContext(SelectedSourceContext);
-  const { ackAll } = logDataSliceActions;
+  const { ack } = logDataSliceActions;
 
   return (
     <AckAllButton
       {...prop}
       notAckedCount={notAckedCount}
-      onClick={() => dispatch(ackAll({ type: "sourceId", sourceId: selectedSource?.sourceId }))}
+      onClick={() => dispatch(ack({ type: "sourceId", sourceId: selectedSource?.sourceId }))}
     />
   );
 }

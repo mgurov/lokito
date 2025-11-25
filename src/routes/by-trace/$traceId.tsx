@@ -31,14 +31,14 @@ function SourcesData({ data }: { data: LogWithSource[] }) {
 
 function AckAllOnTraceViewButton({ data }: { data: LogWithSource[] }) {
   const dispatch = useDispatch();
-  const { ackAll } = logDataSliceActions;
+  const { ack } = logDataSliceActions;
 
   const notAckedCount = data.filter(p => p.acked === null).length;
 
   return (
     <AckAllButton
       notAckedCount={notAckedCount}
-      onClick={() => dispatch(ackAll({ type: "ids", ids: data.map(l => l.id) }))}
+      onClick={() => dispatch(ack({ type: "ids", ids: data.map(l => l.id) }))}
       ackNack="nack"
     />
   );
