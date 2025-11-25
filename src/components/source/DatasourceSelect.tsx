@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { DatasourcesContext } from "../datasource/LoadedDatasourceContext";
+import { DatasourcesContext } from "../config/LoadedConfigurationContext";
 
 export interface DatasourceSelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   showEmptyOptionOnNoDefaultValue?: boolean;

@@ -1,16 +1,14 @@
+import { configUrl } from "@/config/config-schema";
 import { expect, test } from "@tests/app/setup/testExtended";
 import { AnnotationSuppressDefaultApp } from "../setup/AppStateFixture";
 import { Deferred } from "../util/promises";
 
-test("should show error when no datasources", async ({ page, mainPage }) => {
-  await page.route("/config/data-sources", async (route) =>
-    route.fulfill({
-      json: [],
-    }));
+test("should show error when no datasources", async ({ mainPage, appState }) => {
+  appState.givenDatasourcesConfig(...[]);
 
   await mainPage.open({ startFetch: false });
 
-  await expect(mainPage.getByTestId("loki-datasources-empty")).toContainText(
+  await expect(mainPage.getByTestId("loki-config-empty")).toContainText(
     /No Loki datasources have been configured\./,
   );
   await expect(mainPage.newSourceButton).not.toBeVisible();
@@ -19,11 +17,11 @@ test("should show error when no datasources", async ({ page, mainPage }) => {
 test("should show error when error fetching datasources", async ({ page, mainPage, consoleLogging }) => {
   consoleLogging.ignoreErrorMessagesContaining("Failed to load resource: net::ERR_FAILED");
 
-  await page.route("/config/data-sources", async (route) => route.abort());
+  await page.route(configUrl, async (route) => route.abort());
 
   await mainPage.open({ startFetch: false });
 
-  await expect(mainPage.getByTestId("loki-datasources-error")).toContainText(
+  await expect(mainPage.getByTestId("loki-config-error")).toContainText(
     /Error fetching Loki datasources configuration\./,
   );
 
@@ -33,7 +31,7 @@ test("should show error when error fetching datasources", async ({ page, mainPag
 test("should be fine by default", async ({ page, mainPage }) => {
   const dataSourcesBlocked = new Deferred();
 
-  await page.route("/config/data-sources", async (route) => {
+  await page.route(configUrl, async (route) => {
     await dataSourcesBlocked.promise;
     return route.fallback();
   });
@@ -41,7 +39,7 @@ test("should be fine by default", async ({ page, mainPage }) => {
   await mainPage.open({ startFetch: false });
 
   await test.step("loading", async () => {
-    await expect(mainPage.getByTestId("loki-datasources-loading")).toContainText(
+    await expect(mainPage.getByTestId("loki-config-loading")).toContainText(
       /Loading Loki datasources configuration/,
     );
     await expect(mainPage.newSourceButton).not.toBeVisible();
@@ -51,7 +49,7 @@ test("should be fine by default", async ({ page, mainPage }) => {
 
   await expect(mainPage.newSourceButton).toBeVisible();
 
-  await expect(mainPage.getByTestId("loki-datasources-loading")).not.toBeAttached();
+  await expect(mainPage.getByTestId("loki-config-loading")).not.toBeAttached();
 });
 
 test(
@@ -103,7 +101,6 @@ test(
   "should route queries per configured datasource",
   AnnotationSuppressDefaultApp,
   async ({ appState, mainPage, logs }) => {
-    // TODO: doesn't matter actually. Test should call predefined even if missed; the first one if undefined though.
     appState.givenDatasourcesConfig(
       { id: "default" },
       { id: "second" },

@@ -3,4 +3,8 @@ const datasources = [
   { id: "proxy", url: "http://localhost:3000/api/datasources/proxy/3/loki" },
 ];
 
-export default {datasources};
+const features = {
+  indexedDbAckPersistence: true
+}
+
+export default {datasources, features};
