@@ -5,7 +5,7 @@ import { nextId } from "../util/nextId";
 import { StorageFixture, storageTest } from "./StorageFixture";
 
 export class AppStateFixture {
-  constructor(public storage: StorageFixture, private page: Page) {
+  constructor(public storage: StorageFixture) {
   }
 
   async sourceNames() {
@@ -23,10 +23,18 @@ export class AppStateFixture {
     return source;
   }
 
-  async givenDatasourcesConfig(...specs: DatasourceSpec[]) {
-    await this.page.route("/config/data-sources", async (route) =>
+  private config: { datasources: DatasourceSpec[] } = {
+    datasources: [{ id: "default" }],
+  };
+
+  givenDatasourcesConfig(...specs: DatasourceSpec[]) {
+    this.config.datasources = specs;
+  }
+
+  async setupConfigRouting(page: Page) {
+    await page.route("/config/data-sources", async (route) =>
       route.fulfill({
-        json: specs,
+        json: this.config.datasources,
       }));
   }
 
@@ -117,10 +125,11 @@ export const appStateTest = storageTest.extend<{
 }>({
   appState: [
     async ({ storage, page }, use, testInfo) => {
-      const appState = new AppStateFixture(storage, page);
+      const appState = new AppStateFixture(storage);
       if (!testInfo.annotations.find(it => it.type === suppressDefaultAppStateAnnotation.type)) {
         await appState.givenSources({ name: "default", datasource: "default" });
       }
+      await appState.setupConfigRouting(page);
       await use(appState);
     },
     { auto: true },
