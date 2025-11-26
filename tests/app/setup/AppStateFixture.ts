@@ -24,20 +24,23 @@ export class AppStateFixture {
     return source;
   }
 
-  private config: { datasources: DatasourceSpec[] } = {
+  private config: { datasources: DatasourceSpec[]; features: Record<string, unknown> } = {
     datasources: [{ id: "default" }],
+    features: {},
   };
 
   givenDatasourcesConfig(...specs: DatasourceSpec[]) {
     this.config.datasources = specs;
   }
 
+  givenFeature(name: string, value: unknown) {
+    this.config.features[name] = value;
+  }
+
   async setupConfigRouting(page: Page) {
     await page.route(configUrl, async (route) =>
       route.fulfill({
-        json: {
-          datasources: this.config.datasources,
-        },
+        json: this.config,
       }));
   }
 

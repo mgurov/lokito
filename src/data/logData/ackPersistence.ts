@@ -1,13 +1,20 @@
+import { isAckPersistenceEnabled } from "@/components/config/LoadedConfigurationContext";
 import { DBSchema, openDB } from "idb";
 
 // TODO: check the id is time-growing
 export async function isAcked(logId: string) {
+  if (!isAckPersistenceEnabled()) {
+    return false;
+  }
   const db = await openOurDb();
   const result = await db.get(ackedObjectStore, logId);
   return result !== undefined;
 }
 
 export async function markAcked(logIds: string[]) {
+  if (!isAckPersistenceEnabled()) {
+    return;
+  }
   const db = await openOurDb();
   const tx = db.transaction(ackedObjectStore, "readwrite");
   const store = tx.objectStore(ackedObjectStore);
@@ -19,6 +26,9 @@ export async function markAcked(logIds: string[]) {
 }
 
 export async function unmarkAcked(logIds: string[]) {
+  if (!isAckPersistenceEnabled()) {
+    return;
+  }
   const db = await openOurDb();
   const tx = db.transaction(ackedObjectStore, "readwrite");
   const store = tx.objectStore(ackedObjectStore);

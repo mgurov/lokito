@@ -1,4 +1,9 @@
+import { FeatureToggles } from "@/config/config-schema";
 import { test } from "@tests/app/setup/testExtended";
+
+test.beforeEach(({ appState }) => {
+  appState.givenFeature(FeatureToggles.persistentAcks, true);
+});
 
 test("acks should survive page reload", async ({ mainPage, logs }) => {
   logs.givenRecords("event1", "event2", "event3");

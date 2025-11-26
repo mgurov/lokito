@@ -29,3 +29,7 @@ export type ClientDatasource = z.infer<typeof datasourceOverWireSchema>;
 export type ClientConfig = Pick<Config, "features"> & { datasources: ClientDatasource[] };
 
 export const configUrl = "/config";
+
+export const FeatureToggles = {
+  persistentAcks: "persistentAcks",
+};

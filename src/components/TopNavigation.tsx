@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { GoogleIcon } from "@/components/ui/icons/GoogleIcon";
 import { LokitoLogo } from "@/components/ui/icons/lokito-logo";
 import { Button } from "@/components/ui/shadcn/button";
+import { FeatureToggles } from "@/config/config-schema";
 import {
   fetchingActions,
   NORMAL_DELAY_BEFORE_REFRESH_SEC,
@@ -12,6 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import { UpdateIcon } from "@radix-ui/react-icons";
 import { useDispatch } from "react-redux";
+import { useFeatureToggle } from "./config/LoadedConfigurationContext";
 
 export default function TopNavigation() {
   return (
@@ -34,12 +36,22 @@ export default function TopNavigation() {
         </Link>
       </Button>
 
-      <Link data-testid="tech-details" to="/tech-details" className="invisible">
-        tech-details
-      </Link>
-
       <FetchNowButton />
+
+      <TechDetails />
     </div>
+  );
+}
+
+function TechDetails() {
+  const showTechDetails = useFeatureToggle(FeatureToggles.persistentAcks);
+  if (!showTechDetails) {
+    return null;
+  }
+  return (
+    <Link data-testid="tech-details" to="/tech-details" className="invisible">
+      tech-details
+    </Link>
   );
 }
 

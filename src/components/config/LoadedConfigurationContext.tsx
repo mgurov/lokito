@@ -1,7 +1,7 @@
-import { ClientConfig, ClientDatasource } from "@/config/config-schema";
+import { ClientConfig, ClientDatasource, FeatureToggles } from "@/config/config-schema";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { createContext } from "react";
+import { createContext, useContext } from "react";
 import { Alert } from "../ui/shadcn/alert";
 
 export const DatasourcesContext = createContext<Record<string, ClientDatasource>>({});
@@ -40,5 +40,16 @@ export function LoadConfiguration({ children }: { children: React.ReactNode }) {
 
 async function loadConfig(): Promise<ClientConfig> {
   const response = await axios.get<ClientConfig>("/config");
+  evilFeatureTogglesConfigSingleton = response.data?.features ?? {};
   return response.data;
+}
+
+export function useFeatureToggle(name: string): boolean {
+  const featuresContext = useContext(FeaturesContext);
+  return featuresContext[name];
+}
+
+let evilFeatureTogglesConfigSingleton: Record<string, boolean> = {};
+export function isAckPersistenceEnabled() {
+  return evilFeatureTogglesConfigSingleton[FeatureToggles.persistentAcks];
 }
