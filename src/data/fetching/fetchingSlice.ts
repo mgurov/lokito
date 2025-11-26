@@ -139,9 +139,9 @@ export const fetchingSlice = createSlice({
       sourceState.successiveErrorCount += 1;
       sourceState.error = action.payload.error;
       if (isAxiosError(action.payload.error)) {
-        const errorText = (action.payload.error as AxiosError).response?.data as string;
-        if (errorText?.indexOf("the query time range exceeds the limit") != -1) {
-          state.overallState.errorFetchToMuch = errorText;
+        const errorBody = (action.payload.error as AxiosError).response?.data;
+        if (typeof errorBody === "string" && errorBody?.indexOf("the query time range exceeds the limit") != -1) {
+          state.overallState.errorFetchToMuch = errorBody;
         }
       }
     },

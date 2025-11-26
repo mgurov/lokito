@@ -24,6 +24,48 @@ test(
   },
 );
 
+test(
+  "should show json error upon failure to fetch",
+  AnnotationSuppressDefaultApp,
+  async ({ appState, mainPage }) => {
+    await mainPage.onLokiRequest(async (request) => {
+      await request.fulfill({
+        status: 502,
+        json: {
+          message: "gateway issue",
+        },
+      });
+    });
+
+    const source = await appState.givenSource();
+
+    await mainPage.open({ startFetch: true });
+
+    await mainPage.sourceTabHeader(source).getByTestId("source-in-error-indicator").click();
+    await expect(mainPage.page.getByText("gateway issue")).toBeVisible();
+  },
+);
+
+test(
+  "should show plain text error upon failure to fetch",
+  AnnotationSuppressDefaultApp,
+  async ({ appState, mainPage }) => {
+    await mainPage.onLokiRequest(async (request) => {
+      await request.fulfill({
+        status: 502,
+        body: "gateway issue",
+      });
+    });
+
+    const source = await appState.givenSource();
+
+    await mainPage.open({ startFetch: true });
+
+    await mainPage.sourceTabHeader(source).getByTestId("source-in-error-indicator").click();
+    await expect(mainPage.page.getByText("gateway issue")).toBeVisible();
+  },
+);
+
 test("should keep fetching after a delayed response", async ({ mainPage, logs }) => {
   logs.givenRecords({ message: "e1" });
 

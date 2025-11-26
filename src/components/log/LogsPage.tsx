@@ -148,7 +148,12 @@ function FetchError({ error }: { error: Error | null }) {
   }
   if (isAxiosError(error)) {
     const axiosError = error as AxiosError;
-    return <Alert variant="destructive" title={axiosError.message}>{axiosError.response?.data as string}</Alert>;
+    const responseData = axiosError.response?.data;
+    return (
+      <Alert variant="destructive" title={axiosError.message}>
+        {typeof responseData === "string" ? responseData : JSON.stringify(responseData)}
+      </Alert>
+    );
   }
   return <Alert variant="destructive">{error.message}</Alert>;
 }
