@@ -60,7 +60,7 @@ test(
   async ({ appState, mainPage, consoleLogging }) => {
     consoleLogging.ignoreErrorMessagesContaining("error fetching logs Error: No datasource configured for source");
 
-    await appState.givenDatasourcesConfig(
+    appState.givenDatasourcesConfig(
       { id: "default" },
       { id: "second" },
     );
@@ -81,7 +81,7 @@ test(
   "should route source queries to preconfigured datasource even if not awailable anymore",
   AnnotationSuppressDefaultApp,
   async ({ appState, mainPage, logs }) => {
-    await appState.givenDatasourcesConfig(
+    appState.givenDatasourcesConfig(
       { id: "primary" },
     );
 
@@ -104,7 +104,7 @@ test(
   AnnotationSuppressDefaultApp,
   async ({ appState, mainPage, logs }) => {
     // TODO: doesn't matter actually. Test should call predefined even if missed; the first one if undefined though.
-    await appState.givenDatasourcesConfig(
+    appState.givenDatasourcesConfig(
       { id: "default" },
       { id: "second" },
     );

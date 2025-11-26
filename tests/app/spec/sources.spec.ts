@@ -51,7 +51,7 @@ test.describe("datasources", () => {
     "should be able to select a datasource when configuring a source",
     AnnotationSuppressDefaultApp,
     async ({ appState, mainPage, page, logs }) => {
-      await appState.givenDatasourcesConfig(
+      appState.givenDatasourcesConfig(
         { id: "default", name: "Primary" },
         { id: "second" },
       );
@@ -82,7 +82,7 @@ test.describe("datasources", () => {
     "precreated source with no source should have no source visible",
     AnnotationSuppressDefaultApp,
     async ({ appState, sourcePage }) => {
-      await appState.givenDatasourcesConfig(
+      appState.givenDatasourcesConfig(
         { id: "default", name: "Primary" },
         { id: "second" },
       );
@@ -106,7 +106,7 @@ test.describe("datasources", () => {
   );
 
   test("edit a source datasource", AnnotationSuppressDefaultApp, async ({ appState, sourcePage }) => {
-    await appState.givenDatasourcesConfig(
+    appState.givenDatasourcesConfig(
       { id: "default", name: "Primary" },
       { id: "second" },
     );
