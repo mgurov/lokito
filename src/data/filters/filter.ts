@@ -44,7 +44,7 @@ export function createFilterMatcher(filter: FilterForMatching): FilterMatcher {
   const regex = new RegExp(filter.messageRegex);
   const captureWholeTrace = filter.captureWholeTrace;
 
-  const acker: (line: { timestamp: string }) => Acked | null = (() => {
+  const acker: (line: { timestamp: string }) => Acked = (() => {
     if (filter.autoAck === false) {
       return () => null;
     } else if (filter.autoAckTillDate) {
