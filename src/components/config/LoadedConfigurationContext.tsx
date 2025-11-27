@@ -31,7 +31,7 @@ export function LoadConfiguration({ children }: { children: React.ReactNode }) {
 
   return (
     <DatasourcesContext.Provider value={normalizedDatasources}>
-      <FeaturesContext.Provider value={data.features}>
+      <FeaturesContext.Provider value={data.features || {}}>
         {children}
       </FeaturesContext.Provider>
     </DatasourcesContext.Provider>

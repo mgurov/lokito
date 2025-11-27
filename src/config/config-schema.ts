@@ -9,7 +9,7 @@ const datasourceSchema = z.object({
 
 const configSchema = z.object({
   datasources: z.array(datasourceSchema),
-  features: z.record(z.string(), z.boolean()),
+  features: z.record(z.string(), z.boolean()).optional(),
 });
 
 export function validateConfig(data: unknown) {
