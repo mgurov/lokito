@@ -1,10 +1,6 @@
 import { FeatureToggles } from "@/config/config-schema";
 import { test } from "@tests/app/setup/testExtended";
 
-test.beforeEach(({ appState }) => {
-  appState.givenFeature(FeatureToggles.persistentAcks, true);
-});
-
 test("acks should survive page reload", async ({ mainPage, logs }) => {
   logs.givenRecords("event1", "event2", "event3");
 
@@ -22,6 +18,25 @@ test("acks should survive page reload", async ({ mainPage, logs }) => {
   await mainPage.open({ resetLogsFetchState: logs });
 
   await mainPage.expectLogMessages("event3");
+});
+
+test("should be possible to disable the feature", async ({ mainPage, logs, appState }) => {
+  appState.givenFeature(FeatureToggles.persistentAcks, false);
+
+  logs.givenRecords("event1", "event2", "event3");
+
+  await mainPage.open();
+
+  await mainPage.expectLogMessages("event3", "event2", "event1");
+
+  await mainPage.ack("event1");
+  await mainPage.ack("event2");
+
+  await mainPage.expectLogMessages("event3");
+
+  await mainPage.open({ resetLogsFetchState: logs });
+
+  await mainPage.expectLogMessages("event3", "event2", "event1");
 });
 
 test("unacked item should survive page reload", async ({ mainPage, logs }) => {

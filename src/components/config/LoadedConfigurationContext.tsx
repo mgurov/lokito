@@ -1,4 +1,4 @@
-import { ClientConfig, ClientDatasource, FeatureToggles } from "@/config/config-schema";
+import { ClientConfig, ClientDatasource, defaultFeatureConfig, FeatureToggles } from "@/config/config-schema";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { createContext, useContext } from "react";
@@ -39,9 +39,16 @@ export function LoadConfiguration({ children }: { children: React.ReactNode }) {
 }
 
 async function loadConfig(): Promise<ClientConfig> {
-  const response = await axios.get<ClientConfig>("/config");
-  evilFeatureTogglesConfigSingleton = response.data?.features ?? {};
-  return response.data;
+  const { data: configResponse } = await axios.get<ClientConfig>("/config");
+  const withDefaults = {
+    ...configResponse,
+    features: {
+      ...defaultFeatureConfig,
+      ...(configResponse.features || {}),
+    },
+  };
+  evilFeatureTogglesConfigSingleton = withDefaults.features;
+  return withDefaults;
 }
 
 export function useFeatureToggle(name: string): boolean {

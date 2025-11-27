@@ -33,3 +33,7 @@ export const configUrl = "/config";
 export const FeatureToggles = {
   persistentAcks: "persistentAcks",
 };
+
+export const defaultFeatureConfig = {
+  [FeatureToggles.persistentAcks]: true,
+};
