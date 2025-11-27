@@ -41,3 +41,13 @@ export function reverseDeleteFromArray<T>(arr: T[], predicate: (t: T) => boolean
     }
   }
 }
+
+export function setDeduct<T>(fromSet: Set<T>, minusSet: Set<T>) {
+  const result = new Set<T>();
+  fromSet.forEach(e => {
+    if (!minusSet.has(e)) {
+      result.add(e);
+    }
+  });
+  return result;
+}

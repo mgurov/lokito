@@ -1,7 +1,6 @@
 import { isAckPersistenceEnabled } from "@/components/config/LoadedConfigurationContext";
 import { DBSchema, openDB } from "idb";
 
-// TODO: check the id is time-growing
 export async function isAcked(logId: string) {
   if (!isAckPersistenceEnabled()) {
     return false;
@@ -11,7 +10,7 @@ export async function isAcked(logId: string) {
   return result !== undefined;
 }
 
-export async function markAcked(logIds: string[]) {
+export async function markAcked(logIds: Set<string>) {
   if (!isAckPersistenceEnabled()) {
     return;
   }
@@ -25,7 +24,7 @@ export async function markAcked(logIds: string[]) {
   await tx.done;
 }
 
-export async function unmarkAcked(logIds: string[]) {
+export async function unmarkAcked(logIds: Set<string>) {
   if (!isAckPersistenceEnabled()) {
     return;
   }

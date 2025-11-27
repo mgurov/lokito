@@ -1,10 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
+import { enableMapSet } from "immer";
 import fetchingMiddleware from "../fetching/fetchingMiddleware";
 import fetchingReducer from "../fetching/fetchingSlice";
 import filtersMiddleware from "../filters/filtersSlice";
 import ackPersistingMiddleware from "../logData/ackPersistingMiddleware";
 import logDataReducer from "../logData/logDataSlice";
 import sourcesReducer from "./sourcesSlice";
+
+enableMapSet();
 
 export const store = configureStore({
   reducer: {

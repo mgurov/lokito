@@ -65,7 +65,6 @@ test("ack all should survive page reload", async ({ mainPage, logs }) => {
 /*
 
 TODO:
-- sortable id?
 - GC?
 - visualize
 

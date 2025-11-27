@@ -9,27 +9,27 @@ export default ackPersistingMiddleware;
 ackPersistingMiddleware.startListening({
   predicate: (_action, currentState) => {
     const logDataState = (currentState as RootState).logData;
-    return logDataState.justAcked.length > 0;
+    return logDataState.justAcked.size > 0;
   },
   effect: async (_action, listenerApi) => {
     // TODO: minus the previously noted.
     const { justAcked } = (listenerApi.getState() as RootState).logData;
     await ackPersistence.markAcked(justAcked);
     // TODO: error handling.
-    listenerApi.dispatch(logDataSliceActions.cleanAcked(justAcked));
+    listenerApi.dispatch(logDataSliceActions.cleanAcked(new Set(justAcked)));
   },
 });
 
 ackPersistingMiddleware.startListening({
   predicate: (_action, currentState) => {
     const logDataState = (currentState as RootState).logData;
-    return logDataState.justUnacked.length > 0;
+    return logDataState.justUnacked.size > 0;
   },
   effect: async (_action, listenerApi) => {
     // TODO: minus the previously noted.
     const { justUnacked } = (listenerApi.getState() as RootState).logData;
     await ackPersistence.unmarkAcked(justUnacked);
     // TODO: error handling.
-    listenerApi.dispatch(logDataSliceActions.cleanUnacked(justUnacked));
+    listenerApi.dispatch(logDataSliceActions.cleanUnacked(new Set(justUnacked)));
   },
 });

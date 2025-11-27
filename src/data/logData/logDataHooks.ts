@@ -192,7 +192,7 @@ export const useJustAckedBacklogLength = () =>
   useSelector(
     createSelector(
       [(state: RootState) => state.logData.justAcked],
-      (justAcked) => justAcked.length,
+      (justAcked) => justAcked.size,
     ),
   );
 
@@ -200,6 +200,6 @@ export const useJustUnackedBacklogLength = () =>
   useSelector(
     createSelector(
       [(state: RootState) => state.logData.justUnacked],
-      (justUnacked) => justUnacked.length,
+      (justUnacked) => justUnacked.size,
     ),
   );
