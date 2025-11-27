@@ -66,6 +66,7 @@ test("ack all should survive page reload", async ({ mainPage, logs }) => {
 
 TODO:
 - GC?
-- visualize
+- visualize?
+- error handling?
 
 */

@@ -1,5 +1,5 @@
 import { isAckPersistenceEnabled } from "@/components/config/LoadedConfigurationContext";
-import { DBSchema, openDB } from "idb";
+import { DBSchema, IDBPObjectStore, openDB } from "idb";
 
 export async function isAcked(logId: string) {
   if (!isAckPersistenceEnabled()) {
@@ -11,20 +11,17 @@ export async function isAcked(logId: string) {
 }
 
 export async function markAcked(logIds: Set<string>) {
-  if (!isAckPersistenceEnabled()) {
-    return;
-  }
-  const db = await openOurDb();
-  const tx = db.transaction(ackedObjectStore, "readwrite");
-  const store = tx.objectStore(ackedObjectStore);
-
-  for (const logId of logIds) {
-    await store.put(true, logId);
-  }
-  await tx.done;
+  await operateOnLogIds(logIds, (store, logId) => store.put(true, logId));
 }
 
 export async function unmarkAcked(logIds: Set<string>) {
+  await operateOnLogIds(logIds, (store, logId) => store.delete(logId));
+}
+
+async function operateOnLogIds(
+  logIds: Set<string>,
+  op: (store: IDBPObjectStore<MyDB, ["acked"], "acked", "readwrite">, logId: string) => Promise<void | string>,
+) {
   if (!isAckPersistenceEnabled()) {
     return;
   }
@@ -32,7 +29,7 @@ export async function unmarkAcked(logIds: Set<string>) {
   const tx = db.transaction(ackedObjectStore, "readwrite");
   const store = tx.objectStore(ackedObjectStore);
   for (const logId of logIds) {
-    await store.delete(logId);
+    await op(store, logId);
   }
   await tx.done;
 }
