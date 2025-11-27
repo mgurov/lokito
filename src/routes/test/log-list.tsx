@@ -38,13 +38,29 @@ function generateLogData(): LogWithSource[] {
     [s1, s2, s3],
   ];
 
+  const specialLines: Record<number, string> = {
+    10: "something very long decimal happened" + (Array.from({ length: 100 }).map((_, j) => `element ${j}`).join(".")),
+    11: "long unbreakable field value",
+    12: "long breakable field value",
+  };
+
+  const specialFields: Record<number, Record<string, string>> = {
+    11: {
+      key1: "value1",
+      key2: Array.from({ length: 100 }).map((_, j) => `ELEMENT_${j}`).join(","),
+    },
+    12: {
+      key1: "value1",
+      key3: Array.from({ length: 100 }).map((_, j) => `ELEMENT ${j}`).join(", "),
+    },
+  };
+
   const simpleData = Array.from({ length: 100 }).map((_, i) => {
     const sources = sourceCombos[i % 6];
-    const line = i === 10
-      ? "something very long decimal happened" + (Array.from({ length: 100 }).map((_, j) => `element ${j}`).join("."))
-      : "something happened " + i;
+    const line = specialLines[i] ?? "something happened " + i;
+
     return {
-      fields: {
+      fields: specialFields[i] ?? {
         key1: "value1",
         key2: "value2",
       },

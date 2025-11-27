@@ -91,7 +91,7 @@ function RenderFields(props: { log: Log }) {
           >
             {field}
           </div>
-          <div className="group flex">
+          <div className="group flex overflow-auto">
             {props.log.fields?.[field] !== undefined && (
               <Button
                 size="icon"
@@ -101,7 +101,6 @@ function RenderFields(props: { log: Log }) {
                 title={copiedField === field ? "Copied!" : "Copy"}
               >
                 {copiedField === field ? <CheckIcon /> : <CopyIcon />}
-                <span className="sr-only">Copy Order ID</span>
               </Button>
             )}
             <span>{props.log.fields?.[field] as ReactNode}</span>
