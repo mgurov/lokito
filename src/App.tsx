@@ -68,6 +68,9 @@ function DocumentTitleUpdater() {
     } else {
       document.title = "Lokito";
     }
+    if (navigator.setAppBadge) {
+      void navigator.setAppBadge(notAckedCount);
+    }
   }, [notAckedCount]);
 
   return null;
