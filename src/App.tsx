@@ -5,12 +5,11 @@ import { LoadConfiguration } from "@/components/config/LoadedConfigurationContex
 import TopNavigation from "@/components/TopNavigation";
 import { Toaster } from "@/components/ui/shadcn/sonner";
 import { TooltipProvider } from "@/components/ui/shadcn/tooltip";
-import { useNotAckedDataLength } from "@/data/logData/logDataHooks";
 import { store } from "@/data/redux/store";
 import { createRouter } from "@/routing";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useEffect } from "react";
 import { Provider } from "react-redux";
+import { DocumentTitleUpdater } from "./components/DocumentTitleUpdater";
 
 function App() {
   const router = createRouter({ layout: <Layout /> });
@@ -57,23 +56,6 @@ function Layout() {
       <DocumentTitleUpdater />
     </>
   );
-}
-
-function DocumentTitleUpdater() {
-  const notAckedCount = useNotAckedDataLength();
-
-  useEffect(() => {
-    if (notAckedCount > 0) {
-      document.title = `Lokito🔥${notAckedCount}`;
-    } else {
-      document.title = "Lokito";
-    }
-    if (navigator.setAppBadge) {
-      void navigator.setAppBadge(notAckedCount);
-    }
-  }, [notAckedCount]);
-
-  return null;
 }
 
 export default App;
