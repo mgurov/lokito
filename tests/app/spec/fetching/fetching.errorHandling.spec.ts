@@ -200,6 +200,8 @@ test(
       await mainPage.expectLogMessagesRev("s1.1", "s1.2");
 
       await expect(mainPage.page.getByText("Some sources failed to fetch logs")).not.toBeVisible();
+
+      await expect.poll(async () => mainPage.page.title()).toBe("Lokito🔥2");
     });
 
     await test.step("second error is considered to be systematic", async () => {
@@ -210,6 +212,8 @@ test(
       await mainPage.expectLogMessagesRev("s1.1", "s1.2", "s1.3");
 
       await expect(mainPage.page.getByText("Some sources failed to fetch logs")).toBeVisible();
+
+      await expect.poll(async () => mainPage.page.title()).toBe("Lokito🔥3⚠️");
     });
 
     await test.step("warning should be gone after fetch OK", async () => {
@@ -221,6 +225,8 @@ test(
       await mainPage.expectLogMessagesRev("s1.1", "s1.2", "s1.3", "s2.1");
 
       await expect(mainPage.page.getByText("Some sources failed to fetch logs")).not.toBeVisible();
+
+      await expect.poll(async () => mainPage.page.title()).toBe("Lokito🔥4");
     });
   },
 );
