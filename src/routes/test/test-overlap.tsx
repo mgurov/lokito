@@ -1,6 +1,10 @@
+import { Button } from "@/components/ui/shadcn/button";
+import { useState } from "react";
+
 export default function testOverlap() {
   return (
     <>
+      <h4>Flexes and blocks</h4>
       <div className="flex">
         <span>Blah flah</span>
         <div className="inline-block">
@@ -13,6 +17,36 @@ export default function testOverlap() {
         </div>
         <span className="ml-1">Other content</span>
       </div>
+      <hr />
+      <h4>Button with progress</h4>
+      <p>
+        Here goes a <Button>normal button</Button> and an <EnhancedButton>enhanced one</EnhancedButton>.
+      </p>
     </>
+  );
+}
+
+function EnhancedButton({ children }: { children: React.ReactNode }) {
+  const [progress, setProgress] = useState<number>(50);
+
+  const lineStyle = {
+    width: progress + "%",
+  };
+
+  return (
+    <Button
+      className="relative"
+      onClick={() =>
+        setProgress(p => {
+          if (p >= 100) {
+            return 0;
+          } else {
+            return p + 25;
+          }
+        })}
+    >
+      {children}
+      <div style={lineStyle} className="bg-red-500 absolute left-0 right-0 bottom-[5px] h-1 transition-all"></div>
+    </Button>
   );
 }
