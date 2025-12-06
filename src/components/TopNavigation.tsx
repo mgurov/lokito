@@ -75,9 +75,14 @@ function FetchNowButton() {
       variant="secondary"
       onClick={() => dispatch(fetchingActions.fetchNow())}
       disabled={fetchingNow}
-      style={{ background: `linear-gradient(${progressRatio * 90}deg, orange ${progressRatio * 100}%, yellow 100%)` }}
+      className="relative overflow-hidden"
     >
       <UpdateIcon className={cn("mr-1", fetchingNow && "animate-spin")} /> <span>Fetch now</span>
+      <div
+        style={{ width: progressRatio * 100 + "%" }}
+        className="transition-all ease-linear rounded-sm duration-1000 absolute bg-gray-400 bottom-0 left-0 h-1"
+      >
+      </div>
     </Button>
   );
 }
