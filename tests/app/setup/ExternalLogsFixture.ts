@@ -16,7 +16,7 @@ export const externalLogsTest = test.extend<{ logs: LogSource }>({
 export type LogRecordSpec = string | {
   timestamp?: string;
   message?: string;
-  traceId?: string;
+  traceId?: string | string[];
   data?: Record<string, string>;
 };
 
@@ -92,7 +92,15 @@ export class LogSource {
       const logSpecObjectified = typeof logSpec === "string" ? { message: logSpec } : logSpec;
       const { timestamp, message = "a log message", data = {} } = logSpecObjectified;
       if (logSpecObjectified.traceId) {
-        data[TRACE_ID_FIELDS[0]] = logSpecObjectified.traceId;
+        const toAddTraces = typeof (logSpecObjectified.traceId) === "string"
+          ? [logSpecObjectified.traceId]
+          : logSpecObjectified.traceId;
+        if (toAddTraces.length > TRACE_ID_FIELDS.length) {
+          throw new Error("Can't add more different type of traces than the number of TRACE_ID_FIELDS");
+        }
+        toAddTraces.forEach((traceValue, traceFieldIndex) => {
+          data[TRACE_ID_FIELDS[traceFieldIndex]] = traceValue;
+        });
       }
       let timestampDate: Date;
       if (timestamp) {

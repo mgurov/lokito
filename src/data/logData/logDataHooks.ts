@@ -137,9 +137,6 @@ export const useMatchedAckedUnackedCount = (filter: FilterOnField): MatchedCount
   );
 
 function countMatched(filter: FilterOnField, logs: Log[]): MatchedCountsString {
-  let unacked: number = 0;
-  let acked: number = 0;
-  let total: number = 0;
   let filterMatcher;
 
   try {
@@ -157,23 +154,38 @@ function countMatched(filter: FilterOnField, logs: Log[]): MatchedCountsString {
     throw e;
   }
 
+  let unackedTotal: number = 0;
+  let unackedMatchedCount: number = 0;
+  let unackedTraceCarriedCount: number = 0;
+  const unMatchedLogs: Log[] = [];
+  const matchedTraceIds = new Set<string>();
+
   for (const l of logs) {
+    if (l.acked) {
+      continue;
+    }
+    unackedTotal += 1;
     const matched = filterMatcher.match({
       sourcesLines: l.sourcesAndMessages,
       timestamp: l.timestamp,
       fieldValues: l.fields,
     });
-    if (!matched) {
-      continue;
-    }
-    total += 1;
-    if (l.acked === null) {
-      unacked += 1;
+    if (matched) {
+      traceIdFields(l).forEach(tf => matchedTraceIds.add(tf.traceIdValue));
+      unackedMatchedCount++;
     } else {
-      acked += 1;
+      unMatchedLogs.push(l);
     }
   }
-  return `${unacked}|${acked}|${total}`;
+  for (const unmatched of unMatchedLogs) {
+    for (const { traceIdValue } of traceIdFields(unmatched)) {
+      if (matchedTraceIds.has(traceIdValue)) {
+        unackedTraceCarriedCount++;
+        break;
+      }
+    }
+  }
+  return `${unackedMatchedCount}|${unackedTotal}|${unackedTraceCarriedCount}`;
 }
 
 function enrichLogWithSourcesFun(sources: { [id: string]: Source }): (log: Log) => LogWithSource {

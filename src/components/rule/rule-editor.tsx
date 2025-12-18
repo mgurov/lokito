@@ -15,7 +15,7 @@ import { escapeRegExp } from "./regex-utils";
 import { OpenRuleEditorPayload, RuleEditorActionContext, RuleEditorContext } from "./ruleEditorContext";
 import { TTLDatePicker } from "./TTLDatePicker";
 
-import { FilterOnField, useMatchedAckedUnackedCount } from "@/data/logData/logDataHooks";
+import { useMatchedAckedUnackedCount } from "@/data/logData/logDataHooks";
 import { GoogleIcon } from "../ui/icons/GoogleIcon";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/shadcn/card";
 import { Switch } from "../ui/shadcn/switch";
@@ -181,6 +181,13 @@ function RuleFilterStep(
 
   React.useEffect(() => onFieldChange(), [step1Props.field]);
 
+  const {
+    PlusCount,
+    MatchNowButton,
+  } = useMatchCountComponents(
+    step1Props,
+  );
+
   let logLineMatchesRegex: "yes" | "no" | "err" = "no";
   let errorMessage: string | null = null;
   try {
@@ -262,16 +269,14 @@ function RuleFilterStep(
             checked={step1Props.captureWholeTrace}
             onCheckedChange={(checked) => setStep1Props(current => ({ ...current, captureWholeTrace: !!checked }))}
           />
-          <p className="text-sm text-muted-foreground">
-            Acks all messages with the same trace IDs as the matched one
+          <p className="text-sm text-muted-foreground" data-testid="ack-trace-explanation">
+            Acks all messages with the same trace IDs as the matched one <PlusCount />
           </p>
         </div>
       </div>
 
       <div className="flex flex-col-reverse sm:flex-row sm:space-x-2">
         <MatchNowButton
-          regex={step1Props.messageRegex}
-          field={step1Props.field}
           data-testid="apply-rule-button"
           onClick={() => onSubmit({ save: false })}
           variant="secondary"
@@ -295,28 +300,46 @@ function RuleFilterStep(
   );
 }
 
-function MatchNowButton({ regex, field, ...theRest }: ButtonProps & FilterOnField) {
-  const [matchedUnackedCount, matchedAckedCount, totalCount] = useMatchedAckedUnackedCount({ regex, field }).split("|")
+function useMatchCountComponents({ messageRegex, field, captureWholeTrace }: Step1FilterProps) {
+  const [matchedUnackedCount, totalUnackedCount, unackedTraceCarriedCount] = useMatchedAckedUnackedCount({
+    regex: messageRegex,
+    field,
+  }).split("|")
     .map(
       s => parseInt(s, 10),
     );
 
-  let buttonText = "Nothing matched";
-  if (totalCount > 0) {
-    buttonText = `Ack ${matchedUnackedCount} matched now`;
-    if (matchedAckedCount > 0) {
-      buttonText += ` (of ${totalCount})`;
+  function PlusCount() {
+    if (unackedTraceCarriedCount > 0) {
+      return <span data-testid="unacked-trace-carried">(+{unackedTraceCarriedCount} now)</span>;
     }
+    return null;
   }
 
-  return (
-    <Button
-      disabled={totalCount === 0}
-      {...theRest}
-    >
-      {buttonText}
-    </Button>
-  );
+  function MatchNowButton(buttonProps: ButtonProps) {
+    let buttonText = "Nothing matched";
+    if (matchedUnackedCount > 0) {
+      const toBeAckedCount = matchedUnackedCount + (captureWholeTrace ? unackedTraceCarriedCount : 0);
+      buttonText = `Ack ${toBeAckedCount} matched now`;
+      if (totalUnackedCount != toBeAckedCount) {
+        buttonText += ` (of ${totalUnackedCount})`;
+      }
+    }
+
+    return (
+      <Button
+        disabled={matchedUnackedCount === 0}
+        {...buttonProps}
+      >
+        {buttonText}
+      </Button>
+    );
+  }
+
+  return {
+    PlusCount,
+    MatchNowButton,
+  };
 }
 
 function RulePersistenceStep(

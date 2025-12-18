@@ -39,7 +39,7 @@ test("should show a match count for unacked when doing the regex", async ({ main
       await test.step("narrow regex", async () => {
         await filterEditor.filterRegex.fill("message 1");
         await expect(filterEditor.applyButton).toBeEnabled();
-        await expect(filterEditor.applyButton).toHaveText("Ack 1 matched now");
+        await expect(filterEditor.applyButton).toHaveText("Ack 1 matched now (of 3)");
       });
 
       await test.step("invalid regex", async () => {
@@ -57,41 +57,71 @@ test("should show a match count for unacked when doing the regex", async ({ main
   await mainPage.expectLogMessages("something 3");
 });
 
-test(
-  "the match count for unacked should include match on other source",
-  AnnotationSuppressDefaultApp,
-  async ({ mainPage, logs, appState }) => {
-    const [s1, s2] = await appState.givenSources({ name: "s1" }, { name: "s2" });
+test("the match count should include the trace-carried matches", async ({ mainPage, logs }) => {
+  logs.givenRecords(
+    { message: "message 0", traceId: "trace1" },
+    { message: "message 1", traceId: "trace1" },
+    { message: "message 2", traceId: "trace1" },
+  );
 
-    const sameTimestamp = "2025-02-04T20:00:00.000Z";
-    const sameData = { "event": "event1" };
+  await mainPage.open();
 
-    logs.givenSourceRecords(s1, { message: "s1 event1", timestamp: sameTimestamp, data: sameData });
-    // message can be formatted differently different sources
-    logs.givenSourceRecords(
-      s2,
-      { message: "s2 event1", timestamp: sameTimestamp, data: sameData }, // same event appeared from other datasource
-      { message: "s2 event2" },
-    );
+  await mainPage.expectLogMessages("message 2", "message 1", "message 0");
 
-    await appState.givenFilters("s1 event");
+  await mainPage.createFilter({
+    logLineText: "message 1",
+    onFirstScreenShown: async (filterEditor: FilterEditorPageFixture) => {
+      await expect(filterEditor.applyButton).toHaveText("Ack 3 matched now");
+    },
+  });
+  await mainPage.expectNoLogMessages();
+});
 
-    await mainPage.open();
+test("the match count should exclude the trace-carried matches when the filter doesn't include those", async ({ mainPage, logs }) => {
+  logs.givenRecords(
+    { message: "message 0", traceId: "trace1" },
+    { message: "message 1", traceId: "trace1" },
+    { message: "message 2", traceId: "trace1" },
+  );
 
-    await mainPage.expectLogMessages("s2 event2");
+  await mainPage.open();
 
-    await mainPage.createFilter({
-      logLineText: "s2 event2",
-      filterRegex: "s2 event",
-      saveAction: "apply",
-      onFirstScreenShown: async (filterEditor: FilterEditorPageFixture) => {
-        await expect(filterEditor.applyButton).toHaveText("Ack 1 matched now (of 2)");
-      },
-    });
-  },
-);
+  await mainPage.expectLogMessages("message 2", "message 1", "message 0");
 
-test("a saved filter should be applied to existing and following messages ", async ({ page, mainPage, logs }) => {
+  await mainPage.createFilter({
+    logLineText: "message 1",
+    onFirstScreenShown: async (filterEditor: FilterEditorPageFixture) => {
+      await expect(filterEditor.applyButton).toHaveText("Ack 3 matched now");
+      await expect(filterEditor.locator.getByTestId("unacked-trace-carried")).toHaveText("(+2 now)");
+      await filterEditor.ackWholeTraceCheckbox.click();
+      await expect(filterEditor.applyButton).toHaveText("Ack 1 matched now (of 3)");
+    },
+  });
+  await mainPage.expectLogMessages("message 2", "message 0");
+});
+
+test("the message matched multiple traces should be counted once", async ({ mainPage, logs }) => {
+  logs.givenRecords(
+    { message: "message 0", traceId: ["trace1", "trace2"] },
+    { message: "message 1", traceId: ["trace1", "trace2"] },
+  );
+
+  await mainPage.open();
+
+  await mainPage.expectLogMessages("message 1", "message 0");
+
+  await mainPage.createFilter({
+    logLineText: "message 1",
+    saveAction: "apply",
+    onFirstScreenShown: async (filterEditor: FilterEditorPageFixture) => {
+      await expect(filterEditor.applyButton).toHaveText("Ack 2 matched now");
+      await expect(filterEditor.locator.getByTestId("unacked-trace-carried")).toHaveText("(+1 now)");
+    },
+  });
+  await mainPage.expectLogMessages();
+});
+
+test("a saved filter should be applied to existing and following messages", async ({ page, mainPage, logs }) => {
   await page.clock.install();
   logs.givenRecords("this_message", "unrelated 1");
 

@@ -341,6 +341,10 @@ export class FilterEditorPageFixture {
     return this.locator.getByTestId("ack-trace");
   }
 
+  get ackWholeTraceExplanation() {
+    return this.locator.getByTestId("ack-trace-explanation");
+  }
+
   get autoAckTtlTriggerButton() {
     return this.locator.getByTestId("auto-ack-ttl-trigger-button");
   }
@@ -381,7 +385,7 @@ export class FilterEditorPageFixture {
   }
 
   async expectMatchIndicators({ toAck, ofTotal }: { toAck: number; ofTotal?: number }) {
-    const total = ofTotal ? ` (of 3)` : "";
+    const total = ofTotal ? ` (of ${ofTotal})` : "";
     await expect(this.applyButton).toHaveText(`Ack ${toAck} matched now${total}`);
   }
 }

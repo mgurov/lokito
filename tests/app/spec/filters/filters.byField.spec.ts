@@ -20,7 +20,7 @@ test("should match a message by a field", async ({ mainPage, logs }) => {
 
       await expect(filterEditor.filterRegex).toHaveValue("foo");
 
-      await filterEditor.expectMatchIndicators({ toAck: 2 });
+      await filterEditor.expectMatchIndicators({ toAck: 2, ofTotal: 4 });
     },
   });
   await mainPage.expectLogMessagesRev("m3 other", "m4 missing");
@@ -56,7 +56,7 @@ test("should include matched show match count on creation", async ({ mainPage, l
   await mainPage.expectLogMessages("unrelated");
 });
 
-test("field selector should full text-search on both field name and vlaue", async ({ mainPage, logs }) => {
+test("field selector should full text-search on both field name and value", async ({ mainPage, logs }) => {
   logs.givenRecords(
     {
       message: "message line",
