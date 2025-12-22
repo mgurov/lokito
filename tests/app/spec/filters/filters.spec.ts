@@ -244,7 +244,16 @@ test("filter description", async ({ page, mainPage, logs }) => {
   });
 
   await expect(page.getByTestId("filter-message-description")).toContainText("This is a somewhat explanation");
+
+  await test.step("should be able to change the descriptions", async () => {
+    await page.getByTestId("filter-message-description").click();
+    await page.getByTestId("filter-message-description").fill("Somewhat adjusted description");
+    await page.getByTestId("filter-message-description-save").click();
+    await expect(page.getByTestId("filter-message-description")).toContainText("Somewhat adjusted description");
+  });
 });
+
+// TODO: md
 
 test("should filter multilined messages", async ({ mainPage, logs }) => {
   logs.givenRecords("a\nb_\nc");

@@ -2,9 +2,10 @@ import { Button } from "@/components/ui/shadcn/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/shadcn/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/shadcn/tooltip";
 import { Filter } from "@/data/filters/filter";
-import { deleteFilter, useFilter } from "@/data/filters/filtersSlice";
+import { changeFilter, deleteFilter, useFilter } from "@/data/filters/filtersSlice";
 import { useFilterHitCount, useFilterTotalCount } from "@/data/logData/logDataHooks";
 import { TrashIcon } from "@radix-ui/react-icons";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 
@@ -48,10 +49,46 @@ export default function FilterCard({ filter, hideId }: { filter: Filter; hideId?
       <CardContent>
         {filter.field && <p>Field: {filter.field}</p>}
         <p data-testid="filter-message-regex">{filter.messageRegex}</p>
-        {filter.description && <p data-testid="filter-message-description">{filter.description}</p>}
+        <EditableDescription filterId={filter.id} description={filter.description} />
       </CardContent>
     </Card>
   );
+}
+
+function EditableDescription({ filterId, description }: { filterId: string; description?: string }) {
+  const dispatch = useDispatch();
+  const [isEditing, setIsEditing] = useState(false);
+  const [value, setValue] = useState(description || "");
+
+  const handleSave = () => {
+    dispatch(changeFilter({ id: filterId, type: "description", newValue: value }));
+    setIsEditing(false);
+  };
+
+  return isEditing
+    ? (
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          className="flex-1 px-2 py-1 border rounded"
+          autoFocus
+          data-testid="filter-message-description"
+        />
+        <Button size="sm" data-testid="filter-message-description-save" onClick={handleSave}>Save</Button>
+        <Button size="sm" variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
+      </div>
+    )
+    : (
+      <p
+        onClick={() => setIsEditing(true)}
+        data-testid="filter-message-description"
+        className="cursor-pointer text-muted-foreground hover:text-foreground"
+      >
+        {value || "Add description..."}
+      </p>
+    );
 }
 
 function FilterStats({ filterId }: { filterId: string }) {

@@ -12,6 +12,11 @@ const initialFiltersState: FiltersState = {
   data: _.keyBy(FiltersLocalStorage.filters.load(), "id"),
 };
 
+type FilterChange = { id: string } & {
+  type: "description";
+  newValue: string | undefined;
+};
+
 export const filtersSlice = createSlice({
   name: "filters",
   initialState: initialFiltersState,
@@ -23,6 +28,11 @@ export const filtersSlice = createSlice({
       state.data[action.payload.id] = action.payload;
       FiltersLocalStorage.filters.save(Object.values(state.data));
     },
+    changeFilter: (state, action: PayloadAction<FilterChange>) => {
+      if (state.data[action.payload.id]) {
+        state.data[action.payload.id].description = action.payload.newValue;
+      }
+    },
     deleteFilter: (state, action: PayloadAction<string>) => {
       delete state.data[action.payload];
       FiltersLocalStorage.filters.save(Object.values(state.data));
@@ -30,7 +40,7 @@ export const filtersSlice = createSlice({
   },
 });
 
-export const { createFilter, deleteFilter } = filtersSlice.actions;
+export const { createFilter, deleteFilter, changeFilter } = filtersSlice.actions;
 
 export default filtersSlice.reducer;
 
