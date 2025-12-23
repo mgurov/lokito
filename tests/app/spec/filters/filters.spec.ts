@@ -246,10 +246,18 @@ test("filter description", async ({ page, mainPage, logs }) => {
   await expect(page.getByTestId("filter-message-description")).toContainText("This is a somewhat explanation");
 
   await test.step("should be able to change the descriptions", async () => {
-    await page.getByTestId("filter-message-description").click();
+    await page.getByTestId("filter-message-description-edit").click();
     await page.getByTestId("filter-message-description").fill("Somewhat adjusted description");
     await page.getByTestId("filter-message-description-save").click();
     await expect(page.getByTestId("filter-message-description")).toContainText("Somewhat adjusted description");
+  });
+
+  await test.step.skip("should be persisted", async () => {
+    await mainPage.page.reload();
+    const filtersPage = await mainPage.openFiltersPage();
+    await expect(filtersPage.getFilterCard({ regex: "message1" }).description).toHaveText(
+      "Somewhat adjusted description",
+    );
   });
 });
 

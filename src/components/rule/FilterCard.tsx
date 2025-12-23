@@ -6,6 +6,7 @@ import { changeFilter, deleteFilter, useFilter } from "@/data/filters/filtersSli
 import { useFilterHitCount, useFilterTotalCount } from "@/data/logData/logDataHooks";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
+import Markdown from "react-markdown";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 
@@ -68,26 +69,46 @@ function EditableDescription({ filterId, description }: { filterId: string; desc
   return isEditing
     ? (
       <div className="flex gap-2">
-        <input
-          type="text"
+        <textarea
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="flex-1 px-2 py-1 border rounded"
+          className="flex-1 px-2 py-1 border rounded resize-y"
+          rows={4}
           autoFocus
           data-testid="filter-message-description"
         />
         <Button size="sm" data-testid="filter-message-description-save" onClick={handleSave}>Save</Button>
-        <Button size="sm" variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => {
+            setIsEditing(false);
+            setValue(description || "");
+          }}
+        >
+          Cancel
+        </Button>
       </div>
     )
     : (
-      <p
-        onClick={() => setIsEditing(true)}
-        data-testid="filter-message-description"
-        className="cursor-pointer text-muted-foreground hover:text-foreground"
-      >
-        {value || "Add description..."}
-      </p>
+      <div className="group flex items-start justify-between">
+        <div
+          data-testid="filter-message-description"
+          className="cursor-pointer text-muted-foreground hover:text-foreground flex-1 pr-2"
+        >
+          <Markdown>{value || "Add description..."}</Markdown>
+        </div>
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setIsEditing(true)}
+            data-testid="filter-message-description-edit"
+          >
+            Edit
+          </Button>
+        </div>
+      </div>
     );
 }
 

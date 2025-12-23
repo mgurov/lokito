@@ -32,6 +32,7 @@ export const filtersSlice = createSlice({
       if (state.data[action.payload.id]) {
         state.data[action.payload.id].description = action.payload.newValue;
       }
+      FiltersLocalStorage.filters.save(Object.values(state.data));
     },
     deleteFilter: (state, action: PayloadAction<string>) => {
       delete state.data[action.payload];
