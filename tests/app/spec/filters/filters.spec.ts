@@ -252,7 +252,7 @@ test("filter description", async ({ page, mainPage, logs }) => {
     await expect(page.getByTestId("filter-message-description")).toContainText("Somewhat adjusted description");
   });
 
-  await test.step.skip("should be persisted", async () => {
+  await test.step("should be persisted", async () => {
     await mainPage.page.reload();
     const filtersPage = await mainPage.openFiltersPage();
     await expect(filtersPage.getFilterCard({ regex: "message1" }).description).toHaveText(
