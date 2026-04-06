@@ -3,6 +3,7 @@
   "extends": [
     "config:recommended"
   ],
+  "minimumReleaseAge": "14d",
   "branchConcurrentLimit": 10,
   "automerge": true,
   "packageRules": [
